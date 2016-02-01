@@ -1,3 +1,106 @@
+##' Add or remove edges
+##' 
+##' @details At the moment no effort is made to 
+##' detect duplication in addEdges().  To be added later.
+##' Currently removeEdges() forces all edges to be
+##' represented by adjacency matrices. 
+##' 
+##' @param graph a \code{mixedgraph} object
+##' @param edges list of edges to be added/removed
+##' 
+##' @export addEdges
+addEdges <- function(graph, edges) {
+  out <- graph
+  v <- graph$v
+  
+  etys = edgeTypes()$type
+  if (is.null(names(edges))) et = seq_along(edges)
+  else et = pmatch(names(edges), etys)
+  if (length(et) == 1 && is.na(et)) {
+    warning("No edge type given, assuming undirected")
+    et = 1
+  }
+  else if (any(is.na(et))) stop("Edge types not matched")
+  else if (any(duplicated(et))) stop("Repeated edge types matched")
+  
+  ## Check all edges given as lists to be added are valid and of length 2
+  edL <- sapply(edges, is.list)
+  if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
+  if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
+  
+  ## Check all edges given as edge matrices to be added are valid and of length 2
+  edE <- sapply(edges, is.edgeMatrix)
+  if (any(is.na(match(unlist(edges[edE]), v)))) stop("Edges must be between vertices in the graph")
+  if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
+
+  for (i in seq_along(et)) {
+    if (etys[et[i]] %in% names(out$edges)) {
+      ## if there are some of this type of edge already
+      ## add it in the same format
+      dir <- edgeTypes()$directed[et[i]]
+      if (is.list(out$edges[[etys[et[i]]]])) {
+        out$edges[[etys[et[i]]]] = c(out$edges[[etys[et[i]]]], edgeList(edges[[i]], directed = dir))
+      }
+      else if (is.edgeMatrix(out$edges[[etys[et[i]]]])) {
+        out$edges[[etys[et[i]]]] = cbind(out$edges[[etys[et[i]]]], edgeMatrix(edges[[i]], directed = dir))
+      }
+      else if (is.adjMatrix(out$edges[[etys[et[i]]]])) {
+        out$edges[[etys[et[i]]]] = out$edges[[etys[et[i]]]] + adjMatrix(edges[[i]], directed = dir)
+      }
+      else stop("mixedgraph supplied seems invalid")
+    }
+    else {
+      ## otherwise just add it in
+      dimnames(edges[[i]]) <- NULL   # drop dimnames
+      out$edges[[etys[et[i]]]] <- edges[[i]]
+    }
+  }
+  
+  out
+}
+
+##' @describeIn addEdges
+##' @export removeEdges
+removeEdges <- function(graph, edges) {
+  out <- withAdjMatrix(graph)
+  v <- graph$v
+  
+  etys = edgeTypes()$type
+  if (is.null(names(edges))) et = seq_along(edges)
+  else et = pmatch(names(edges), etys)
+  if (length(et) == 1 && is.na(et)) {
+    warning("No edge type given, assuming undirected")
+    et = 1
+  }
+  else if (any(is.na(et))) stop("Edge types not matched")
+  else if (any(duplicated(et))) stop("Repeated edge types matched")
+
+  ## Check all edges given as lists to be added are valid and of length 2
+  edL <- sapply(edges, is.list)
+  if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
+  if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
+  
+  ## Check all edges given as edge matrices to be added are valid and of length 2
+  edE <- sapply(edges, is.edgeMatrix)
+  if (any(is.na(match(unlist(edges[edE]), v)))) stop("Edges must be between vertices in the graph")
+  if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
+  
+  ## Now convert to adjacency matrix anyway  
+  edges <- mapply(adjMatrix, edges, directed=edgeTypes()$directed[et], n=length(v), SIMPLIFY = FALSE)
+  
+  for (i in seq_along(et)) {
+    if (etys[et[i]] %in% names(out$edges)) {
+      ## if these edges are present remove them
+      out$edges[[etys[et[i]]]] = out$edges[[etys[et[i]]]] - edges[[i]]
+      if (any(out$edges[[etys[et[i]]]] < 0)) stop("Tried to remove edge not present")
+    }
+    ## else just ignore 
+  }
+  
+  out 
+}
+
+
 ##' Delete edges
 ##' 
 ##' Remove edges adjacent to set of vertices
@@ -48,70 +151,4 @@ mutilate <- function(graph, A, etype, dir=0L) {
   }
   graph$edges[whEdge] <- edges
   graph
-}
-
-##' Test for separation
-##' 
-##' @param graph a \code{mixedgraph} object
-##' @param A,B sets of vertices in \code{graph}
-##' @param C proposed separating set of vertices in \code{graph}
-##' @param etype which edges to remove
-##' 
-##' @export separated
-separated <- function(graph, A, B, C, etype) {
-  if (missing(etype)) etype <- edgeTypes()$type
-  if (length(C) > 0) gr2 <- graph[-C]
-  else gr2 <- graph
-  ad <- grp(gr2, v = A, etype = etype, dir=0, sort=0)
-  
-  return(!any(B %in% ad))
-}
-
-##' Moral graph
-##' 
-##' Find moral graph of a DAG
-##' 
-##' @param graph a \code{mixedgraph} object with directed and undirected edges
-##' @param A optionally, a set whose ancestors should be moralized (defaults to entire graph)
-##' 
-##' @details if \code{a -> c <- b} with \code{a,b} not adjacent, then an 
-##' undirected edge is added.
-##' 
-##' @export moralize
-moralize <- function(graph, A) {
-  add <- list()
-  if (missing(A)) A = graph$v
-  else A = anc(graph, A)
-  
-  for (i in A) {
-    pas <- pa(graph, i)
-    for (p in pas) {
-      tmp <- c(p, adj(graph, p, etype=c("undirected", "directed")))
-      ## look for other parents not adjacent to p
-      miss <- setdiff(pas, tmp)
-      add <- lapply(miss, function(x) c(p, x))
-      ## add an undirectd edge if no adjacency
-      graph$edges$undirected <- c(graph$edges$undirected, add)
-    }
-  }
-  
-  return(graph)
-}
-
-##' Test for d-separation
-##' 
-##' @param graph a \code{mixedgraph} object
-##' @param A,B sets of vertices in \code{graph}
-##' @param C proposed separating set of vertices in \code{graph}
-##' 
-##' @details Only directed and undirected edges within the ancestral
-##' subgraph are considered.  [Would probably make more sense to use
-##' anterior instead of ancestors here.]
-##' 
-##' @export d_separated
-d_separated <- function(graph, A, B, C) {
-  anGr <- graph[anc(graph, c(A,B,C), sort=1)]
-  morGr <- moralize(anGr)
-  
-  return(separated(morGr, A, B, C))
 }

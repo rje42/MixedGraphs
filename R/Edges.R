@@ -47,7 +47,8 @@ edgeMatrix <- function(edges, directed=FALSE) {
   
   if (length(edges)==0) return(matrix(NA, 2, 0))
 
-  if (is.matrix(edges)) {
+  if (is.edgeMatrix(edges)) return(edges)
+  if (is.adjMatrix(edges)) {
     rs <- row(edges)[edges > 0]
     cs <- col(edges)[edges > 0]
     if (!directed) {
@@ -72,7 +73,7 @@ edgeList <- function(edges, directed=FALSE) {
   if(is.null(edges)) {
     return(list())
   }
-  else if (is.matrix(edges)) {
+  else if (is.adjMatrix(edges)) {
     rs <- row(edges)[edges > 0]
     cs <- col(edges)[edges > 0]
     if (!directed) {
@@ -81,9 +82,9 @@ edgeList <- function(edges, directed=FALSE) {
     }
     out <- mapply(c, rs, cs, SIMPLIFY=FALSE)
   }
-#   else if (is.data.frame(edges)) {
-#     out <- mapply(c, edges[,1], edges[,2], SIMPLIFY=FALSE)
-#   }
+  else if (is.edgeMatrix(edges)) {
+     out <- mapply(c, edges[1,], edges[2,], SIMPLIFY=FALSE)
+  }
   else if (is.list(edges)) out <- edges
   else stop("Not a valid edgeList")
   out

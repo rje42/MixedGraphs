@@ -7,12 +7,14 @@
 \usage{
 \method{[}{mixedgraph}(graph, v, ...)
 
-subGraph(graph, v)
+subGraph(graph, v, drop = FALSE)
 }
 \arguments{
 \item{graph}{a \code{mixedgraph} object}
 
 \item{v}{vertices to keep}
+
+\item{drop}{force drop removed vertices from representation?}
 }
 \description{
 Take induced vertex subgraph of mixedgraph
