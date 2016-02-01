@@ -94,11 +94,20 @@ gr3$v
 This is computationally advantageous with vertex lists (since
 they do not have to be relabelled) and for later comparing 
 subgraphs with their parent graph.
-This feature can be over-ridden with the `drop` argument if required.
+This feature can be overridden with the `drop` argument if required.
 
 ### Adding and removing edges
 
-Create some functions for this.
+The `addEdges()` and `removeEdges()` functions can be used to modify an 
+existing graph.  Just supply a named list of edges as for initializing
+with `mixedgraph()`:
+```{r}
+addEdges(gr1, list(dir=list(c(1,3))))
+removeEdges(gr1, list(bi=list(c(3,4))))
+```
+`addEdges()` stores edges in the same format as the original graph.
+Currently `removeEdges()` forces all edges to be stored as adjacency
+matrices: this will be corrected in future.
 
 ## Edge Specifications
 
@@ -155,6 +164,15 @@ We are free to specify multiple edge types and directions:
 adj(gr1, v = c(2,4), etype = c("undirected", "directed"), dir = c(0,-1))
 ```
 
+#### Specific Versions
+
+The functions `pa()`, `ch()`, `sp()` and `nb()` are available for
+the special cases of adjacencies generally called parents, children,
+spouses and neighbours respectively.
+```{r}
+ch(gr1, 2)   # short cut for adj(gr1, v = 2, etype = "directed", dir = 1)
+```
 
 ## Adding Edge Types
 
+New edge types can be added to the built in options.
