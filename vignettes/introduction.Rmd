@@ -1,0 +1,160 @@
+---
+title: "Mixed Graphs in R"
+author: "Robin Evans"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Mixed Graphs in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This package gives functionality for mixed graphs, that is graphs
+with more than one kind of edge, in R.  Some standard edge types
+are built in to the package, and can be seen by calling
+`edgeTypes()`.  Others can be added.
+```{r, message=FALSE}
+library(MixedGraphs)
+edgeTypes()
+```
+We build flexible functions for things like adjacency and 
+connected components, so they can be used for any type of edge,
+even ones which have not yet been added to the package.
+
+## Graph Construction
+
+### Common Graphs
+
+The functions `makeGraphComplete()`, `makeGraphChain()`, `makeGraphCycle()`
+and `makeGraphStar()` can be used to create commonly used 
+graph shapes of graph.  Specifying just a graph size results
+in an undirected graph:
+```{r}
+makeGraphStar(5)
+```
+Otherwise the optional argument `type` can be used to specify a 
+different type of edge:
+```{r}
+makeGraphComplete(4, "directed")
+```
+
+### Character Input
+
+For convenience, the function `graphCr()` allows graphs
+to be specified just by typing in their format.  You can
+supply as many character arguments to the function as you 
+like, which are then parsed and translated in to a mixed graph.
+```{r}
+gr1 <- graphCr("1 -- 2 -> 3 <-> 4, 2 -> 4", "1 -- 4")
+gr1
+```
+The edges should be in the same format as specified 
+in `edgeTypes()`, save that adjacent dashes will be contracted:
+so `---` and `-` are the same, as are `<--->` and `<->`.
+
+If all the vertex labels given are all numeric, then these are 
+assumed to be their indices, and they are given the names
+`x1`, `x2`, etc.  If any of the vertex labels are not 
+numeric, then they are all taken as character representations,
+and their ordering becomes lexicographic.
+```{r}
+graphCr("1 -- 2 -> x3 <-> 4, 2 -> 4", "1 -- 4")  # notice vertex ordering
+```
+So here the 3rd vertex has the name `4`.
+
+### General Graphs
+
+Graphs can most generally and safely be created using `mixedgraph()`.  
+The main things to specify are `n`, the number of vertices,
+and `edges`, a named list of edges.
+```{r}
+gr2 <- mixedgraph(5, edges=list(undirected=list(c(1,2),c(2,4),c(3,5))))
+```
+Each element of the edge list can be 
+
+
+## Graph Manipulations
+
+### Subgraphs
+
+The `[` operator can be used to take induced subgraphs specified 
+by their vertex numbers.  For example,
+```{r}
+gr3 <- gr1[c(1,3,4)]
+gr3
+```
+An important point to note is that, although the subgraph only
+has three vertices, it (by default) retains all the information 
+and positions of the vertices of the complete graph.
+```{r}
+gr3$vnames
+gr3$v
+# gr3[2]   will fail
+```
+This is computationally advantageous with vertex lists (since
+they do not have to be relabelled) and for later comparing 
+subgraphs with their parent graph.
+This feature can be over-ridden with the `drop` argument if required.
+
+### Adding and removing edges
+
+Create some functions for this.
+
+## Edge Specifications
+
+Edges can be specified in any of three ways, as an adjacency matrix (`adjMatrix`),
+a list of edges (`edgeList`), or a matrix with two rows, each of whose column
+corresponds to an edge (`edgeMatrix`).  
+
+These each have their own 
+useful properties: adjacency matrices generally allow things to be calculated
+most quickly with small or dense graphs, since R is well suited to working with matrices.
+Finding the neighbours of a vertex is very fast; conversely using edge lists or 
+edge matrices requires searching for the edges whose end points match the 
+specification. 
+
+For larger sparse graphs the adjacency matrix may become burdensome and wasteful,
+so we can use either of the others.  The edge matrix is the most efficient,
+but lists are intuitive and will in future be extended to allow hypergraphs.
+
+We can force the use of adjacency matrices by applying `withAdjMatrix()`
+to a `mixedgraph` object.
+
+## Generic Relations
+
+The functions `adj()`, `grp()`, `groups()` and `mutilate()` 
+allow graphical operations to be performed on any edge type,
+as specified by the user.  
+
+### Adjacency
+
+`adj()` is used to find vertices which are adjacent to the 
+specified vertex, with respect to whatever kind of edge.
+To find the neighbours of a (set of) vertices \code{v}, 
+we just specify that we want adjacency via undirected edges:
+```{r}
+adj(gr1, v = 2, etype = "undirected")
+```
+For edges with direction, we can specify whether we want 
+that direction to matter with the `dir` argument.  The 
+default is `0`, which specifies either direction, and 
+the alternatives `1` and `-1` specify that the direction
+must be respectively the same or opposite to the default.
+
+So, for example, to find the children of a vertex we would
+use
+```{r}
+adj(gr1, v = 2, etype = "directed", dir = 1)
+```
+Correspondingly using `dir = -1` would give the parents.
+Using vector valued `v` means the definitions are applied 
+disjuntively (i.e.\ it is the same as taking the union of 
+the scalar outcomes).
+We are free to specify multiple edge types and directions:
+```{r}
+adj(gr1, v = c(2,4), etype = c("undirected", "directed"), dir = c(0,-1))
+```
+
+
+## Adding Edge Types
+
