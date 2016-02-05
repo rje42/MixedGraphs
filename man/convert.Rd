@@ -4,18 +4,32 @@
 \alias{convert}
 \title{Convert graph to format associated with specific package}
 \usage{
-convert(graph, format = "mixedgraph", cur_format)
+convert(graph, format = "mixedgraph", cur_format, ...)
 }
 \arguments{
 \item{graph}{graphical object, of one of classes listed below}
 
 \item{format}{character string giving new format to convert to}
+
+\item{cur_format}{character string of current format; can be deduced
+from the object in many cases}
+
+\item{...}{}
 }
 \description{
 Convert graph to format associated with specific package
 }
 \details{
 Currently limited functionality, only
-converts 'ADMGs' to 'mixedgraph' objects.
+converts 'ADMGs' and 'ggm' to 'mixedgraph' objects.
+
+Implemented thus far:
+mixedgraph <-> ggm
+mixedgraph <-> ADMG
+mixedgraph <-> graphNEL
+mixedgraph <-> graphAM
+mixedgraph <-- PAG
+
+\code{ggm} entries must be specified by \code{cur_format = "ggm"}.
 }
 

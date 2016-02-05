@@ -16,8 +16,15 @@ Current features:
 * Built in edge-types include undirected, directed, bidirected and partially 
   directed.
   
+To install the package, run the commands
+```
+install.packages("devtools")
+devtools::install_github("rje42/MixedGraphs")
+library(MixedGraphs)
+```
+
 ### Future Plans
 
 Ultimately there will be functions for converting between the
 representations in the various other graph packages (e.g.\ `graph`,
-`igraph`, `ggm`).  At the moment this is not ready.
+`igraph`, `ggm`).  This is currently partially implemented.

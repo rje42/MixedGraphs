@@ -9,17 +9,20 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-This package gives functionality for mixed graphs, that is graphs
-with more than one kind of edge, in R.  Some standard edge types
-are built in to the package, and can be seen by calling
-`edgeTypes()`.  Others can be added.
+This package gives R functionality for mixed graphs, i.e.\ graphs
+with more than one kind of edge.  Some standard edge types
+are built into the package, and can be seen by calling
+`edgeTypes()`.  Others can be added by the user.
 ```{r, message=FALSE}
 library(MixedGraphs)
 edgeTypes()
 ```
-We build flexible functions for things like adjacency and 
+Edges may be specified using either lists or adjacency matrices,
+giving the best of both worlds in terms of speed or storage
+requirements. 
+We include flexible functions for finding adjacencies and 
 connected components, so they can be used for any type of edge,
-even ones which have not yet been added to the package.
+even ones which have not yet been added to the package. 
 
 ## Graph Construction
 
@@ -52,6 +55,11 @@ The edges should be in the same format as specified
 in `edgeTypes()`, save that adjacent dashes will be contracted:
 so `---` and `-` are the same, as are `<--->` and `<->`.
 
+Graphs can also be produced in representations used by other
+packages, for example (requires the `graph` package):
+```
+graphCr("1 -- 2 -- 3", representation = "graphNEL")
+```
 If all the vertex labels given are all numeric, then these are 
 assumed to be their indices, and they are given the names
 `x1`, `x2`, etc.  If any of the vertex labels are not 
@@ -176,3 +184,8 @@ ch(gr1, 2)   # short cut for adj(gr1, v = 2, etype = "directed", dir = 1)
 ## Adding Edge Types
 
 New edge types can be added to the built in options.
+
+## Graph Format Conversion
+
+The `convert()` function allows graphs to be transformed between
+the specifications used for different packages.  

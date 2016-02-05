@@ -7,11 +7,11 @@ graphOptionsEnv <- new.env()
 ## directed : does the orientation of this edge have meaning?
 ## hyper    : is this a hyper edge? [Not yet supported.]
 assign("edgeTypesDF", 
-       data.frame(type=c("undirected", "directed", "bidirected", "partially directed", "not directed"),
-                  char=c("---","-->","<->", ".->", ".-."),
-                  revchar=c(NA, "<--" ,NA, "<-.", NA),
-                  directed=c(FALSE, TRUE, FALSE, TRUE, FALSE),
-                  hyper=c(FALSE, FALSE, FALSE, FALSE, FALSE), stringsAsFactors=FALSE),
+       data.frame(type=c("undirected", "directed", "bidirected", "partially directed", "partially undirected", "not directed"),
+                  char=c("---","-->","<->", ".->", ".--", ".-."),
+                  revchar=c(NA, "<--" ,NA, "<-.", "--.", NA),
+                  directed=c(FALSE, TRUE, FALSE, TRUE, TRUE, FALSE),
+                  hyper=c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE), stringsAsFactors=FALSE),
        envir=graphOptionsEnv)
 
 ## need to add a function to add edge types
@@ -112,6 +112,7 @@ is.mixedgraph <- function(object) {
 }
 
 ##' Check if object could be an edgeMatrix
+##' @export is.edgeMatrix
 is.edgeMatrix <- function(object, n) {
   if (!is.matrix(object)) return(FALSE)
   if (!missing(n) && any(object > n)) return(FALSE)
@@ -123,6 +124,7 @@ is.edgeMatrix <- function(object, n) {
 ##' Check if object could be an edgeMatrix
 ##' 
 ##' Currently assumes that entries must be non-negative
+##' @export is.adjMatrix
 is.adjMatrix <- function(object, n) {
   if (!is.matrix(object)) return(FALSE)
   if (!missing(n) && n != ncol(object) && n != nrow(object)) return(FALSE)
@@ -248,15 +250,18 @@ subGraph = function (graph, v, drop=FALSE) {
 ##' 
 ##' @param char string of inputs given by vertex names separated by edges
 ##' @param ... other strings of further edges
+##' @param useMatrices in mixed graph representation, should the output
+##' use adjacency matrices?
+##' @param representation 
 ##' 
 ##' @details Symbols \code{-<>=*|:} are assumed to be part of an edge, so
 ##' cannot be used in node names for this function.
 ##' 
 ##' @examples
 ##' graphCr("1--->2<-->3<-4","2<->4,4->5")
-##' graphCr("1-2-3-4-1")
+##' graphCr("1-2-3-4-1", representation="graphNEL")  # requires package 'graph'
 ##' @export graphCr
-graphCr <- function(char, ..., useMatrices=FALSE) {
+graphCr <- function(char, ..., useMatrices=FALSE, representation="mixedgraph") {
   out <- list(char, ...)
   # in future try to allow direct typing
   #out <- unlist(sapply(out, as.character))
@@ -313,7 +318,10 @@ graphCr <- function(char, ..., useMatrices=FALSE) {
   n <- max(c(v1, v2))
   
   out <- mixedgraph(n, edges=edges, vnames=vnames)
-  if (useMatrices) out <- withAdjMatrix(out)
+  if (representation != "mixedgraph") {
+    out <- convert(out, format=representation)
+  }
+  else if (useMatrices) out <- withAdjMatrix(out)
   
   out
 }

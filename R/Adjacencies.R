@@ -8,12 +8,18 @@
 ##' @details returns an edgeMatrix or adjacency matrix for possibly multiple edge types.
 ##' If any of the edges are specified as an adjacency matrix, then the output will also
 ##' be an adjacency matrix.
+##' 
+##' @export collapse
 collapse <- function(edges, v1, v2, dir=1, matrix=FALSE) {
   ## repeat direction with warning if necessary
   if (length(edges) == 0 || length(unlist(edges))==0) return(matrix(NA, 2, 0))
   dir <- dir*rep(1L, length(edges))
   
   all1 <- all2 <- FALSE
+  
+  rmv <- sapply(edges, is.null)
+  edges <- edges[!rmv]
+  dir <- dir[!rmv]
   
   isAMat <- sapply(edges, is.adjMatrix)
   ## vertices not specified, use all
@@ -40,10 +46,9 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE) {
   ## then use this representation
   if (any(isAMat) || matrix) {
     ## could speed this up by not converting edge lists
-    edges[!isAMat] <- lapply(edges[!isAMat], adjMatrix, n=nv)
-
     jointMat <- matrix(0, length(v1), length(v2))
     for (i in seq_along(edges)) {
+      if (!isAMat[i]) edges[[i]] <- adjMatrix(edges[[i]], n=nv, directed=dir[i])
       if (dir[i] >= 0) jointMat <- jointMat + edges[[i]][v1, v2]
       if (dir[i] <= 0) jointMat <- jointMat + t(edges[[i]][v2, v1])
     }
@@ -412,6 +417,8 @@ skeleton = function(graph) {
 ##' 2. Base case: {} is ancestral
 ##' 3. Induction: (i) Assume we have a list L of all ancestral sets involving Xi-1 in the order.
 ##' (ii) If an ancestral set S in L contains all parents of Xi, Xi + S is also ancestral.
+##' 
+##' @author Ilya Shpitser
 ##' 
 ##' @export anSets
 anSets = function(graph) {

@@ -19,4 +19,7 @@ Algorithm:
 3. Induction: (i) Assume we have a list L of all ancestral sets involving Xi-1 in the order.
 (ii) If an ancestral set S in L contains all parents of Xi, Xi + S is also ancestral.
 }
+\author{
+Ilya Shpitser
+}
 

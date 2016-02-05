@@ -8,5 +8,7 @@ License: GPL2
 LazyData: true
 Suggests: testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    graph,
+    ggm
 VignetteBuilder: knitr
