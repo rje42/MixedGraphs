@@ -1,3 +1,6 @@
+---
+output: html_document
+---
 # MixedGraphs
 
 Graphs are implemented patchily in R, in various packages which each have 

@@ -30,7 +30,7 @@ even ones which have not yet been added to the package.
 
 The functions `makeGraphComplete()`, `makeGraphChain()`, `makeGraphCycle()`
 and `makeGraphStar()` can be used to create commonly used 
-graph shapes of graph.  Specifying just a graph size results
+graphs.  Specifying just a graph size results
 in an undirected graph:
 ```{r}
 makeGraphStar(5)
@@ -57,7 +57,7 @@ so `---` and `-` are the same, as are `<--->` and `<->`.
 
 Graphs can also be produced in representations used by other
 packages, for example (requires the `graph` package):
-```
+```{r}
 graphCr("1 -- 2 -- 3", representation = "graphNEL")
 ```
 If all the vertex labels given are all numeric, then these are 
@@ -77,6 +77,7 @@ The main things to specify are `n`, the number of vertices,
 and `edges`, a named list of edges.
 ```{r}
 gr2 <- mixedgraph(5, edges=list(undirected=list(c(1,2),c(2,4),c(3,5))))
+detach(package:graph)
 ```
 Each element of the edge list can be 
 
@@ -188,4 +189,22 @@ New edge types can be added to the built in options.
 ## Graph Format Conversion
 
 The `convert()` function allows graphs to be transformed between
-the specifications used for different packages.  
+the specifications used for different packages. (This function
+is not yet well tested.)  
+
+```{r}
+library(graph)
+data(MAPKsig)
+convert(MAPKsig)
+```
+It can also be used to send objects to different formats:
+```{r}
+amat <- convert(MAPKsig, format="ggm")
+dim(amat)
+```
+The graph creation function `graphCr` also allows graphs to quickly 
+be specified in other formats.
+```{r}
+graphCr("1 -- 2 -- 4 -- 5, 2 -- 3 -- 5", representation = "graphNEL")
+graphCr("1 -> 2 -> 3 -> 4, 2 <-> 4", representation = "ggm")
+```

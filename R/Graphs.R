@@ -53,7 +53,9 @@ vertexTypes <- function() {
 mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
 
   ## Check vertices are positive integers
-  if (missing(n)) n = length(v)
+  if (missing(n)) {
+    n = length(v)
+  }
   else if (length(v) != n) stop("Vertex list must have length 'n'")
   else if (any(v < 1)) stop("Vertices must be numbered as positive integers")
   if (!missing(vtype)) {
@@ -62,43 +64,48 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
     if (length(vtype) != n) vtype <- rep.int(vtype, length=n)
   }
 
-  ## Check that edge types are matched by global options
-  etys = edgeTypes()$type
-  if (is.null(names(edges))) et = seq_along(edges)
-  else et = pmatch(names(edges), etys)
-  if (length(et) == 1 && is.na(et)) {
-    warning("No edge type given, assuming undirected")
-    et = 1
-  }
-  else if (any(is.na(et))) stop("Edge types not matched")
-  else if (any(duplicated(et))) stop("Repeated edge types matched")
-
-  ## Check all edges given as lists are valid and of length 2
-  edL <- sapply(edges, is.list)
-  if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
-  if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
-
-  ## Check all edges given as edge matrices are valid and of length 2
-  edE <- sapply(edges, is.edgeMatrix)
-  if (any(is.na(match(unlist(edges[edE]), v)))) stop("Edges must be between vertices in the graph")
-  if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
-  
-  ## Construct edge lists
-  edgeList = list()
-  for (i in seq_along(et)) {
-    dimnames(edges[[i]]) <- NULL   # drop dimnames
-    edgeList[[etys[et[i]]]] = edges[[i]]
-  }
-  class(edgeList) = "edgeList"
-  wh = which(names(edgeList) == "")
-  if (length(wh) > 0) names(edgeList)[wh] = paste("EdgeType", wh, sep="")
-
   if (missing(vnames) || is.null(vnames)) {
     if (length(v) > 0) vnames = paste("x", seq_len(max(v)), sep="")
     else vnames = character(0)
   }
   else if (length(v) > 0 && length(vnames) < max(v)) {
     stop("Variable names vector must be at least max(v)")
+  }
+  
+  if (length(edges) > 0) {
+    ## Check that edge types are matched by global options
+    etys = edgeTypes()$type
+    if (is.null(names(edges))) et = seq_along(edges)
+    else et = pmatch(names(edges), etys)
+    if (length(et) == 1 && is.na(et)) {
+      warning("No edge type given, assuming undirected")
+      et = 1
+    }
+    else if (any(is.na(et))) stop("Edge types not matched")
+    else if (any(duplicated(et))) stop("Repeated edge types matched")
+    
+    ## Check all edges given as lists are valid and of length 2
+    edL <- sapply(edges, is.list)
+    if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
+    if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
+    
+    ## Check all edges given as edge matrices are valid and of length 2
+    edE <- sapply(edges, is.edgeMatrix)
+    if (any(is.na(match(unlist(edges[edE]), v)))) stop("Edges must be between vertices in the graph")
+    if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
+    
+    ## Construct edge lists
+    edgeList = list()
+    for (i in seq_along(et)) {
+      dimnames(edges[[i]]) <- NULL   # drop dimnames
+      edgeList[[etys[et[i]]]] = edges[[i]]
+    }
+    class(edgeList) = "edgeList"
+    wh = which(names(edgeList) == "")
+    if (length(wh) > 0) names(edgeList)[wh] = paste("EdgeType", wh, sep="")
+  }
+  else {
+    edgeList = list()
   }
 
   out = list(v=v, edges=edgeList, vnames=vnames)
