@@ -20,15 +20,22 @@ from the object in many cases}
 Convert graph to format associated with specific package
 }
 \details{
-Currently limited functionality, only
-converts 'ADMGs' and 'ggm' to 'mixedgraph' objects.
+Currently limited functionality.  Possible formats
+are "ADMG", "ggm", "graphNEL", "graphAM", "PAG", "bn", "igraph",
+and of course "mixedgraph".
+The function can recognise the class of objects other than
+"ggm", which is just an adjacency matrix.
 
 Implemented thus far:
-mixedgraph <-> ggm
-mixedgraph <-> ADMG
-mixedgraph <-> graphNEL
-mixedgraph <-> graphAM
-mixedgraph <-- PAG
+\itemize{
+\item mixedgraph <-> ggm
+\item mixedgraph <-> ADMG
+\item mixedgraph <-> graphNEL
+\item mixedgraph <-> graphAM
+\item mixedgraph <-- PAG
+\item mixedgraph <-> bn
+\item mixedgraph <-- igraph
+}
 
 \code{ggm} entries must be specified by \code{cur_format = "ggm"}.
 }
