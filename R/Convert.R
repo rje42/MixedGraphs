@@ -57,6 +57,7 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
                    directed=graph$d.edges, 
                    bidirected=graph$bi.edges)
       edges <- edges[!sapply(edges, is.null)]
+      n <- graph$n
       out = mixedgraph(n, v=seq_len(n), edges = edges, vnames=graph$vnames)
     } 
     else if (cur_format %in% via_mixed_graph) {
