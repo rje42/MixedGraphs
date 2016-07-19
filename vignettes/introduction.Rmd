@@ -57,7 +57,8 @@ so `---` and `-` are the same, as are `<--->` and `<->`.
 
 Graphs can also be produced in representations used by other
 packages, for example (requires the `graph` package):
-```{r}
+```{r, echo=2}
+suppressMessages(require(graph))  ## otherwise fills page with conflicts
 graphCr("1 -- 2 -- 3", representation = "graphNEL")
 ```
 If all the vertex labels given are all numeric, then these are 
@@ -207,4 +208,21 @@ be specified in other formats.
 ```{r}
 graphCr("1 -- 2 -- 4 -- 5, 2 -- 3 -- 5", representation = "graphNEL")
 graphCr("1 -> 2 -> 3 -> 4, 2 <-> 4", representation = "ggm")
+```
+
+### Automatic Evaluation
+
+To save time if one needs functions from many packages, 
+the `%G%` operator allows direct evaluation and takes care
+of the format conversion for you.  
+```{r}
+gr2 <- graphCr("1 -> 2 -> 3 -> 4 <- 2")
+gr2 %G% degree(Nodes=c(2,4))
+degree(convert(gr2, "graphNEL"), Nodes=c(2,4))
+```
+This is based on the idea of the pipe operator `%>%`. 
+The `%G%` operator will try to determine which
+format is suitable for the code you provide.
+```{r}
+MAPKsig %G% skeleton %G% (ggm::conComp)
 ```

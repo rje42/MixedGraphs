@@ -92,9 +92,10 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE) {
 ##' @details The argument \code{directed} is recycled for multiple edge types, but 
 ##' has no effect for edges without a specified direction.  
 ##' 
+##' @export adj
+##' 
 ##' @seealso \code{\link{grp}} for paths
 ##' 
-##' @export adj
 adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1) {
   ## if no edge type specified, use all available types
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
@@ -404,7 +405,7 @@ skeleton = function(graph) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   e = lapply(unlist(graph$edges, recursive=FALSE), sort.int)
   e = unique(e)
-  out = graph(v=graph$v, edges=list(undirected=e), vnames=graph$vnames)
+  out = mixedgraph(v=graph$v, edges=list(undirected=e), vnames=graph$vnames)
   return(out)
 }
 

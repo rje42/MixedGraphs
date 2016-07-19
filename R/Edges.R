@@ -107,6 +107,24 @@ withAdjMatrix <- function(graph, edges) {
   graph
 }
 
+##' Adjacency matrix representation
+##' 
+##' Change edge representation of graph to use adjacency matrices
+##' 
+##' @param graph an object of class \code{mixedgraph}
+##' @param edges character vector of edge types to change, defaults to all
+withEdgeList <- function(graph, edges) {
+  if (missing(edges)) idx <- seq_along(graph$edges)
+  else idx <- pmatch(edges, names(graph$edges))
+  if (length(idx) == 0) return(graph)
+  
+  dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
+  n <- length(graph$vnames)
+  graph$edges[idx] <- mapply(edgeList, graph$edges[idx], directed=dir, SIMPLIFY=FALSE)
+  graph
+}
+
+
 isAdjMatrix <- function(x) {
   is.matrix(x) && (nrow(x) == ncol(x)) && any(x==0)
 }

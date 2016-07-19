@@ -1,6 +1,7 @@
 ## functions for using graph, igraph, PAG, ggm, igraph, bn
 ## Really need to tidy this up
 
+
 ##' Convert graph to format associated with specific package
 ##' 
 ##' @param graph graphical object, of one of classes listed below
@@ -9,37 +10,52 @@
 ##' from the object in many cases
 ##' @param ...
 ##' 
-##' @details Currently limited functionality.  Possible formats
-##' are "ADMG", "ggm", "graphNEL", "graphAM", "PAG", "bn", "igraph",
-##' and of course "mixedgraph".
+##' @details Possible formats
+##' are 
+##' \itemize{
+##' \item \code{\link{mixedgraph}}
+##' \item \code{ggm} an adjacency matrix as specified in the \code{ggm} package; 
+##' \item \code{graphNEL}, \code{graphAM}, \code{graphBAM} from the \code{graph} package;
+##' \item \code{igraph};
+##' \item \code{PAG}: that is, the output of \code{pc()} or \code{fci()} functions in the \code{pcalg} package;
+##' \item \code{bn} from the \code{bnlearn} package;
+##' \item \code{ADMG}, from the \code{ADMGs} package.
+##' }
 ##' The function can recognise the class of objects other than
 ##' "ggm", which is just an adjacency matrix.
 ##' 
-##' Implemented thus far:
+##' Implemented natively thus far:
 ##' \itemize{
 ##' \item mixedgraph <-> ggm
 ##' \item mixedgraph <-> ADMG
 ##' \item mixedgraph <-> graphNEL
 ##' \item mixedgraph <-> graphAM
-##' \item mixedgraph <-- PAG
+##' \item mixedgraph <-> graphBAM
+##' \item mixedgraph <-> PAG
 ##' \item mixedgraph <-> bn
-##' \item mixedgraph <-- igraph
+##' \item mixedgraph <-> igraph (goes mixedgraph -> graphNEL -> igraph)
+##' \item graphNEL <-> igraph (using functions in the \code{igraph} package)
+##' \item graphNEL, graphAM <-> bn (using functions in the \code{bnlearn} package)
 ##' }
 ##' 
-##' \code{ggm} entries must be specified by \code{cur_format = "ggm"}.
+##' \code{ggm} entries must be specified by \code{cur_format = "ggm"}.  
+##' \code{PAG} objects are those whose class inherits from \code{gAlgo}, 
+##' or an adjacency matrix if \code{cur_format = "PAG"} is specified.
 ##' 
 ##' @export convert
 convert <- function(graph, format="mixedgraph", cur_format, ...) {
   
-  ## formats we can do 'to' and 'from' mixedgraph.
+  ## formats we can do 'to' and 'from' mixedgraph directly.
   via_mixed_graph <- c("ggm", "ADMG", "graphNEL", "graphAM", "bn")
   
   if (missing(cur_format)) {
     if (class(graph) == "igraph") cur_format <- "igraph"
     else if (class(graph) == "mixedgraph") cur_format <- "mixedgraph"
-    else if (class(graph) == "grain") cur_format <- "grain"
+# else if (class(graph) == "grain") cur_format <- "grain"
     else if ("graphNEL" %in% class(graph)) cur_format <- "graphNEL"
     else if ("graphAM" %in% class(graph)) cur_format <- "graphAM"
+    else if ("graphBAM" %in% class(graph)) cur_format <- "graphBAM"
+    else if ("gAlgo" %in% is(graph)) cur_format <- "PAG"
     else if (class(graph) == "graph") {
       cur_format <- "ADMG"
     }
@@ -53,15 +69,11 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   
   if (cur_format == "ADMG") {
     if(format == "mixedgraph") {
-      edges = list(undirected=graph$ud.edges, 
-                   directed=graph$d.edges, 
-                   bidirected=graph$bi.edges)
-      edges <- edges[!sapply(edges, is.null)]
-      n <- graph$n
-      out = mixedgraph(n, v=seq_len(n), edges = edges, vnames=graph$vnames)
+      out = conv_ADMG_mixedgraph(graph)
     } 
     else if (cur_format %in% via_mixed_graph) {
       ## go 'via' a mixedgraph
+      ## this is safe since ADMGs are less general than mixedgraphs
       out <- Recall(Recall(graph, "mixedgraph", cur_format=cur_format), format=format, "mixedgraph")
     }
     else {
@@ -70,36 +82,10 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   }
   else if (cur_format == "ggm") {
     if (format == "mixedgraph") {
-      nv <- nrow(graph)
-      if (ncol(graph) != nv) stop("ggm adjacency matrix must be square")
-      edges <- list()
-
-      ud <- graph %% 2
-      if (any(ud > 0)) {
-        edges$undirected <- ud
-        graph <- graph - ud
-      }
-      graph <- graph/10
-      
-      di <- graph %% 2
-      if (any(di > 0)) {
-        edges$directed <- di
-        graph <- graph - di
-      }
-      graph <- graph/10
-      
-      bi <- graph %% 2
-      if (any(bi > 0)) {
-        edges$bidirected <- bi
-        graph <- graph - bi
-      }
-      
-      if (any(graph != 0)) stop("Not a valid ggm object")
-      
-      out <- mixedgraph(nv, edges = edges, vnames = colnames(graph))
+      out <- conv_ggm_mixedgraph(graph)
     }    
     else if (cur_format %in% via_mixed_graph) {
-      ## go 'via' a mixedgraph
+      ## go 'via' a mixedgraph.  This _should_ be safe.
       out <- Recall(Recall(graph, "mixedgraph", cur_format=cur_format), format=format, "mixedgraph")
     }
     else {
@@ -108,13 +94,11 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   }
   else if (cur_format == "graphNEL") {
     if (format == "mixedgraph") {
-      require(graph)
-      vnames <- nodes(graph)
-      edgeList <- mapply(function(x,y) lapply(y$edges, function(z) c(x,z)), 
-                         seq_along(vnames), graph@edgeL)
-      edgeList <- list(do.call(c, edgeList))
-      names(edgeList) <- edgemode(graph)
-      out <- mixedgraph(n=length(vnames), vnames=vnames, edges=edgeList)
+      out = conv_graphNEL_mixedgraph(graph)
+    }
+    else if (format == "igraph") {
+      require(igraph, quietly = TRUE)
+      out = igraph.from.graphNEL(graph)
     }
     else if (cur_format %in% via_mixed_graph) {
       ## go 'via' a mixedgraph
@@ -126,11 +110,7 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   }
   else if (cur_format == "graphAM") {
     if (format == "mixedgraph") {
-      require(graph)
-      vnames <- colnames(graph@adjMat)
-      edgeMat <- list(graph@adjMat)
-      names(edgeMat) <- edgemode(graph)
-      out <- mixedgraph(n=length(vnames), vnames=vnames, edges=edgeMat)
+      out <- conv_graphAM_mixedgraph(graph)
     }
     else if (cur_format %in% c("ggm", "ADMG")) {
       out <- Recall(Recall(graph, "mixedgraph", cur_format=cur_format), format=format, "mixedgraph")
@@ -139,49 +119,36 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
       stop("Method not currently supported, but check back soon...")
     }
   }
+  else if (cur_format == "graphBAM") {
+    if (format == "mixedgraph") {
+      require(graph, warn.conflicts = FALSE, quietly = TRUE)
+      A <- graph::adjacencyMatrix(graph)
+      vnames <- colnames(A)
+      edgeMat <- list(A)
+      names(edgeMat) <- edgemode(graph)
+      out <- mixedgraph(n=length(vnames), vnames=vnames, edges=edgeMat)
+    }
+    else if (cur_format %in% c("ggm", "ADMG")) {
+      out <- Recall(Recall(graph, "mixedgraph", cur_format=cur_format), format=format, "mixedgraph")
+    }    
+    else {
+      stop("Method not currently supported, but check back soon...")
+    }
+  }
   else if (cur_format == "PAG") {
-    if (!is.matrix(graph)) graph <- graph@amat
-    
-    edges <- list()
-    rg <- row(graph); cg <- col(graph)
-    
-    tmp <- which((graph == 1) & (t(graph) == 1) & lower.tri(graph))
-    if (length(tmp) > 0) edges$`not directed` <- mapply(c, cg[tmp], rg[tmp], SIMPLIFY = FALSE)
-
-    tmp <- which((graph == 1) & (t(graph) == 2))
-    if (length(tmp) > 0) edges$`partially directed` <- mapply(c, cg[tmp], rg[tmp], SIMPLIFY = FALSE)
-    
-    tmp <- which((graph == 1) & (t(graph) == 3))
-    if (length(tmp) > 0) edges$`partially undirected` <- mapply(c, cg[tmp], rg[tmp], SIMPLIFY = FALSE)
-
-    tmp <- which((graph == 2) & (t(graph) == 2) & lower.tri(graph))
-    if (length(tmp) > 0) edges$`bidirected` <- mapply(c, cg[tmp], rg[tmp], SIMPLIFY = FALSE)
-    
-    tmp <- which((graph == 3) & (t(graph) == 2))
-    if (length(tmp) > 0) edges$`directed` <- mapply(c, cg[tmp], rg[tmp], SIMPLIFY = FALSE)
-    
-    tmp <- which((graph == 3) & (t(graph) == 3) & lower.tri(graph))
-    if (length(tmp) > 0) edges$`undirected` <- mapply(c, cg[tmp], rg[tmp], SIMPLIFY = FALSE)
-    
-    out <- mixedgraph(n = ncol(graph), vnames = colnames(graph), edges=edges)
-    
+    out <- conv_PAG_mixedgraph(graph)
     if (format != "mixedgraph") out <- Recall(out, format=format)
   }
   else if (cur_format == "igraph") {
-    require(igraph)
-
-    am_sp <- graph[]
-    if (nrow(am_sp) > 500) warning("Large graph, might be inefficient to use non-sparse adjacency matrix")
-    am <- as.matrix(am_sp)  # get adjacency matrix
-    ud <- am*(am == t(am))
-    dir <- am - ud
-    if (igraph::is_named(g)) {
-      vnames <- V(graph)$name
-    }
-    else vnames <- NULL
     
-    out <- mixedgraph(n=length(V(graph)), vnames=vnames, edges=list(undirected=ud, directed=dir))
-    if (format != "mixedgraph") out <- Recall(out, format=format)
+    if (format == "graphNEL") {
+      require(igraph, quietly = TRUE)
+      out = igraph.to.graphNEL(graph)
+    }
+    else {
+      out <- conv_igraph_mixedgraph(graph)
+      if (format != "mixedgraph") out <- Recall(out, format=format)
+    }
   }
   else if (cur_format == "bn") {
     if (format == "graphNEL") {
@@ -193,101 +160,33 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
       return(bnlearn::as.graphAM(graph))
     }
     
-    vnames <- names(graph$nodes)
-    un <- sapply(graph$nodes, FUN = function(x) match(setdiff(x$nb, c(x$children, x$parents)), vnames))
-    names(un) <- NULL
-    un <- mapply(function(x,y) x[x > y], un, seq_along(un))
-    un <- mapply(function(x,y) lapply(x, function(z) c(y,z)), un, seq_along(un))
-    un <- do.call(c, un)
-
-    dir <- sapply(graph$nodes, FUN = function(x) match(x$children, vnames))
-    names(dir) <- NULL
-    dir <- mapply(function(x,y) lapply(x, function(z) c(y,z)), dir, seq_along(dir))
-    dir <- do.call(c, dir)
-    
-    edgeList <- list(undirected=un, directed=dir)
-    
-    out <- mixedgraph(n = length(vnames), vnames=vnames, edges = edgeList)
+    out <- conv_bn_mixedgraph(graph)
     if (format != "mixedgraph") out <- Recall(out, format=format)
   }
   else if (cur_format == "mixedgraph") {
     if (format == "ADMG") {
-      require(ADMGs)
-      ud.edges <- edgeList(graph$edges$undirected)
-      d.edges <- edgeList(graph$edges$directed)
-      bi.edges <- edgeList(graph$edges$bidirected)
-      nv <- length(graph$vnames)
-      out = ADMGs::makeGraph(nv, 
-                             ud.edges = ud.edges, 
-                             d.edges = d.edges, 
-                             bi.edges = bi.edges, 
-                             vnames = graph$vnames)
+      out = conv_mixedgraph_ADMG(graph)
     } 
     else if (format == "ggm") {
-      nv <- length(graph$vnames)
-      out <- matrix(0, nv, nv, dimnames=list(graph$vnames, graph$vnames))
-      
-      dir <- ("directed" %in% names(graph$edges))
-      un <- ("undirected" %in% names(graph$edges))
-      bi <- ("bidirected" %in% names(graph$edges))
-
-      if (un) out <- out + adjMatrix(graph$edges$undirected, nv)
-      if (dir) out <- out + 10*adjMatrix(graph$edges$directed, nv, directed = TRUE)
-      if (bi) out <- out + 100*adjMatrix(graph$edges$bidirected, nv)
+      out = conv_mixedgraph_ggm(graph)
     }
     else if (format == "graphNEL") {
-      # is graph directed or undirected?
-      require(graph)
-      mode <- "undirected"
-      if (!is.null(graph$edges$directed) && length(graph$edges$directed) > 0) {
-        if (!is.null(graph$edges$undirected) && length(graph$edges$undirected) > 0) {
-          stop("Both directed and undirected edges, unclear how to proceed")
-        }
-        mode <- "directed"
-        edL <- lapply(graph$v, ch, graph=graph)
-      }
-      else {
-        edL <- lapply(graph$v, nb, graph=graph)
-      }
-      edL <- lapply(edL, function(x) list(edges=x)) 
-      names(edL) <- graph$vnames[graph$v]
-      
-      out <- graphNEL(nodes=graph$vnames[graph$v], edgeL=edL, edgemode=mode)
+      out = conv_mixedgraph_graphNEL(graph)
     }
     else if (format == "graphAM") {
-      # is graph directed or undirected?
-      require(graph)
-      mode <- "undirected"
-      if (!is.null(graph$edges$directed) && length(graph$edges$directed) > 0) {
-        if (!is.null(graph$edges$undirected) && length(graph$edges$undirected) > 0) {
-          stop("Both directed and undirected edges, unclear how to proceed")
-        }
-        mode <- "directed"
-        amat <- collapse(graph$edges["directed"], dir=1, matrix=TRUE)
-      }
-      else {
-        amat <- collapse(graph$edges["undirected"], dir=0, matrix=TRUE)
-      }
-      colnames(amat) <- graph$vnames[graph$v]
-      
-      out <- graphAM(amat, edgemode = mode)
+      out = conv_mixedgraph_graphAM(graph)
+    }
+    else if (format == "graphBAM") {
+      out = as(conv_mixedgraph_graphNEL(graph), "graphBAM")
     }
     else if (format == "bn") {
-      require(bnlearn)
-      arcs1 <- edgeMatrix(graph$edges$directed)
-      ## undirected edges are just directed both ways
-      arcs2 <- edgeMatrix(graph$edges$undirected)
-      arcs2 <- cbind(arcs2, arcs2[2:1,])
-      ## make this into matrix of the form used 
-      ## by bnlearn
-      edges <- rbind(t(arcs1), t(arcs2))
-      edges[] <- graph$vnames[edges]
-      colnames(edges) <- c("from", "to")
-      
-      ## make a new bn object
-      out <- bnlearn::empty.graph(graph$vnames[graph$v])
-      out$arcs <- edges
-      out$nodes <- bnlearn:::cache.structure(graph$vnames[graph$v], edges)
+      out = conv_mixedgraph_bn(graph)
+    }
+    else if (format == "igraph") {
+      out = conv_mixedgraph_igraph(graph)
+    }
+    else if (format == "PAG") {
+      out = conv_mixedgraph_PAG(graph)
     }
     else {
       stop("Method not currently supported, but check back soon...")
@@ -299,3 +198,106 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   
   out
 }
+
+##' Automatically convert and apply graph function
+##' 
+##' Experimental automatic conversion function
+##' 
+##' @param graph a graph object that can be handled
+##' by \code{MixedGraphs}
+##' @param .f right-hand side of a pipe to be evaluated
+##' 
+##' This is a version of the pipe `%>%` from \code{magrittr}
+##' that converts the left-hand side into a graph of suitable
+##' format to be used by the right-hand side.
+##' 
+##' @examples 
+##' gr1 <- graphCr("1 -> 2 <- 3 -> 4")
+##' # use the degree function from the graph package
+##' gr1 %G% graph::degree
+##' # equivalently in this case:
+##' gr1 %>% 
+##'     convert(format="graphNEL") %>%
+##'     degree
+##'     
+##' @export %G%`
+`%G%` <- function (graph, .f) 
+{
+  require(magrittr, quietly = TRUE)
+  subf = substitute(.f)
+  package = determinePackage(subf)
+  
+  if (package %in% c("graph", "gRbase", "gRain")) {
+    mode = "graphNEL"
+  }
+  else if (package == "MixedGraphs") {
+    mode = "mixedgraph"
+  }
+  else if (package == "pcalg") {
+    mode = "PAG"
+  }
+  else mode = package
+  
+  eval(substitute(graph %>% .f, 
+                  list(graph=convert(graph, mode), .f=substitute(.f, env=))
+                  ))
+}
+
+##' Determine which graph package evaluation will
+##' occur in.
+##' 
+##' @param x quoted expression
+##' 
+##' @details Fails if functions match distinct
+##' packages.  Might need to change this in future if
+##' different packages work with the same format.
+determinePackage <- function(x) {
+  
+  if(is.name(x)) {
+    ## if RHS is just a single function, find out 
+    ## which package it's in
+    env = environment(eval(x))
+    if (!is.null(env)) package = packageName(env)
+    else package = "base"
+  }
+  else if (is.call(x)) {
+    ## otherwise need to do something more clever
+    ## add a recursion
+    tmp <- as.list(x)
+    
+    if (x[[1]] == quote(`::`)) return(as.character(x[[2]]))
+    
+    package = vapply(x, determinePackage, character(1))
+    package = intersect(package, graphFormats()$package)
+    if (length(package) > 1) stop("Multiple graph packages in code")
+    else if (length(package) == 0) package = ""
+    # package = packageName(enclosing_env(pairlist(subf)[[1]][[1]]))
+  }
+  else return("")
+  
+  return(package)
+}
+
+# grswit <- function(name) {
+#   if (!is.na(match(name, ls("package:MixedGraphs")))) {
+#     return("mixedgraph")
+#   }
+#   
+#   require(graph, quietly = TRUE)
+#   if (!is.na(match(name, ls("package:graph")))) {
+#     return("graphNEL")
+#   }
+#   
+#   require(igraph, quietly = TRUE)
+#   if (!is.na(match(name, ls("package:igraph")))) {
+#     return("igraph")
+#   } 
+#   
+#   require(ggm, quietly = TRUE)
+#   if (!is.na(match(name, ls("package:ggm")))) {
+#     return("ggm")
+#   } 
+#   
+#   NA_character_
+# }
+

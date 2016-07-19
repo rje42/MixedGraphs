@@ -14,6 +14,20 @@ assign("edgeTypesDF",
                   hyper=c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE), stringsAsFactors=FALSE),
        envir=graphOptionsEnv)
 
+
+## List of graph formats, which can be expanded.
+## format    : character name of graph format
+## package   : associated package
+assign("graphFormatsDF", 
+       data.frame(format=c("mixedgraph", "graphNEL", "graphAM", "graphBAM", "igraph", "gAlgo", "ggm"),
+                  package=c("MixedGraphs", "graph", "graph", "graph", "igraph", "pcalg", "ggm"), stringsAsFactors=FALSE),
+       envir=graphOptionsEnv)
+
+##' @export edgeTypes
+graphFormats <- function() {
+  get("graphFormatsDF", envir=graphOptionsEnv)
+}
+
 ## need to add a function to add edge types
 
 ## List of vertex types, which can be expanded [not currently supported]
@@ -284,6 +298,7 @@ graphCr <- function(char, ..., useMatrices=FALSE, representation="mixedgraph") {
   
   em <- matrix(unlist(lapply(out, function(x) {
       k <- length(x)
+      if (k == 1) return(matrix("", 3, 0))
       if (k %% 2 == 0) stop(paste("\"", out, "\" didn't parse correctly", sep=""))
       x[rep(seq(k),times=c(1,rep(c(1,2),length=k-3),1,1))]
     })), nrow=3)
@@ -300,15 +315,25 @@ graphCr <- function(char, ..., useMatrices=FALSE, representation="mixedgraph") {
     stop("Some edge types not matched")
   }
   
+  ## unattached vertices
+  unattached <- unlist(lapply(out, function(x) {
+    k <- length(x)
+    if (k != 1) return(character(0))
+    else return(x)
+  }))
+  
   ## first see if numbers were supplied
+  ## v0 corresponds to vertices not attached to edges
   v1 <- suppressWarnings(as.integer(em[1,]))
   v2 <- suppressWarnings(as.integer(em[3,]))
+  v0 <- suppressWarnings(as.integer(unattached))
   
   ## at least one name wasn't a number, so use supplied names
-  if (any(is.na(v1)) || any(is.na(v2))) {
-    vs_tmp <- factor(c(t(em[c(1,3),,drop=FALSE])))
+  if (any(is.na(v1)) || any(is.na(v2)) || any(is.na(v0))) {
+    vs_tmp <- factor(c(t(em[c(1,3),,drop=FALSE]), unattached))
     v1 <- as.integer(vs_tmp[seq_len(ncol(em))])
     v2 <- as.integer(vs_tmp[seq_len(ncol(em))+ncol(em)])
+    v0 <- as.integer(vs_tmp[2*seq_len(ncol(em))+seq_along(unattached)])
     vnames <- levels(vs_tmp)
   }
   else vnames = NULL
@@ -322,7 +347,7 @@ graphCr <- function(char, ..., useMatrices=FALSE, representation="mixedgraph") {
   for (i in seq_along(v1)) {
     edges[[etys[etype[i]]]] = c(edges[[etys[etype[i]]]], list(c(v1[i], v2[i])))
   }
-  n <- max(c(v1, v2))
+  n <- max(c(v1, v2, v0))
   
   out <- mixedgraph(n, edges=edges, vnames=vnames)
   if (representation != "mixedgraph") {
