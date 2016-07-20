@@ -6,13 +6,13 @@ Description: Functions for creating and manipulating graphs with arbitrary
     edges.
 Depends:
     R (>= 3.1),
-    rje
+    rje,
+    knitr
 License: GPL2
 LazyData: true
 Suggests:
     testthat,
     magrittr,
-    knitr,
     rmarkdown,
     graph,
     gRbase,
