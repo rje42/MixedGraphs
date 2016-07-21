@@ -168,6 +168,7 @@ conv_mixedgraph_graphAM <- function(graph) {
 }
 
 conv_mixedgraph_igraph <- function(graph) {
+  require(igraph)
   igraph.from.graphNEL(conv_mixedgraph_graphNEL(graph))
 }
 
