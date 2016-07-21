@@ -60,6 +60,10 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
       cur_format <- "ADMG"
     }
     else if (class(graph) == "bn") cur_format <- "bn"
+    else if (class(graph) == "matrix") {
+      warning("Matrix input, assuming ggm format")
+      cur_format <- "ggm"
+    }
     else {
       stop("Format not supported")
     }
@@ -227,16 +231,14 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   subf = substitute(.f)
   package = determinePackage(subf)
   
-  if (package %in% c("graph", "gRbase", "gRain")) {
-    mode = "graphNEL"
+  wh = match(package, graphFormats()$package)
+  if (is.na(wh)) {
+    if (package %in% c("gRbase", "gRain")) {
+      mode = "graphNEL"
+    }
+    else mode = package
   }
-  else if (package == "MixedGraphs") {
-    mode = "mixedgraph"
-  }
-  else if (package == "pcalg") {
-    mode = "PAG"
-  }
-  else mode = package
+  else mode = graphFormats()$format[wh]
   
   eval(substitute(graph %>% .f, 
                   list(graph=convert(graph, mode), .f=substitute(.f, env=))

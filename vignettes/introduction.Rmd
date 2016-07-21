@@ -59,7 +59,7 @@ Graphs can also be produced in representations used by other
 packages, for example (requires the `graph` package):
 ```{r, echo=2}
 suppressMessages(require(graph))  ## otherwise fills page with conflicts
-graphCr("1 -- 2 -- 3", representation = "graphNEL")
+graphCr("1 -- 2 -- 3", format = "graphNEL")
 ```
 If all the vertex labels given are all numeric, then these are 
 assumed to be their indices, and they are given the names
@@ -206,8 +206,8 @@ dim(amat)
 The graph creation function `graphCr` also allows graphs to quickly 
 be specified in other formats.
 ```{r}
-graphCr("1 -- 2 -- 4 -- 5, 2 -- 3 -- 5", representation = "graphNEL")
-graphCr("1 -> 2 -> 3 -> 4, 2 <-> 4", representation = "ggm")
+graphCr("1 -- 2 -- 4 -- 5, 2 -- 3 -- 5", format = "graphNEL")
+graphCr("1 -> 2 -> 3 -> 4, 2 <-> 4", format = "ggm")
 ```
 
 ### Automatic Evaluation

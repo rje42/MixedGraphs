@@ -19,8 +19,8 @@ assign("edgeTypesDF",
 ## format    : character name of graph format
 ## package   : associated package
 assign("graphFormatsDF", 
-       data.frame(format=c("mixedgraph", "graphNEL", "graphAM", "graphBAM", "igraph", "gAlgo", "ggm"),
-                  package=c("MixedGraphs", "graph", "graph", "graph", "igraph", "pcalg", "ggm"), stringsAsFactors=FALSE),
+       data.frame(format=c("mixedgraph", "ADMG", "graphNEL", "graphAM", "graphBAM", "igraph", "gAlgo", "ggm", "bn"),
+                  package=c("MixedGraphs", "ADMGs", "graph", "graph", "graph", "igraph", "pcalg", "ggm", "bnlearn"), stringsAsFactors=FALSE),
        envir=graphOptionsEnv)
 
 ##' @export edgeTypes
@@ -273,16 +273,18 @@ subGraph = function (graph, v, drop=FALSE) {
 ##' @param ... other strings of further edges
 ##' @param useMatrices in mixed graph representation, should the output
 ##' use adjacency matrices?
-##' @param representation 
+##' @param format type of graph format to use, options are \code{mixedgraph} 
+##' (the default), \code{graphNEL} (and \code{graphAM}, \code{graphBAM}), 
+##' \code{igraph}, \code{ggm}, \code{bn}, \code{PAG}.
 ##' 
 ##' @details Symbols \code{-<>=*|:} are assumed to be part of an edge, so
-##' cannot be used in node names for this function.
+##' cannot be used in node names using this function.
 ##' 
 ##' @examples
 ##' graphCr("1--->2<-->3<-4","2<->4,4->5")
 ##' graphCr("1-2-3-4-1", representation="graphNEL")  # requires package 'graph'
 ##' @export graphCr
-graphCr <- function(char, ..., useMatrices=FALSE, representation="mixedgraph") {
+graphCr <- function(char, ..., useMatrices=FALSE, format="mixedgraph") {
   out <- list(char, ...)
   # in future try to allow direct typing
   #out <- unlist(sapply(out, as.character))
@@ -350,8 +352,8 @@ graphCr <- function(char, ..., useMatrices=FALSE, representation="mixedgraph") {
   n <- max(c(v1, v2, v0))
   
   out <- mixedgraph(n, edges=edges, vnames=vnames)
-  if (representation != "mixedgraph") {
-    out <- convert(out, format=representation)
+  if (format != "mixedgraph") {
+    out <- convert(out, format=format)
   }
   else if (useMatrices) out <- withAdjMatrix(out)
   
