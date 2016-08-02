@@ -5,17 +5,17 @@ conv_ggm_mixedgraph <- function(graph) {
   if (ncol(graph) != nv) stop("ggm adjacency matrix must be square")
   edges <- list()
   
-  ud <- graph %% 2
-  if (any(ud > 0)) {
-    edges$undirected <- ud
-    graph <- graph - ud
-  }
-  graph <- graph/10
-  
   di <- graph %% 2
   if (any(di > 0)) {
     edges$directed <- di
     graph <- graph - di
+  }
+  graph <- graph/10
+  
+  ud <- graph %% 2
+  if (any(ud > 0)) {
+    edges$undirected <- ud
+    graph <- graph - ud
   }
   graph <- graph/10
   
@@ -122,8 +122,8 @@ conv_mixedgraph_ggm <- function(graph) {
   un <- ("undirected" %in% names(graph$edges))
   bi <- ("bidirected" %in% names(graph$edges))
   
-  if (un) out <- out + adjMatrix(graph$edges$undirected, nv)
-  if (dir) out <- out + 10*adjMatrix(graph$edges$directed, nv, directed = TRUE)
+  if (dir) out <- out + adjMatrix(graph$edges$directed, nv, directed = TRUE)
+  if (un) out <- out + 10*adjMatrix(graph$edges$undirected, nv)
   if (bi) out <- out + 100*adjMatrix(graph$edges$bidirected, nv)
   out
 }

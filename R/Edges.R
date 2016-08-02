@@ -121,6 +121,7 @@ withEdgeList <- function(graph, edges) {
   dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
   n <- length(graph$vnames)
   graph$edges[idx] <- mapply(edgeList, graph$edges[idx], directed=dir, SIMPLIFY=FALSE)
+  class(graph$edges) = "edgeList"
   graph
 }
 
