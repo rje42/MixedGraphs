@@ -224,7 +224,7 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
 ##'     convert(format="graphNEL") %>%
 ##'     degree
 ##'     
-##' @export %G%`
+##' @export %G%
 `%G%` <- function (graph, .f) 
 {
   require(magrittr, quietly = TRUE)

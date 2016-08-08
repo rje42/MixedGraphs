@@ -11,7 +11,7 @@ subGraph(graph, v, drop = FALSE)
 
 \item{v}{vertices to keep}
 
-\item{drop}{force drop removed vertices from representation?}
+\item{drop}{force removed vertices to be dropped from representation in adjacency matrices?}
 }
 \description{
 Take induced vertex subgraph of mixedgraph
