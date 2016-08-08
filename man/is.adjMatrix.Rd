@@ -2,7 +2,7 @@
 % Please edit documentation in R/Graphs.R
 \name{is.adjMatrix}
 \alias{is.adjMatrix}
-\title{Check if object could be an edgeMatrix}
+\title{Check if object could be an adjacency matrix}
 \usage{
 is.adjMatrix(object, n)
 }

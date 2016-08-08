@@ -96,6 +96,8 @@ edgeList <- function(edges, directed=FALSE) {
 ##' 
 ##' @param graph an object of class \code{mixedgraph}
 ##' @param edges character vector of edge types to change, defaults to all
+##' 
+##' @export withAdjMatrix
 withAdjMatrix <- function(graph, edges) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
@@ -113,6 +115,8 @@ withAdjMatrix <- function(graph, edges) {
 ##' 
 ##' @param graph an object of class \code{mixedgraph}
 ##' @param edges character vector of edge types to change, defaults to all
+##' 
+##' @export withEdgeList
 withEdgeList <- function(graph, edges) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
