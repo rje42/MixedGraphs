@@ -142,7 +142,7 @@ is.edgeMatrix <- function(object, n) {
   return(TRUE)
 }
 
-##' Check if object could be an edgeMatrix
+##' Check if object could be an adjacency matrix
 ##' 
 ##' Currently assumes that entries must be non-negative
 ##' @export is.adjMatrix
@@ -151,6 +151,7 @@ is.adjMatrix <- function(object, n) {
   if (!missing(n) && n != ncol(object) && n != nrow(object)) return(FALSE)
   else if (nrow(object) != ncol(object)) return(FALSE)
   if (any(object < 0)) return(FALSE)
+  if (all(object > 0)) return(FALSE)
   return(TRUE)
 }
 
@@ -211,7 +212,7 @@ print.mixedgraph = function(x, ...) {
 ##' 
 ##' @param graph a \code{mixedgraph} object
 ##' @param v vertices to keep
-##' @param drop force drop removed vertices from representation?
+##' @param drop force removed vertices to be dropped from representation in adjacency matrices?
 ##' 
 ##' @export subGraph
 subGraph = function (graph, v, drop=FALSE) {
@@ -263,6 +264,50 @@ subGraph = function (graph, v, drop=FALSE) {
   else out = list(v=v, edges=edges, vnames=graph$vnames)
   class(out) = "mixedgraph"
   out
+}
+
+##' Write graphs in standard format
+##' 
+##' Designed to make comparison of graphs easier
+standardizeEdges <- function(graph) {
+  ## standard order for edges
+  #stop("FUNCTION NOT FINISHED")
+  et <- na.omit(match(edgeTypes()[,1], names(graph$edges)))
+  
+  graph$edges <- graph$edges[et]
+  graph <- withEdgeList(graph)
+  k <- max(graph$v)
+
+  nms <- names(graph$edges)
+  et <- sort(et)
+  
+  ## order edges numerically
+  for (i in seq_along(graph$edges)) {
+    
+    ## order edges by first vertex
+    if (edgeTypes()$directed[et[i]]) {
+      ord = order(sapply(graph$edges[[i]], function(x) k*x[1]+x[2]))
+    }
+    else{
+      ## make smallest vertex first for undirected edges
+      wh = sapply(graph$edges[[i]], function(x) x[1] > x[2])
+      graph$edges[[i]][wh] = lapply(graph$edges[[i]][wh], rev)
+      ord = order(sapply(graph$edges[[i]], function(x) k*x[1]+x[2]))
+    }
+    
+    graph$edges[[i]] = graph$edges[[i]][ord]
+  }
+  
+  graph
+}
+
+##' Test graphs are equal
+##' 
+##' NOT TESTED
+graph_equal <- function(g1, g2) {
+  g1 <- standardizeEdges(g1)
+  g2 <- standardizeEdges(g2)
+  return(isTRUE(all.equal(g1, g2)))
 }
 
 ##' Create graph from character parsing

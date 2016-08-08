@@ -111,9 +111,10 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1) {
   whEdge <- pmatch(etype,names(graph$edges))
   
   edges <- graph$edges[whEdge]
+  n <- length(graph$v)
   
   ## special case of one adjacency matrix to save time
-  if (length(edges) == 1 && isAdjMatrix(edges[[1]])) {
+  if (length(edges) == 1 && is.adjMatrix(edges[[1]], n)) {
     es <- edges[[1]][v,,drop=FALSE]
     n <- ncol(es)
     if (dir == 0) es <- es + t(edges[[1]][,v,drop=FALSE])
@@ -403,8 +404,9 @@ sterile = function(graph, v=graph$v){
 ##' @export skeleton
 skeleton = function(graph) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
-  e = lapply(unlist(graph$edges, recursive=FALSE), sort.int)
-  e = unique(e)
+  # e = lapply(unlist(graph$edges, recursive=FALSE), sort.int)
+  # e = unique(e)
+  e = collapse(graph$edges)
   out = mixedgraph(v=graph$v, edges=list(undirected=e), vnames=graph$vnames)
   return(out)
 }

@@ -1,3 +1,45 @@
+##' Remove duplicate edges
+##' 
+##' @param edgeList \code{edgeList} object
+##' @param directed are edges directed? (i.e.
+##' does the order of vertices matter?)
+##' @param sort should vertices in undirected edges
+##' be sorted as a side-effect of the function? (list form
+##' only)
+##' 
+##' Check for and remove duplicate edges in a list of
+##' edges or edgeMatrix.  Note that this will sort 
+##' elements in 
+remove_duplicate_edges <- function(edgeList, directed=TRUE, sort=FALSE) {
+  if (is.matrix(edgeList)) {
+    ## edgeMatrix object
+    if (nrow(edgeList) != 2 || any(edgeList <= 0)) stop("Object provided is a matrix but doesn't seem to be an edgeMatrix")
+    if (ncol(edgeList) <= 1) return(edgeList)
+    
+    ## get a unique number representing each edge
+    k = max(edgeList) + 1L
+    char = c(t(c(1L,k)) %*% edgeList)
+    ## if undirected, check both orders and take the smaller
+    if (!directed) char = pmin(char, c(t(c(k,1L)) %*% edgeList))
+    dup = duplicated(char)
+    
+    if (sort) warning("sort = TRUE has no effect for edgeMatrix")
+    return(edgeList[,!dup,drop=FALSE])
+  }
+  else if (is.list(edgeList)) {
+
+    if (directed) return(unique(edgeList))
+    ## if undirected, sort entries
+    out = lapply(edgeList, sort.int)
+    dup = duplicated(out)
+    if (sort) return(out[!dup])
+    else return(edgeList[!dup])
+  }
+  else stop("Not sure how to handle this, should be list or matrix")
+  
+  
+}
+
 ##' Add or remove edges
 ##' 
 ##' @details At the moment no effort is made to 
@@ -14,13 +56,15 @@ addEdges <- function(graph, edges) {
   v <- graph$v
   
   etys = edgeTypes()$type
-  if (is.null(names(edges))) et = seq_along(edges)
-  else et = pmatch(names(edges), etys)
-  if (length(et) == 1 && is.na(et)) {
+  
+  if (!is.list(edges)) stop("'edges' must be a list named with edge types")
+  if (is.null(names(edges))) {
     warning("No edge type given, assuming undirected")
     et = 1
   }
-  else if (any(is.na(et))) stop("Edge types not matched")
+  else et = pmatch(names(edges), etys)
+  
+  if (any(is.na(et))) stop("Edge types not matched")
   else if (any(duplicated(et))) stop("Repeated edge types matched")
   
   ## Check all edges given as lists to be added are valid and of length 2
@@ -34,10 +78,11 @@ addEdges <- function(graph, edges) {
   if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
 
   for (i in seq_along(et)) {
+    dir <- edgeTypes()$directed[et[i]]
+    
     if (etys[et[i]] %in% names(out$edges)) {
       ## if there are some of this type of edge already
       ## add it in the same format
-      dir <- edgeTypes()$directed[et[i]]
       if (is.list(out$edges[[etys[et[i]]]])) {
         out$edges[[etys[et[i]]]] = c(out$edges[[etys[et[i]]]], edgeList(edges[[i]], directed = dir))
       }
@@ -53,6 +98,9 @@ addEdges <- function(graph, edges) {
       ## otherwise just add it in
       dimnames(edges[[i]]) <- NULL   # drop dimnames
       out$edges[[etys[et[i]]]] <- edges[[i]]
+    }
+    if (!is.adjMatrix(out$edges[[etys[et[i]]]])) {
+      out$edges[[etys[et[i]]]] = remove_duplicate_edges(out$edges[[etys[et[i]]]], directed=dir)
     }
   }
   
@@ -118,6 +166,8 @@ removeEdges <- function(graph, edges) {
 ##' @export mutilate
 mutilate <- function(graph, A, etype, dir=0L) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
+  if (length(A) == 0) return(graph)
+  
   ## if no edge type specified, use all available types
   if (missing(etype)) {
     whEdge <- seq_along(graph$edges)
@@ -125,7 +175,11 @@ mutilate <- function(graph, A, etype, dir=0L) {
   }
   else {
     whEdge <- pmatch(etype, names(graph$edges))
+    etype = etype[!is.na(whEdge)]
+    whEdge = etype[!is.na(whEdge)]
+    if (length(etype) == 0) return(graph)
     tmp <- pmatch(etype, edgeTypes()$type)
+    if (any(is.na(tmp))) stop("Some edge types not matched")
   }
   dir[!edgeTypes()$directed[tmp]] <- 0L
 

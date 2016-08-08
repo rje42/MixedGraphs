@@ -125,7 +125,41 @@ withEdgeList <- function(graph, edges) {
   graph
 }
 
-
-isAdjMatrix <- function(x) {
-  is.matrix(x) && (nrow(x) == ncol(x)) && any(x==0)
+## internal function to count edges 
+##
+## should it know whether matrix is directed or not?
+nedge2 <- function(edges, directed=TRUE) {
+  if (is.adjMatrix(edges)) {
+    if (directed) return(sum(edges != 0))
+    else {
+      return(sum(edges[upper.tri(edges)] != 0))
+    }
+  }
+  else if (is.edgeMatrix(edges)) {
+    return(ncol(edges))
+  }
+  else if (is.list(edges)) {
+    return(length(edges))
+  }
 }
+
+##' Give number of edges
+##' 
+##' @param graph an object of class \code{mixedgraph}
+##' @param edges character vector of edge types to include, defaults to all
+##' 
+##' Uses an internal function \code{nedge2} to count for
+##' each type of edge separately.  
+##' Do we want this to apply to graphs or edge lists
+##' or both?
+##' 
+##' @export nedge
+nedge <- function (graph, edges) {
+  if (missing(edges)) idx <- seq_along(graph$edges)
+  else idx <- pmatch(edges, names(graph$edges))
+  if (length(idx) == 0) return(0L)
+  
+  dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
+  sum(mapply(nedge2, graph$edges[idx], dir))
+}
+
