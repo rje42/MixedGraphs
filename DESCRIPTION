@@ -7,10 +7,10 @@ Description: Functions for creating and manipulating graphs with arbitrary
 Depends:
     R (>= 3.1),
     rje,
-    knitr
 License: GPL2
 LazyData: true
 Suggests:
+    knitr,
     testthat,
     magrittr,
     rmarkdown,

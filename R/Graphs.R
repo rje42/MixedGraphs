@@ -380,7 +380,7 @@ graphCr <- function(char, ..., useMatrices=FALSE, format="mixedgraph") {
     vs_tmp <- factor(c(t(em[c(1,3),,drop=FALSE]), unattached))
     v1 <- as.integer(vs_tmp[seq_len(ncol(em))])
     v2 <- as.integer(vs_tmp[seq_len(ncol(em))+ncol(em)])
-    v0 <- as.integer(vs_tmp[2*seq_len(ncol(em))+seq_along(unattached)])
+    v0 <- as.integer(vs_tmp[2*ncol(em)+seq_along(unattached)])
     vnames <- levels(vs_tmp)
   }
   else vnames = NULL

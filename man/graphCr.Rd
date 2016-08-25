@@ -4,7 +4,7 @@
 \alias{graphCr}
 \title{Create graph from character parsing}
 \usage{
-graphCr(char, ..., useMatrices = FALSE, representation = "mixedgraph")
+graphCr(char, ..., useMatrices = FALSE, format = "mixedgraph")
 }
 \arguments{
 \item{char}{string of inputs given by vertex names separated by edges}
@@ -14,14 +14,16 @@ graphCr(char, ..., useMatrices = FALSE, representation = "mixedgraph")
 \item{useMatrices}{in mixed graph representation, should the output
 use adjacency matrices?}
 
-\item{representation}{}
+\item{format}{type of graph format to use, options are \code{mixedgraph} 
+(the default), \code{graphNEL} (and \code{graphAM}, \code{graphBAM}), 
+\code{igraph}, \code{ggm}, \code{bn}, \code{PAG}.}
 }
 \description{
 Convenience function for quickly constructing graphs with character input
 }
 \details{
 Symbols \code{-<>=*|:} are assumed to be part of an edge, so
-cannot be used in node names for this function.
+cannot be used in node names using this function.
 }
 \examples{
 graphCr("1--->2<-->3<-4","2<->4,4->5")
