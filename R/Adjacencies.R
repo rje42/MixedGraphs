@@ -426,7 +426,7 @@ skeleton = function(graph) {
 ##' @export anSets
 anSets = function(graph) {
   if (length(graph$v) <= 1) return(list(graph$v))
-  out = list(numeric(0))
+  out = list(integer(0))
   top <- topologicalOrder(graph)
   
   for(node in top){
