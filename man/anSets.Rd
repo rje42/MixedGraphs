@@ -22,4 +22,3 @@ Algorithm:
 \author{
 Ilya Shpitser
 }
-

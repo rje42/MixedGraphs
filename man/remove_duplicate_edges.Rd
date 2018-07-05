@@ -23,4 +23,3 @@ elements in}
 \description{
 Remove duplicate edges
 }
-

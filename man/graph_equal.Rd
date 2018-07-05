@@ -9,4 +9,3 @@ graph_equal(g1, g2)
 \description{
 NOT TESTED
 }
-

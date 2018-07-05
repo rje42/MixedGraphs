@@ -9,4 +9,3 @@ edgeTypes()
 \description{
 Returns data frame of current edge types.
 }
-

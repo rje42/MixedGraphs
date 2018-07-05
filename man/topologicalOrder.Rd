@@ -10,4 +10,3 @@ topologicalOrder(graph)
 Looks for topological ordering of vertices with respect to directed edges.
 Not tested
 }
-

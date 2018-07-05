@@ -29,4 +29,3 @@ cannot be used in node names using this function.
 graphCr("1--->2<-->3<-4","2<->4,4->5")
 graphCr("1-2-3-4-1", representation="graphNEL")  # requires package 'graph'
 }
-

@@ -19,4 +19,3 @@ or both?}
 \description{
 Give number of edges
 }
-

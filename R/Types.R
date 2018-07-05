@@ -32,7 +32,7 @@ is.cyclic = function(graph) {
   return(any(is.na(out)))
 }
 
-##' @describeIn is.DAG
+##' @describeIn is.DAG test if an ADMG
 ##' @export is.ADMG
 is.ADMG = function(graph) {
   if (class(graph) != "mixedgraph") stop("Must be an object of class 'graph'")
@@ -43,7 +43,7 @@ is.ADMG = function(graph) {
   return(!is.cyclic(graph))
 }
 
-##' @describeIn is.DAG
+##' @describeIn is.DAG test if a summary graph
 ##' @export is.SG
 is.SG = function(graph) {
   if (class(graph) != "mixedgraph") stop("Must be an object of class 'graph'")

@@ -9,4 +9,3 @@ is.adjMatrix(object, n)
 \description{
 Currently assumes that entries must be non-negative
 }
-

@@ -2,9 +2,12 @@
 % Please edit documentation in R/mutilate.R
 \name{addEdges}
 \alias{addEdges}
+\alias{removeEdges}
 \title{Add or remove edges}
 \usage{
 addEdges(graph, edges)
+
+removeEdges(graph, edges)
 }
 \arguments{
 \item{graph}{a \code{mixedgraph} object}
@@ -20,4 +23,8 @@ detect duplication in addEdges().  To be added later.
 Currently removeEdges() forces all edges to be
 represented by adjacency matrices.
 }
+\section{Functions}{
+\itemize{
+\item \code{removeEdges}: remove edges
+}}
 

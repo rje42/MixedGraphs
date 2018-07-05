@@ -19,4 +19,3 @@ Fails if functions match distinct
 packages.  Might need to change this in future if
 different packages work with the same format.
 }
-

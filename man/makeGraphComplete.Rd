@@ -2,9 +2,18 @@
 % Please edit documentation in R/Graphs.R
 \name{makeGraphComplete}
 \alias{makeGraphComplete}
+\alias{makeGraphChain}
+\alias{makeGraphCycle}
+\alias{makeGraphStar}
 \title{Graph Constructor Functions}
 \usage{
 makeGraphComplete(n, type = "undirected")
+
+makeGraphChain(n, type = "undirected")
+
+makeGraphCycle(n, type = "undirected")
+
+makeGraphStar(n, type = "undirected")
 }
 \arguments{
 \item{n}{number of vertices}
@@ -19,4 +28,12 @@ Provides some construction
 functions for common graphs: complete graphs, 
 chains, cycles and stars.
 }
+\section{Functions}{
+\itemize{
+\item \code{makeGraphChain}: graph with chain of edges
+
+\item \code{makeGraphCycle}: graph with cycle of edges
+
+\item \code{makeGraphStar}: star shaped graph
+}}
 

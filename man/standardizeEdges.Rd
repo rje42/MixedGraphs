@@ -9,4 +9,3 @@ standardizeEdges(graph)
 \description{
 Designed to make comparison of graphs easier
 }
-

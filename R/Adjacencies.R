@@ -165,10 +165,9 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1) {
 ##' connected by such a path (i.e.\ the connected components with respect 
 ##' to the specified edge types).
 ##' 
-##' @seealso \code{\link{adj}} for single edge adjacencies.
-##' 
 ##' @export grp
-grp = function(graph, v, etype, inclusive=TRUE, dir=0, sort=1) {
+##' @seealso \code{\link{adj}} for single edge adjacencies.
+grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (length(v) == 0) return(integer(0))
   if (missing(etype)) etype <- edgeTypes()$type
@@ -225,8 +224,8 @@ grp = function(graph, v, etype, inclusive=TRUE, dir=0, sort=1) {
   out
 }
 
-##' @describeIn grp
 ##' @export groups
+##' @describeIn grp find equivalence classes
 groups = function(graph, etype) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (missing(etype)) etype <- edgeTypes()$type
@@ -268,6 +267,7 @@ groups = function(graph, etype) {
 ##' The usual familial relations between vertices in
 ##' mixed graphs.
 ##' 
+##' @aliases ch
 ##' @param graph \code{mixedgraph} object
 ##' @param v collection of vertices
 ##' @param sort integer:1 for unique but unsorted, 2 for 
@@ -284,43 +284,43 @@ pa = function(graph, v, sort=1) {
   adj(graph, v, etype="directed", dir=-1, inclusive=TRUE, sort=sort)
 }
 
-##' @describeIn pa
-##' @export ch
+##' @describeIn pa find children of vertices
+##' @export ch 
 ch = function(graph, v, sort=1) {
   adj(graph, v, etype="directed", dir=1, inclusive=TRUE, sort=sort)
 }
 
-##' @describeIn pa
+##' @describeIn pa find spouses of vertices
 ##' @export sp
 sp = function(graph, v, sort=1) {
   adj(graph, v, etype="bidirected", dir=0, inclusive=TRUE, sort=sort)
 }
 
-##' @describeIn pa
+##' @describeIn pa find undirected neighbours of vertices
 ##' @export nb
 nb = function(graph, v, sort=1) {
   adj(graph, v, etype="undirected", dir=0, inclusive=TRUE, sort=sort)
 }
 
-##' @describeIn pa
+##' @describeIn pa find ancestors of vertices
 ##' @export anc
 anc = function(graph, v, sort=1) {
   grp(graph, v, etype="directed", dir=-1, sort=sort)
 }
 
-##' @describeIn pa
+##' @describeIn pa find descendants of vertices
 ##' @export dec
 dec = function(graph, v, sort=1) {
   grp(graph, v, etype="directed", dir=1, sort=sort)
 }
 
-##' @describeIn pa
+##' @describeIn pa find anterior vertices
 ##' @export ant
 ant = function(graph, v, sort=1) {
   grp(graph, v, etype=c("directed", "undirected"), dir=c(-1,0), sort=sort)
 }
 
-##' @describeIn pa
+##' @describeIn pa find district of vertices
 ##' @export dis
 dis = function(graph, v, sort=1) {
   grp(graph, v, etype="bidirected", dir=0, sort=sort)
@@ -379,8 +379,8 @@ barren = function (graph, v = graph$v) {
   return(ans)
 }
 
+##' @describeIn barren find vertices with no parents
 ##' @export orphaned
-##' @describeIn barren
 orphaned = function (graph, v = graph$v) {
   if (length(v) == 0) return(integer(0))
   ans = adj(graph, v, etype="directed", dir=1)
@@ -389,7 +389,7 @@ orphaned = function (graph, v = graph$v) {
 }
 
 ##' @export sterile
-##' @describeIn barren
+##' @describeIn barren find vertices with no children in the same set
 sterile = function(graph, v=graph$v){
   pas = pa(graph, v)
   sterile = setdiff(v, pas)

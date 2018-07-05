@@ -24,4 +24,3 @@ If \code{directed=1}, then directed edges out of \code{A} are removed,
 but ones into \code{A} are preserved; for \code{directed=-1} the reverse,
 and for \code{directed=0} (the default), direction is irrelevant.
 }
-

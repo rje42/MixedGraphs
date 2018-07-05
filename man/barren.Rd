@@ -2,9 +2,15 @@
 % Please edit documentation in R/Adjacencies.R
 \name{barren}
 \alias{barren}
+\alias{orphaned}
+\alias{sterile}
 \title{Find barren, sterile, orphaned vertices}
 \usage{
 barren(graph, v = graph$v)
+
+orphaned(graph, v = graph$v)
+
+sterile(graph, v = graph$v)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}
@@ -24,4 +30,10 @@ Need to think about whether thse
 do the right thing for \code{v} a proper subset of the 
 vertices
 }
+\section{Functions}{
+\itemize{
+\item \code{orphaned}: find vertices with no parents
+
+\item \code{sterile}: find vertices with no children in the same set
+}}
 

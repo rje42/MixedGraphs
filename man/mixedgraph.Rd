@@ -28,4 +28,3 @@ if they match (or can replace) vertex names.
 \seealso{
 \code{\link{graphCr}}.
 }
-

@@ -199,7 +199,7 @@ print.mixedgraph = function(x, ...) {
   invisible(x)
 }
 
-##' @describeIn subGraph
+##' @describeIn subGraph bracket notation for subgraphs
 ##' @export [.mixedgraph
 `[.mixedgraph` = function(graph, v, ...) {
   if (missing(v)) return(graph)
@@ -430,7 +430,7 @@ makeGraphComplete = function (n, type = "undirected") {
   return(out)
 }
 
-##' @describeIn makeGraphComplete
+##' @describeIn makeGraphComplete graph with chain of edges
 ##' @export makeGraphChain
 makeGraphChain = function(n, type = "undirected") {
   edges = list(lapply(seq_len(max(n-1,0)), function(x) c(x, x+1)))
@@ -444,7 +444,7 @@ makeGraphChain = function(n, type = "undirected") {
   return(out)
 }
 
-##' @describeIn makeGraphComplete
+##' @describeIn makeGraphComplete graph with cycle of edges
 ##' @export makeGraphCycle
 makeGraphCycle = function(n, type = "undirected") {
 
@@ -460,7 +460,7 @@ makeGraphCycle = function(n, type = "undirected") {
   return(out)
 }
 
-##' @describeIn makeGraphComplete
+##' @describeIn makeGraphComplete star shaped graph
 ##' @export makeGraphStar
 makeGraphStar = function(n, type = "undirected") {
   

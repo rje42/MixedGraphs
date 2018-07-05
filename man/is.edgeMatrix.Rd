@@ -9,4 +9,3 @@ is.edgeMatrix(object, n)
 \description{
 Check if object could be an edgeMatrix
 }
-

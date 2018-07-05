@@ -63,7 +63,7 @@ graphCr("1 -- 2 -- 3", format = "graphNEL")
 ```
 If all the vertex labels given are all numeric, then these are 
 assumed to be their indices, and they are given the names
-`x1`, `x2`, etc.  If any of the vertex labels are not 
+`x1`, `x2`, etc.  If any of the vertex labels is not 
 numeric, then they are all taken as character representations,
 and their ordering becomes lexicographic.
 ```{r}

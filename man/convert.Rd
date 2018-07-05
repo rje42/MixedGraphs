@@ -52,4 +52,3 @@ Implemented natively thus far:
 \code{PAG} objects are those whose class inherits from \code{gAlgo}, 
 or an adjacency matrix if \code{cur_format = "PAG"} is specified.
 }
-

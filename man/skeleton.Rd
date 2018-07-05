@@ -9,4 +9,3 @@ skeleton(graph)
 \description{
 Find undirected skeleton of a mixed graph
 }
-

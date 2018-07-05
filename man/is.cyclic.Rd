@@ -10,4 +10,3 @@ is.cyclic(graph)
 Looks for cycles among edges of type 'directed'.  Not tested.
 Maybe should add option to not test among all directed edges types.
 }
-

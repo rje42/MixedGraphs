@@ -107,7 +107,7 @@ addEdges <- function(graph, edges) {
   out
 }
 
-##' @describeIn addEdges
+##' @describeIn addEdges remove edges
 ##' @export removeEdges
 removeEdges <- function(graph, edges) {
   out <- withAdjMatrix(graph)

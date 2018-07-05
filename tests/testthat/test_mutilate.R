@@ -14,3 +14,9 @@ test_that("removeEdges works", {
   dag3 <- removeEdges(dag2, list(un=list(c(5,3))))
   expect_equal(dag3, withAdjMatrix(dag1))
 })
+
+test_that("m-separation test works", {
+  expect_equal(m_sep(dag1a, 1, 2), FALSE)
+  expect_equal(m_sep(dag1a, 1, 2, 3), TRUE)
+  expect_equal(m_sep(dag1a, 1, integer(0)), TRUE)
+})

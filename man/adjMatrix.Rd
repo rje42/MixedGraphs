@@ -16,4 +16,3 @@ adjMatrix(edges, n, directed = FALSE)
 \description{
 Get adjacency matrix from list of edges
 }
-

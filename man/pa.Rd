@@ -2,9 +2,31 @@
 % Please edit documentation in R/Adjacencies.R
 \name{pa}
 \alias{pa}
+\alias{ch}
+\alias{ch}
+\alias{sp}
+\alias{nb}
+\alias{anc}
+\alias{dec}
+\alias{ant}
+\alias{dis}
 \title{Familial Mixed Graph Relations}
 \usage{
 pa(graph, v, sort = 1)
+
+ch(graph, v, sort = 1)
+
+sp(graph, v, sort = 1)
+
+nb(graph, v, sort = 1)
+
+anc(graph, v, sort = 1)
+
+dec(graph, v, sort = 1)
+
+ant(graph, v, sort = 1)
+
+dis(graph, v, sort = 1)
 }
 \arguments{
 \item{graph}{\code{mixedgraph} object}
@@ -25,4 +47,20 @@ parents, children, spouses and neighbours of \code{v} respectively.
 \code{anc}, \code{dec}, \code{ant}, \code{dis} finds the ancestors
 descendants, anterior and district of \code{v} respectively.
 }
+\section{Functions}{
+\itemize{
+\item \code{ch}: find children of vertices
+
+\item \code{sp}: find spouses of vertices
+
+\item \code{nb}: find undirected neighbours of vertices
+
+\item \code{anc}: find ancestors of vertices
+
+\item \code{dec}: find descendants of vertices
+
+\item \code{ant}: find anterior vertices
+
+\item \code{dis}: find district of vertices
+}}
 

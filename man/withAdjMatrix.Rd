@@ -14,4 +14,3 @@ withAdjMatrix(graph, edges)
 \description{
 Change edge representation of graph to use adjacency matrices
 }
-

@@ -23,4 +23,3 @@ returns an edgeMatrix or adjacency matrix for possibly multiple edge types.
 If any of the edges are specified as an adjacency matrix, then the output will also
 be an adjacency matrix.
 }
-

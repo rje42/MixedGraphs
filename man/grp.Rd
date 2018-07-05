@@ -2,9 +2,12 @@
 % Please edit documentation in R/Adjacencies.R
 \name{grp}
 \alias{grp}
+\alias{groups}
 \title{Group vertices by adjacencies}
 \usage{
 grp(graph, v, etype, inclusive = TRUE, dir = 0, sort = 1)
+
+groups(graph, etype)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}
@@ -37,7 +40,13 @@ For example, we can find all the ancestors of \code{v} by using
 connected by such a path (i.e.\ the connected components with respect 
 to the specified edge types).
 }
+\section{Functions}{
+\itemize{
+\item \code{groups}: find equivalence classes
+repeat dir() vector with warning if necessary
+}}
+
 \seealso{
 \code{\link{adj}} for single edge adjacencies.
+repeat dir() vector with warning if necessary
 }
-

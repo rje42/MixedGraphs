@@ -39,7 +39,7 @@ adjMatrix = function(edges, n, directed=FALSE) {
 
 ##' Get edges from adjacency matrix or list
 ##' 
-##' @param edges
+##' @param edges list or adjacency matrix of edges
 ##' @param directed logical: if TRUE edges are assumed directed
 ##' 
 ##' @export edgeMatrix
@@ -65,7 +65,7 @@ edgeMatrix <- function(edges, directed=FALSE) {
 
 ##' Edge list
 ##' 
-##' @param edges
+##' @param edges edgeMatrix or adjacency matrix
 ##' @param directed logical: if TRUE edges are assumed directed
 ##' 
 ##' @export edgeList

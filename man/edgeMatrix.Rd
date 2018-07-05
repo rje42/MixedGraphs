@@ -7,9 +7,10 @@
 edgeMatrix(edges, directed = FALSE)
 }
 \arguments{
+\item{edges}{list or adjacency matrix of edges}
+
 \item{directed}{logical: if TRUE edges are assumed directed}
 }
 \description{
 Get edges from adjacency matrix or list
 }
-

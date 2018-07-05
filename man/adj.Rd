@@ -35,4 +35,3 @@ has no effect for edges without a specified direction.
 
 repeat dir() vector with warning if necessary
 }
-
