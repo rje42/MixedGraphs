@@ -2,7 +2,7 @@
 % Please edit documentation in R/Edges.R
 \name{withEdgeList}
 \alias{withEdgeList}
-\title{Adjacency matrix representation}
+\title{Edge list representation}
 \usage{
 withEdgeList(graph, edges)
 }
@@ -12,5 +12,5 @@ withEdgeList(graph, edges)
 \item{edges}{character vector of edge types to change, defaults to all}
 }
 \description{
-Change edge representation of graph to use adjacency matrices
+Change edge representation of graph to use edge lists
 }

@@ -88,17 +88,24 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE) {
 ##' @param sort integer:1 for unique but unsorted, 2 for 
 ##' sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 ##' then output will always be unique and sorted.
+##' @param force logical - should invalid \code{v} be ignored?
 ##' 
 ##' @details The argument \code{directed} is recycled for multiple edge types, but 
-##' has no effect for edges without a specified direction.  
+##' has no effect for edges without a specified direction.  If any \code{v} is 
+##' not a vertex of \code{graph}, an error is returned, unless \code{force=TRUE}.
 ##' 
 ##' @export adj
 ##' 
 ##' @seealso \code{\link{grp}} for paths
 ##' 
-adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1) {
+adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
   ## if no edge type specified, use all available types
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
+  
+  ## only include vertices in the graph
+  if (force) v <- intersect(v, graph$v)
+  else if (any(!(v %in% graph$v))) stop("Invalid values of v")
+  
  # if (missing(etype)) etype <- edgeTypes()$type
   if (missing(etype)) etype <- names(graph$edges)
   ##' repeat dir() vector with warning if necessary
@@ -154,6 +161,7 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1) {
 ##' considered: 0 = undirected, 1 = from row to column; -1 = from column to row.
 ##' @param sort integer: 1 for unique but unsorted, 2 for 
 ##' sorted (0 for possibly repeated and unsorted).
+##' @param force logical - should invalid \code{v} be ignored?
 ##' 
 ##' @details \code{grp()} finds all vertices that can be reached from
 ##' vertices in \code{v} by edges of the specified type, and in the 
@@ -165,10 +173,19 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1) {
 ##' connected by such a path (i.e.\ the connected components with respect 
 ##' to the specified edge types).
 ##' 
+##' If any \code{v} is 
+##' not a vertex of \code{graph}, an error is returned, unless 
+##' \code{force=TRUE}.
+##' 
 ##' @export grp
 ##' @seealso \code{\link{adj}} for single edge adjacencies.
-grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1) {
+grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
+  
+  ## only include vertices in the graph
+  if (force) v <- intersect(v, graph$v)
+  else if (any(!(v %in% graph$v))) stop("Invalid values of v")
+
   if (length(v) == 0) return(integer(0))
   if (missing(etype)) etype <- edgeTypes()$type
   ##' repeat dir() vector with warning if necessary
@@ -345,6 +362,52 @@ neighbourhoods = function(graph) {
   groups(graph[un(graph)], etype="undirected")
 }
 
+##' Find Markov blanket
+##' 
+##' Find the Markov blanket for a vertex in an 
+##' ancestral set
+##' 
+##' @param graph \code{mixedgraph} object
+##' @param v a vertex, childless in \code{A}
+##' @param A an ancestral collection of vertices
+##' @param sort integer:1 for unique but unsorted, 2 for 
+##' sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
+##' then output will always be unique and sorted.
+##' 
+##' @details Finds the Markov blanket of \code{v} in \code{A}.
+##' 
+##' @export mb
+mb = function(graph, v, A, check=TRUE, sort=1) {
+  if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
+  if (missing(A)) A <- graph$v
+  
+  if (!(v %in% A)) stop("v must be a member of A")
+  
+  if (check) {
+    A2 <- pa(graph, A)
+    if (!all(A2 %in% A)) {
+      stop("Error: A is not ancestral")
+    }
+  }
+  
+  # consider subgraph over A
+  graph <- graph[A]
+  if (length(ch(graph, v)) > 0) stop("v is not childless in A")
+
+  ## get Markov blanket  
+  D <- dis(graph, v)
+  out <- c(pa(graph, D), D)
+  
+  if (sort == 1) {
+    out <- unique.default(out)
+  }
+  else if (sort == 2) {
+    out <- sort.default(unique.default(out))
+  }
+  
+  out
+}
+
 ##' Find barren, sterile, orphaned vertices
 ##' 
 ##' @param graph an object of class \code{mixedgraph}
@@ -414,6 +477,7 @@ skeleton = function(graph) {
 ##' Find ancestral sets of a graph.
 ##'
 ##' @param graph object of class \code{mixedgraph}, should be a summary graph
+##' @param topOrder optional topological order of vertices
 ##'
 ##' @details Algorithm:
 ##' 1. Find a topological order of nodes.
@@ -424,10 +488,11 @@ skeleton = function(graph) {
 ##' @author Ilya Shpitser
 ##' 
 ##' @export anSets
-anSets = function(graph) {
+anSets = function(graph, topOrder) {
   if (length(graph$v) <= 1) return(list(graph$v))
   out = list(integer(0))
-  top <- topologicalOrder(graph)
+  if (missing(topOrder)) top <- topologicalOrder(graph)
+  else top <- topOrder
   
   for(node in top){
     parents <- pa(graph, node)

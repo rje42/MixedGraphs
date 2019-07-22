@@ -4,7 +4,8 @@
 \alias{adj}
 \title{Find adjacent vertices}
 \usage{
-adj(graph, v, etype, dir = 0, inclusive = TRUE, sort = 1)
+adj(graph, v, etype, dir = 0, inclusive = TRUE, sort = 1,
+  force = FALSE)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}
@@ -20,6 +21,8 @@ included in output group.}
 sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 then output will always be unique and sorted.}
 
+\item{force}{logical - should invalid \code{v} be ignored?}
+
 \item{directed}{for directed edges, indicates which direction to search in:
 1: along direction, -1: against direction, 0: both directions.}
 }
@@ -28,7 +31,8 @@ Generic function for finding adjacent vertices based on any kind of edge.
 }
 \details{
 The argument \code{directed} is recycled for multiple edge types, but 
-has no effect for edges without a specified direction.
+has no effect for edges without a specified direction.  If any \code{v} is 
+not a vertex of \code{graph}, an error is returned, unless \code{force=TRUE}.
 }
 \seealso{
 \code{\link{grp}} for paths

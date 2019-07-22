@@ -4,10 +4,12 @@
 \alias{anSets}
 \title{Find ancestral sets of a graph.}
 \usage{
-anSets(graph)
+anSets(graph, topOrder)
 }
 \arguments{
 \item{graph}{object of class \code{mixedgraph}, should be a summary graph}
+
+\item{topOrder}{optional topological order of vertices}
 }
 \description{
 Find ancestral sets of a graph.

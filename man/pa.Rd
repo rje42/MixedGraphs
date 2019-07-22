@@ -3,7 +3,6 @@
 \name{pa}
 \alias{pa}
 \alias{ch}
-\alias{ch}
 \alias{sp}
 \alias{nb}
 \alias{anc}

@@ -109,9 +109,9 @@ withAdjMatrix <- function(graph, edges) {
   graph
 }
 
-##' Adjacency matrix representation
+##' Edge list representation
 ##' 
-##' Change edge representation of graph to use adjacency matrices
+##' Change edge representation of graph to use edge lists
 ##' 
 ##' @param graph an object of class \code{mixedgraph}
 ##' @param edges character vector of edge types to change, defaults to all

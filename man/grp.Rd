@@ -5,7 +5,8 @@
 \alias{groups}
 \title{Group vertices by adjacencies}
 \usage{
-grp(graph, v, etype, inclusive = TRUE, dir = 0, sort = 1)
+grp(graph, v, etype, inclusive = TRUE, dir = 0, sort = 1,
+  force = FALSE)
 
 groups(graph, etype)
 }
@@ -24,6 +25,8 @@ considered: 0 = undirected, 1 = from row to column; -1 = from column to row.}
 
 \item{sort}{integer: 1 for unique but unsorted, 2 for 
 sorted (0 for possibly repeated and unsorted).}
+
+\item{force}{logical - should invalid \code{v} be ignored?}
 }
 \description{
 Generic functions for finding groups based on edge adjacencies, 
@@ -39,6 +42,10 @@ For example, we can find all the ancestors of \code{v} by using
 \code{groups()} finds equivalence classes in a graph based on being 
 connected by such a path (i.e.\ the connected components with respect 
 to the specified edge types).
+
+If any \code{v} is 
+not a vertex of \code{graph}, an error is returned, unless 
+\code{force=TRUE}.
 }
 \section{Functions}{
 \itemize{
