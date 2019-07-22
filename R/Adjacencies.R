@@ -478,6 +478,8 @@ skeleton = function(graph) {
 ##'
 ##' @param graph object of class \code{mixedgraph}, should be a summary graph
 ##' @param topOrder optional topological order of vertices
+##' @param sort integer:1 for unique but unsorted, 2 for 
+##' sorted (0 for possibly repeated and unsorted). 
 ##'
 ##' @details Algorithm:
 ##' 1. Find a topological order of nodes.
@@ -491,10 +493,9 @@ skeleton = function(graph) {
 anSets = function(graph, topOrder) {
   if (length(graph$v) <= 1) return(list(graph$v))
   out = list(integer(0))
-  if (missing(topOrder)) top <- topologicalOrder(graph)
-  else top <- topOrder
-  
-  for(node in top){
+  if (missing(topOrder)) topOrder <- topologicalOrder(graph)
+
+  for(node in topOrder){
     parents <- pa(graph, node)
     additions <- list()
     

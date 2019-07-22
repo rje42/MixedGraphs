@@ -216,7 +216,9 @@ print.mixedgraph = function(x, ...) {
 ##' 
 ##' @export subGraph
 subGraph = function (graph, v, drop=FALSE) {
-#  v = v[v <= graph$n]
+
+  if (is.logical(v)) v <- which(v)
+  #  v = v[v <= graph$n]
   
   if (length(v) == 0) {
     if (drop) out = mixedgraph(n=0)
