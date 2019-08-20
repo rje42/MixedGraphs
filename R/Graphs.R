@@ -75,7 +75,7 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
   if (!missing(vtype)) {
     vtype <- pmatch(vtype, vertexTypes()$type)
     if (any(is.na(vtype))) stop("Some vertex types not matched")
-    if (length(vtype) != n) vtype <- rep.int(vtype, length=n)
+    if (length(vtype) != n) vtype <- rep(vtype, length=n)
   }
 
   if (missing(vnames) || is.null(vnames)) {
@@ -203,6 +203,7 @@ print.mixedgraph = function(x, ...) {
 ##' @export [.mixedgraph
 `[.mixedgraph` = function(graph, v, ...) {
   if (missing(v)) return(graph)
+  if (is.logical(v)) v <- which(v)
   v = v[v != 0]  # remove 0s
   if (length(v) > 0 && all(v < 0)) v = setdiff(graph$v, -v)
   subGraph(graph, v)

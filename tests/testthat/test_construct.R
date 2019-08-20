@@ -36,6 +36,7 @@ test_that("Basic operations on ADMG work", {
 
 test_that("subgraphs OK", {
   expect_equal(dag2$v, c(2,3,5))  
+  expect_equal(dag1[c(2,3,5)], dag1[c(FALSE, TRUE, TRUE, FALSE, TRUE)])
   expect_equal(anc(dag2, 5, sort=2), c(2,3,5))
   
   # should throw an error

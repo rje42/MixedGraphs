@@ -8,7 +8,7 @@ their strengths and weaknesses.  `MixedGraphs` allows flexible specification
 of graphs with multiple edge types, that can be expanded with custom edges,
 as well as interfaces for existing packages. 
 Ultimately we intend to be able to use the functionality of most existing 
-graph packages with the objects in `mixedgraphs`.
+graph packages with the objects in `MixedGraphs`.
 
 Current features:
 
