@@ -8,7 +8,7 @@
 ##' @param format character string giving new format to convert to
 ##' @param cur_format character string of current format; can be deduced 
 ##' from the object in many cases
-##' @param ...
+##' @param ... other arguments
 ##' 
 ##' @details Possible formats
 ##' are 
@@ -101,8 +101,8 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
       out = conv_graphNEL_mixedgraph(graph)
     }
     else if (format == "igraph") {
-      require(igraph, quietly = TRUE)
-      out = igraph.from.graphNEL(graph)
+      requireNamespace("igraph", quietly = TRUE)
+      out = igraph::igraph.from.graphNEL(graph)
     }
     else if (cur_format %in% via_mixed_graph) {
       ## go 'via' a mixedgraph
@@ -125,11 +125,11 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   }
   else if (cur_format == "graphBAM") {
     if (format == "mixedgraph") {
-      require(graph, warn.conflicts = FALSE, quietly = TRUE)
+      requireNamespace("graph", warn.conflicts = FALSE, quietly = TRUE)
       A <- graph::adjacencyMatrix(graph)
       vnames <- colnames(A)
       edgeMat <- list(A)
-      names(edgeMat) <- edgemode(graph)
+      names(edgeMat) <- graph::edgemode(graph)
       out <- mixedgraph(n=length(vnames), vnames=vnames, edges=edgeMat)
     }
     else if (cur_format %in% c("ggm", "ADMG")) {
@@ -146,8 +146,8 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   else if (cur_format == "igraph") {
     
     if (format == "graphNEL") {
-      require(igraph, quietly = TRUE)
-      out = igraph.to.graphNEL(graph)
+      requireNamespace("igraph", quietly = TRUE)
+      out = igraph::igraph.to.graphNEL(graph)
     }
     else {
       out <- conv_igraph_mixedgraph(graph)
@@ -156,11 +156,11 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   }
   else if (cur_format == "bn") {
     if (format == "graphNEL") {
-      require(bnlearn)
+      requireNamespace("bnlearn")
       return(bnlearn::as.graphNEL(graph))
     }
     else if (format == "graphAM") {
-      require(bnlearn)
+      requireNamespace("bnlearn")
       return(bnlearn::as.graphAM(graph))
     }
     
@@ -203,6 +203,8 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   out
 }
 
+
+
 ##' Automatically convert and apply graph function
 ##' 
 ##' Experimental automatic conversion function
@@ -215,19 +217,10 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
 ##' that converts the left-hand side into a graph of suitable
 ##' format to be used by the right-hand side.
 ##' 
-##' @examples 
-##' gr1 <- graphCr("1 -> 2 <- 3 -> 4")
-##' # use the degree function from the graph package
-##' gr1 %G% graph::degree
-##' # equivalently in this case:
-##' gr1 %>% 
-##'     convert(format="graphNEL") %>%
-##'     degree
-##'     
 ##' @export %G%
 `%G%` <- function (graph, .f) 
 {
-  require(magrittr, quietly = TRUE)
+  requireNamespace("magrittr", quietly = TRUE)
   subf = substitute(.f)
   package = determinePackage(subf)
   
@@ -241,7 +234,8 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   else mode = graphFormats()$format[wh]
   
   eval(substitute(graph %>% .f, 
-                  list(graph=convert(graph, mode), .f=substitute(.f, env=))
+                  list(graph=convert(graph, mode), .f=subf)
+                  # list(graph=convert(graph, mode), .f=substitute(.f, env=))
                   ))
 }
 
@@ -285,17 +279,17 @@ determinePackage <- function(x) {
 #     return("mixedgraph")
 #   }
 #   
-#   require(graph, quietly = TRUE)
+#   requireNamespace("graph", quietly = TRUE)
 #   if (!is.na(match(name, ls("package:graph")))) {
 #     return("graphNEL")
 #   }
 #   
-#   require(igraph, quietly = TRUE)
+#   requireNamespace("igraph", quietly = TRUE)
 #   if (!is.na(match(name, ls("package:igraph")))) {
 #     return("igraph")
 #   } 
 #   
-#   require(ggm, quietly = TRUE)
+#   requireNamespace("ggm", quietly = TRUE)
 #   if (!is.na(match(name, ls("package:ggm")))) {
 #     return("ggm")
 #   } 

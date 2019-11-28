@@ -3,6 +3,8 @@
 ##' Looks for topological ordering of vertices with respect to directed edges.
 ##' Not tested
 ##' 
+##' @param graph a \code{mixedgraph} object
+##' 
 ##' @export topologicalOrder
 topologicalOrder = function(graph) {
   if (length(graph$v) <= 1 || length(graph$edges$directed) == 0) return(graph$v)
@@ -21,6 +23,8 @@ topologicalOrder = function(graph) {
 ##' 
 ##' Looks for cycles among edges of type 'directed'.  Not tested.
 ##' Maybe should add option to not test among all directed edges types.
+##' 
+##' @param graph \code{mixedgraph} object
 ##' 
 ##' @export is.cyclic
 is.cyclic = function(graph) {

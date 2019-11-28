@@ -6,6 +6,11 @@
 \usage{
 is.edgeMatrix(object, n)
 }
+\arguments{
+\item{object}{purported edgeMatrix}
+
+\item{n}{number of vertices in graph}
+}
 \description{
 Check if object could be an edgeMatrix
 }

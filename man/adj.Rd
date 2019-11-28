@@ -14,6 +14,9 @@ adj(graph, v, etype, dir = 0, inclusive = TRUE, sort = 1,
 
 \item{etype}{edge types to consider; defaults to all}
 
+\item{dir}{for directed edges, indicates which direction to search in:
+1: along direction, -1: against direction, 0: both directions.}
+
 \item{inclusive}{logical indicating whether elements of \code{v} can be 
 included in output group.}
 
@@ -22,9 +25,6 @@ sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 then output will always be unique and sorted.}
 
 \item{force}{logical - should invalid \code{v} be ignored?}
-
-\item{directed}{for directed edges, indicates which direction to search in:
-1: along direction, -1: against direction, 0: both directions.}
 }
 \description{
 Generic function for finding adjacent vertices based on any kind of edge.

@@ -195,8 +195,9 @@ is not yet well tested.)
 
 ```{r}
 library(graph)
+library(magrittr)
 data(MAPKsig)
-convert(MAPKsig)
+# convert(MAPKsig)
 ```
 It can also be used to send objects to different formats:
 ```{r}
@@ -223,6 +224,6 @@ degree(convert(gr2, "graphNEL"), Nodes=c(2,4))
 This is based on the idea of the pipe operator `%>%`. 
 The `%G%` operator will try to determine which
 format is suitable for the code you provide.
-```{r}
+```
 MAPKsig %G% skeleton %G% (ggm::conComp)
 ```

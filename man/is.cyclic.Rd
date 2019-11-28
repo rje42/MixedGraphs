@@ -6,6 +6,9 @@
 \usage{
 is.cyclic(graph)
 }
+\arguments{
+\item{graph}{\code{mixedgraph} object}
+}
 \description{
 Looks for cycles among edges of type 'directed'.  Not tested.
 Maybe should add option to not test among all directed edges types.

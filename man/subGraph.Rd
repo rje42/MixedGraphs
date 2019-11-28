@@ -5,7 +5,7 @@
 \alias{subGraph}
 \title{Take induced vertex subgraph of mixedgraph}
 \usage{
-\method{[}{mixedgraph}(graph, v, ...)
+\method{[}{mixedgraph}(graph, v, ..., drop = FALSE)
 
 subGraph(graph, v, drop = FALSE)
 }
@@ -13,6 +13,8 @@ subGraph(graph, v, drop = FALSE)
 \item{graph}{a \code{mixedgraph} object}
 
 \item{v}{vertices to keep}
+
+\item{...}{other arguments}
 
 \item{drop}{force removed vertices to be dropped from representation in adjacency matrices?}
 }

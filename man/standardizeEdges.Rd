@@ -6,6 +6,11 @@
 \usage{
 standardizeEdges(graph)
 }
+\arguments{
+\item{graph}{\code{mixedgraph} object
+
+Designed to make comparison of graphs easier}
+}
 \description{
-Designed to make comparison of graphs easier
+Write graphs in standard format
 }

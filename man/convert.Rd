@@ -14,7 +14,7 @@ convert(graph, format = "mixedgraph", cur_format, ...)
 \item{cur_format}{character string of current format; can be deduced 
 from the object in many cases}
 
-\item{...}{}
+\item{...}{other arguments}
 }
 \description{
 Convert graph to format associated with specific package

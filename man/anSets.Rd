@@ -10,9 +10,6 @@ anSets(graph, topOrder)
 \item{graph}{object of class \code{mixedgraph}, should be a summary graph}
 
 \item{topOrder}{optional topological order of vertices}
-
-\item{sort}{integer:1 for unique but unsorted, 2 for 
-sorted (0 for possibly repeated and unsorted).}
 }
 \description{
 Find ancestral sets of a graph.

@@ -6,6 +6,11 @@
 \usage{
 is.adjMatrix(object, n)
 }
+\arguments{
+\item{object}{purported adjMatrix}
+
+\item{n}{number of vertices in graph}
+}
 \description{
 Currently assumes that entries must be non-negative
 }

@@ -19,13 +19,3 @@ format to be used by the right-hand side.}
 \description{
 Experimental automatic conversion function
 }
-\examples{
-gr1 <- graphCr("1 -> 2 <- 3 -> 4")
-# use the degree function from the graph package
-gr1 \%G\% graph::degree
-# equivalently in this case:
-gr1 \%>\% 
-    convert(format="graphNEL") \%>\%
-    degree
-    
-}

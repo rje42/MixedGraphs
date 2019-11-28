@@ -81,7 +81,7 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE) {
 ##' @param graph an object of class \code{mixedgraph}
 ##' @param v vertices to find adjacencies
 ##' @param etype edge types to consider; defaults to all
-##' @param directed for directed edges, indicates which direction to search in:
+##' @param dir for directed edges, indicates which direction to search in:
 ##' 1: along direction, -1: against direction, 0: both directions.
 ##' @param inclusive logical indicating whether elements of \code{v} can be 
 ##' included in output group.
@@ -206,8 +206,7 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   #   }
   #   else es = matrix(NA, ncol=0, nrow=2)
   
-  if (inclusive) out = v
-  else out = integer(0)
+  out = v
   
   if (any(es == 0)) {
     continue = TRUE
@@ -236,6 +235,8 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
       }
     }
   }
+  if (!inclusive) out = setdiff(out, v)
+  
   if (sort > 1) out = sort.int(out)
   
   out
@@ -343,11 +344,25 @@ dis = function(graph, v, sort=1) {
   grp(graph, v, etype="bidirected", dir=0, sort=sort)
 }
 
+##' Familial Mixed Graph Groups
+##' 
+##' The usual familial relations between vertices in
+##' mixed graphs.
+##' 
+##' @aliases neighbourhoods, un
+##' @param graph \code{mixedgraph} object
+##' 
+##' @details \code{districts} and \code{neighbourhoods} find the
+##' bidirected-connected and undirected-connected components of \code{graph}.
+##' \code{un} finds the undirected part of \code{graph}.
+##' 
 ##' @export districts
 districts = function(graph) {
   groups(graph, etype="bidirected")
 }
 
+##' @describeIn districts Obtain undirected component
+##' @param sort should vertices be sorted?
 ##' @export un
 un <- function(graph, sort=1) {
   out <- unlist(graph$edges$undirected)
@@ -357,6 +372,7 @@ un <- function(graph, sort=1) {
   out
 }
 
+##' @describeIn districts Obtain neighbourhoods
 ##' @export neighbourhoods
 neighbourhoods = function(graph) {
   groups(graph[un(graph)], etype="undirected")
@@ -370,6 +386,7 @@ neighbourhoods = function(graph) {
 ##' @param graph \code{mixedgraph} object
 ##' @param v a vertex, childless in \code{A}
 ##' @param A an ancestral collection of vertices
+##' @param check logical: check \code{A} is ancestral?
 ##' @param sort integer:1 for unique but unsorted, 2 for 
 ##' sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 ##' then output will always be unique and sorted.
@@ -464,6 +481,8 @@ sterile = function(graph, v=graph$v){
 ##' 
 ##' Find undirected skeleton of a mixed graph
 ##' 
+##' @param graph a \code{mixedgraph} object
+##' 
 ##' @export skeleton
 skeleton = function(graph) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
@@ -478,8 +497,6 @@ skeleton = function(graph) {
 ##'
 ##' @param graph object of class \code{mixedgraph}, should be a summary graph
 ##' @param topOrder optional topological order of vertices
-##' @param sort integer:1 for unique but unsorted, 2 for 
-##' sorted (0 for possibly repeated and unsorted). 
 ##'
 ##' @details Algorithm:
 ##' 1. Find a topological order of nodes.

@@ -156,12 +156,12 @@ removeEdges <- function(graph, edges) {
 ##' @param graph a \code{mixedgraph} object
 ##' @param A a set of vertices in \code{graph}
 ##' @param etype which edges to remove
-##' @param directed indicates whether only edges of certain orientation are removed
+##' @param dir indicates whether only edges of certain orientation are removed
 ##' 
 ##' @details  If no edge type is specified, then all edges are removed.
-##' If \code{directed=1}, then directed edges out of \code{A} are removed, 
-##' but ones into \code{A} are preserved; for \code{directed=-1} the reverse,
-##' and for \code{directed=0} (the default), direction is irrelevant.
+##' If \code{dir=1}, then directed edges out of \code{A} are removed, 
+##' but ones into \code{A} are preserved; for \code{dir=-1} the reverse,
+##' and for \code{dir=0} (the default), direction is irrelevant.
 ##' 
 ##' @export mutilate
 mutilate <- function(graph, A, etype, dir=0L) {

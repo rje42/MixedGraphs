@@ -1,3 +1,9 @@
+##' @importFrom "methods" "as" "is"
+##' @importFrom "stats" "na.omit" "rnorm"
+##' @importFrom "utils" "combn" "packageName"
+
+##' @import rje
+
 .onLoad <- function(libname, pkgname) {
   vig_list = tools::vignetteEngine(name='knitr', package = 'knitr')
   vweave <- vig_list[['knitr::knitr']][c('weave')][[1]]

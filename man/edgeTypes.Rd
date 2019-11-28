@@ -2,10 +2,18 @@
 % Please edit documentation in R/Graphs.R
 \name{edgeTypes}
 \alias{edgeTypes}
-\title{See list of edge types}
+\alias{vertexTypes}
+\title{See list of vertex and edge types}
 \usage{
 edgeTypes()
+
+vertexTypes()
 }
 \description{
 Returns data frame of current edge types.
 }
+\section{Functions}{
+\itemize{
+\item \code{vertexTypes}: See vertex types
+}}
+

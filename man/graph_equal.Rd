@@ -6,6 +6,11 @@
 \usage{
 graph_equal(g1, g2)
 }
+\arguments{
+\item{g1, g2}{two \code{mixedgraph} objects
+
+NOT TESTED}
+}
 \description{
-NOT TESTED
+Test graphs are equal
 }

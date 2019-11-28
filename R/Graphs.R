@@ -36,7 +36,7 @@ assign("vertexTypesDF", data.frame(type=c("random"),
                                     hidden=FALSE), 
        envir=graphOptionsEnv)
 
-##' See list of edge types
+##' See list of vertex and edge types
 ##' 
 ##' Returns data frame of current edge types.
 ##' @export edgeTypes
@@ -44,6 +44,7 @@ edgeTypes <- function() {
   get("edgeTypesDF", envir=graphOptionsEnv)
 }
 
+##' @describeIn edgeTypes See vertex types
 ##' @export vertexTypes
 vertexTypes <- function() {
   get("vertexTypesDF", envir=graphOptionsEnv)
@@ -127,12 +128,24 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
   return(out)
 }
 
+##' Test for \code{mixedgraph}
+##' 
+##' Is this object a \code{mixedgraph}?
+##' 
+##' @param object Object to be tested
+##' 
+##' @details Returns \code{TRUE} or \code{FALSE}
+##' 
 ##' @export is.mixedgraph
 is.mixedgraph <- function(object) {
   "mixedgraph" %in% class(object)
 }
 
 ##' Check if object could be an edgeMatrix
+##' 
+##' @param object purported edgeMatrix
+##' @param n number of vertices in graph
+##' 
 ##' @export is.edgeMatrix
 is.edgeMatrix <- function(object, n) {
   if (!is.matrix(object)) return(FALSE)
@@ -145,6 +158,10 @@ is.edgeMatrix <- function(object, n) {
 ##' Check if object could be an adjacency matrix
 ##' 
 ##' Currently assumes that entries must be non-negative
+##' 
+##' @param object purported adjMatrix
+##' @param n number of vertices in graph
+##' 
 ##' @export is.adjMatrix
 is.adjMatrix <- function(object, n) {
   if (!is.matrix(object)) return(FALSE)
@@ -155,7 +172,6 @@ is.adjMatrix <- function(object, n) {
   return(TRUE)
 }
 
-##' @export print.mixedgraph
 print.mixedgraph = function(x, ...) {
   n = length(x$v)
   cat("Graph with ", n, ifelse(n == 1, " vertex", " vertices"),
@@ -200,13 +216,15 @@ print.mixedgraph = function(x, ...) {
 }
 
 ##' @describeIn subGraph bracket notation for subgraphs
-##' @export [.mixedgraph
-`[.mixedgraph` = function(graph, v, ...) {
+##' @param ... other arguments
+##' @method [ mixedgraph
+##' @export
+`[.mixedgraph` = function(graph, v, ..., drop=FALSE) {
   if (missing(v)) return(graph)
   if (is.logical(v)) v <- which(v)
   v = v[v != 0]  # remove 0s
   if (length(v) > 0 && all(v < 0)) v = setdiff(graph$v, -v)
-  subGraph(graph, v)
+  subGraph(graph, v, drop=drop)
 }
 
 ##' Take induced vertex subgraph of mixedgraph
@@ -271,6 +289,8 @@ subGraph = function (graph, v, drop=FALSE) {
 
 ##' Write graphs in standard format
 ##' 
+##' @param graph \code{mixedgraph} object
+##' 
 ##' Designed to make comparison of graphs easier
 standardizeEdges <- function(graph) {
   ## standard order for edges
@@ -305,6 +325,8 @@ standardizeEdges <- function(graph) {
 }
 
 ##' Test graphs are equal
+##' 
+##' @param g1,g2 two \code{mixedgraph} objects
 ##' 
 ##' NOT TESTED
 graph_equal <- function(g1, g2) {

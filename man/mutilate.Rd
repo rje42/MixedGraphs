@@ -13,14 +13,14 @@ mutilate(graph, A, etype, dir = 0L)
 
 \item{etype}{which edges to remove}
 
-\item{directed}{indicates whether only edges of certain orientation are removed}
+\item{dir}{indicates whether only edges of certain orientation are removed}
 }
 \description{
 Remove edges adjacent to set of vertices
 }
 \details{
 If no edge type is specified, then all edges are removed.
-If \code{directed=1}, then directed edges out of \code{A} are removed, 
-but ones into \code{A} are preserved; for \code{directed=-1} the reverse,
-and for \code{directed=0} (the default), direction is irrelevant.
+If \code{dir=1}, then directed edges out of \code{A} are removed, 
+but ones into \code{A} are preserved; for \code{dir=-1} the reverse,
+and for \code{dir=0} (the default), direction is irrelevant.
 }

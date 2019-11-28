@@ -31,10 +31,10 @@ conv_ggm_mixedgraph <- function(graph) {
 }
 
 conv_graphNEL_mixedgraph <- function(graph) {
-  require(graph, warn.conflicts = FALSE, quietly = TRUE)
-  vnames <- nodes(graph)
+  requireNamespace("graph", warn.conflicts = FALSE, quietly = TRUE)
+  vnames <- graph::nodes(graph)
   
-  if (edgemode(graph) == "directed") 
+  if (graph::edgemode(graph) == "directed") 
     edgeList <- mapply(function(x,y) lapply(y$edges, function(z) c(x,z)), 
                      seq_along(vnames), graph@edgeL)
   else 
@@ -43,16 +43,16 @@ conv_graphNEL_mixedgraph <- function(graph) {
   
   if (is.list(edgeList[[1]])) edgeList <- list(do.call(c, edgeList))
   else edgeList <- list(edgeList)
-  names(edgeList) <- edgemode(graph)
+  names(edgeList) <- graph::edgemode(graph)
   
   mixedgraph(n=length(vnames), vnames=vnames, edges=edgeList)
 }
 
 conv_graphAM_mixedgraph <- function(graph) {
-  require(graph, warn.conflicts = FALSE, quietly = TRUE)
+  requireNamespace("graph", warn.conflicts = FALSE, quietly = TRUE)
   vnames <- colnames(graph@adjMat)
   edgeMat <- list(graph@adjMat)
-  names(edgeMat) <- edgemode(graph)
+  names(edgeMat) <- graph::edgemode(graph)
   mixedgraph(n=length(vnames), vnames=vnames, edges=edgeMat)
 }
 
@@ -67,19 +67,19 @@ conv_ADMG_mixedgraph <- function(graph) {
 }
 
 conv_igraph_mixedgraph <- function(graph) {
-  require(igraph, quietly = TRUE)
-  
+  requireNamespace("igraph", quietly = TRUE)
+
   am_sp <- graph[]
   if (nrow(am_sp) > 500) warning("Large graph, might be inefficient to use non-sparse adjacency matrix")
   am <- as.matrix(am_sp)  # get adjacency matrix
   ud <- am*(am == t(am))
   dir <- am - ud
-  if (igraph::is_named(g)) {
-    vnames <- V(graph)$name
+  if (igraph::is_named(graph)) {
+    vnames <- igraph::V(graph)$name
   }
   else vnames <- NULL
-  
-  mixedgraph(n=length(V(graph)), vnames=vnames, edges=list(undirected=ud, directed=dir))
+
+  mixedgraph(n=length(igraph::V(graph)), vnames=vnames, edges=list(undirected=ud, directed=dir))
 }
 
 conv_bn_mixedgraph <- function(graph) {
@@ -101,16 +101,16 @@ conv_bn_mixedgraph <- function(graph) {
 }
 
 conv_mixedgraph_ADMG <- function(graph) {
-  require(ADMGs)
+  requireNamespace("ADMGs")
   ud.edges <- edgeList(graph$edges$undirected)
   d.edges <- edgeList(graph$edges$directed)
   bi.edges <- edgeList(graph$edges$bidirected)
   nv <- length(graph$vnames)
-  
-  ADMGs::makeGraph(nv, 
-                   ud.edges = ud.edges, 
-                   d.edges = d.edges, 
-                   bi.edges = bi.edges, 
+
+  ADMGs::makeGraph(nv,
+                   ud.edges = ud.edges,
+                   d.edges = d.edges,
+                   bi.edges = bi.edges,
                    vnames = graph$vnames)
 }
 
@@ -130,7 +130,7 @@ conv_mixedgraph_ggm <- function(graph) {
 
 conv_mixedgraph_graphNEL <- function(graph) {
   # is graph directed or undirected?
-  require(graph, warn.conflicts = FALSE, quietly = TRUE)
+  requireNamespace("graph", warn.conflicts = FALSE, quietly = TRUE)
   mode <- "undirected"
   if (!is.null(graph$edges$directed) && length(graph$edges$directed) > 0) {
     if (!is.null(graph$edges$undirected) && length(graph$edges$undirected) > 0) {
@@ -145,12 +145,12 @@ conv_mixedgraph_graphNEL <- function(graph) {
   edL <- lapply(edL, function(x) list(edges=x)) 
   names(edL) <- graph$vnames[graph$v]
   
-  graphNEL(nodes=graph$vnames[graph$v], edgeL=edL, edgemode=mode)
+  graph::graphNEL(nodes=graph$vnames[graph$v], edgeL=edL, edgemode=mode)
 }
 
 conv_mixedgraph_graphAM <- function(graph) {
   # is graph directed or undirected?
-  require(graph, warn.conflicts = FALSE, quietly = TRUE)
+  requireNamespace("graph", warn.conflicts = FALSE, quietly = TRUE)
   mode <- "undirected"
   if (!is.null(graph$edges$directed) && length(graph$edges$directed) > 0) {
     if (!is.null(graph$edges$undirected) && length(graph$edges$undirected) > 0) {
@@ -163,31 +163,31 @@ conv_mixedgraph_graphAM <- function(graph) {
     amat <- collapse(graph$edges["undirected"], dir=0, matrix=TRUE)
   }
   colnames(amat) <- graph$vnames[graph$v]
-  
-  graphAM(amat, edgemode = mode)
+
+  graph::graphAM(amat, edgemode = mode)
 }
 
 conv_mixedgraph_igraph <- function(graph) {
-  require(igraph)
-  igraph.from.graphNEL(conv_mixedgraph_graphNEL(graph))
+  requireNamespace("igraph")
+  igraph::igraph.from.graphNEL(conv_mixedgraph_graphNEL(graph))
 }
 
 conv_mixedgraph_bn <- function(graph) {
-  require(bnlearn)
+  requireNamespace("bnlearn")
   arcs1 <- edgeMatrix(graph$edges$directed)
   ## undirected edges are just directed both ways
   arcs2 <- edgeMatrix(graph$edges$undirected)
   arcs2 <- cbind(arcs2, arcs2[2:1,])
-  ## make this into matrix of the form used 
+  ## make this into matrix of the form used
   ## by bnlearn
   edges <- rbind(t(arcs1), t(arcs2))
   edges[] <- graph$vnames[edges]
   colnames(edges) <- c("from", "to")
-  
+
   ## make a new bn object
   out <- bnlearn::empty.graph(graph$vnames[graph$v])
   out$arcs <- edges
-  out$nodes <- bnlearn:::cache.structure(graph$vnames[graph$v], edges)
+  # out$nodes <- bnlearn:::cache.structure(graph$vnames[graph$v], edges)
   out
 }
 
@@ -196,40 +196,41 @@ conv_mixedgraph_bn <- function(graph) {
 ## Convert PAG to mixedgraph
 conv_PAG_mixedgraph <- function(graph) {
   if (!is.matrix(graph)) graph <- graph@amat
-  
+
   edges <- list()
   rg <- row(graph); cg <- col(graph)
-  
+
   tmp <- which((graph == 1) & (t(graph) == 1) & lower.tri(graph))
   if (length(tmp) > 0) edges$`not directed` <- mapply(c, cg[tmp], rg[tmp], SIMPLIFY = FALSE)
-  
+
   tmp <- which((graph == 1) & (t(graph) == 2))
   if (length(tmp) > 0) edges$`partially directed` <- mapply(c, cg[tmp], rg[tmp], SIMPLIFY = FALSE)
-  
+
   tmp <- which((graph == 1) & (t(graph) == 3))
   if (length(tmp) > 0) edges$`partially undirected` <- mapply(c, cg[tmp], rg[tmp], SIMPLIFY = FALSE)
-  
+
   tmp <- which((graph == 2) & (t(graph) == 2) & lower.tri(graph))
   if (length(tmp) > 0) edges$`bidirected` <- mapply(c, cg[tmp], rg[tmp], SIMPLIFY = FALSE)
-  
+
   tmp <- which((graph == 3) & (t(graph) == 2))
   if (length(tmp) > 0) edges$`directed` <- mapply(c, cg[tmp], rg[tmp], SIMPLIFY = FALSE)
-  
+
   tmp <- which((graph == 3) & (t(graph) == 3) & lower.tri(graph))
   if (length(tmp) > 0) edges$`undirected` <- mapply(c, cg[tmp], rg[tmp], SIMPLIFY = FALSE)
-  
+
   mixedgraph(n = ncol(graph), vnames = colnames(graph), edges=edges)
 }
 
 ## Convert mixedgraph to PAG
 conv_mixedgraph_PAG <- function(graph) {
-  
+  # requireNamespace("methods")
+
   n <- length(graph$v)
   graph <- withEdgeList(graph)
-  
+
   out <- matrix(0, n, n)
-  
-  ## 
+
+  ##
   if (!is.null(graph$edges$directed)) {
     tmp <- graph$edges$directed
     for (i in seq_along(tmp)) {
@@ -274,7 +275,7 @@ conv_mixedgraph_PAG <- function(graph) {
   }
 
   dimnames(out) = list(graph$vnames, graph$vnames)
-  
+
   ## bit of a hack, stores as FCI algorithm output
-  new("fciAlgo", amat=out)
+  methods::new("fciAlgo", amat=out)
 }

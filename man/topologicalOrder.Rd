@@ -6,6 +6,9 @@
 \usage{
 topologicalOrder(graph)
 }
+\arguments{
+\item{graph}{a \code{mixedgraph} object}
+}
 \description{
 Looks for topological ordering of vertices with respect to directed edges.
 Not tested
