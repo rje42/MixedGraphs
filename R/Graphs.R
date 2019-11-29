@@ -251,7 +251,7 @@ subGraph = function (graph, v, drop=FALSE) {
 
   edges = lapply(graph$edges, function(x) {
     if (is.adjMatrix(x)) {
-      if (drop) return(x[v,v])
+      if (drop) return(x[v,v,drop=FALSE])
       else {
         x[-v,] = x[,-v] = 0L
         return(x)
@@ -262,7 +262,7 @@ subGraph = function (graph, v, drop=FALSE) {
       if (drop) {
         mask <- match(seq_len(max(v)), v)
         tmp <- apply(tmp, 1:2, function(x) mask[x])
-        if (any(is.na(tmp))) stop("Something went wrong")
+        if (any(is.na(tmp))) stop("Something went wrong with the mask")
       }
       return(tmp)
     }
@@ -273,7 +273,7 @@ subGraph = function (graph, v, drop=FALSE) {
         if (drop) {
           mask <- match(seq_len(max(v)), v)
           tmp <- lapply(tmp, function(x) mask[x])
-          if (any(sapply(tmp, function(x) any(is.na(x))))) stop("Something went wrong")
+          if (any(sapply(tmp, function(x) any(is.na(x))))) stop("Something went wrong with the mask")
         }
         return(tmp)
       }
@@ -285,6 +285,51 @@ subGraph = function (graph, v, drop=FALSE) {
   else out = list(v=v, edges=edges, vnames=graph$vnames)
   class(out) = "mixedgraph"
   out
+}
+
+##' Force graphs to have vertices 1,\dots,k
+##'
+##' @param graph \code{mixedgraph} object
+##' 
+##' Designed to make comparison of graphs easier
+standardizeVertices <- function(graph) {
+  #stop("FUNCTION NOT FINISHED")
+  
+  v <- graph$v
+  k <- length(v)
+
+  if (isTRUE(all.equal(v, seq_len(k)))) return(graph)
+  
+  edges = lapply(graph$edges, function(x) {
+    if (is.adjMatrix(x)) {
+      return(x[v,v,drop=FALSE])
+    } 
+    else if (is.edgeMatrix(x)) {
+      tmp <- x[, (x[1,] %in% v) & (x[2,] %in% v), drop=FALSE]
+      mask <- match(seq_len(max(v)), v)
+      tmp <- apply(tmp, 1:2, function(x) mask[x])
+      if (any(is.na(tmp))) stop("Something went wrong with the mask")
+      return(tmp)
+    }
+    else if (is.list(x)) {
+      if (length(x) > 0) {
+        tmp <- x[sapply(x, function(y) all(y %in% v))]
+        
+        mask <- match(seq_len(max(v)), v)
+        tmp <- lapply(tmp, function(x) mask[x])
+        if (any(sapply(tmp, function(x) any(is.na(x))))) stop("Something went wrong with the mask")
+        
+        return(tmp)
+      }
+      else return(list())
+    }
+  })
+  
+  graph$edges <- edges
+  graph$vnames <- graph$vnames[graph$v]
+  graph$v <- seq_len(k)
+  
+  graph
 }
 
 ##' Write graphs in standard format
