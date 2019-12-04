@@ -172,6 +172,7 @@ is.adjMatrix <- function(object, n) {
   return(TRUE)
 }
 
+##' @export
 print.mixedgraph = function(x, ...) {
   n = length(x$v)
   cat("Graph with ", n, ifelse(n == 1, " vertex", " vertices"),
@@ -247,7 +248,7 @@ subGraph = function (graph, v, drop=FALSE) {
   v = unique.default(v)
   if (drop) v <- sort.int(v)
   if (!all(v %in% graph$v)) stop("Can only keep vertices which are present")
-  if (length(v)==length(graph$v)) return(graph)
+  if (length(v) == length(graph$v)) return(graph)
 
   edges = lapply(graph$edges, function(x) {
     if (is.adjMatrix(x)) {
@@ -292,6 +293,8 @@ subGraph = function (graph, v, drop=FALSE) {
 ##' @param graph \code{mixedgraph} object
 ##' 
 ##' Designed to make comparison of graphs easier
+##' 
+##' @export
 standardizeVertices <- function(graph) {
   #stop("FUNCTION NOT FINISHED")
   
@@ -337,6 +340,8 @@ standardizeVertices <- function(graph) {
 ##' @param graph \code{mixedgraph} object
 ##' 
 ##' Designed to make comparison of graphs easier
+##' 
+##' @export
 standardizeEdges <- function(graph) {
   ## standard order for edges
   #stop("FUNCTION NOT FINISHED")
@@ -374,6 +379,7 @@ standardizeEdges <- function(graph) {
 ##' @param g1,g2 two \code{mixedgraph} objects
 ##' 
 ##' NOT TESTED
+##' @export
 graph_equal <- function(g1, g2) {
   g1 <- standardizeEdges(g1)
   g2 <- standardizeEdges(g2)

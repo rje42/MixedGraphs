@@ -5,6 +5,9 @@
 ##' 
 ##' @param graph a \code{mixedgraph} object
 ##' 
+##' @details \code{isTopological} tests for an ordering being 
+##' topological.
+##' 
 ##' @export topologicalOrder
 topologicalOrder = function(graph) {
   if (length(graph$v) <= 1 || length(graph$edges$directed) == 0) return(graph$v)
@@ -17,6 +20,19 @@ topologicalOrder = function(graph) {
   out2 = Recall(graph[-c(out1,out3)])
 
   return(c(out1, out2, out3))
+}
+
+##' @describeIn topologicalOrder Check if ordering is topological
+##' @param v an ordering of the vertices
+##' @export
+isTopological = function(graph, v) {
+  
+  for (i in seq_along(v)) {
+    pa_i = pa(graph, v[i])
+    if (any(pa_i %in% v[-seq_len(i)])) return(FALSE)
+  }
+  
+  return(TRUE)
 }
 
 ##' Test cyclicity of graph

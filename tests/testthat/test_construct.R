@@ -43,3 +43,6 @@ test_that("subgraphs OK", {
   expect_error(anc(dag2, 4, sort=2))
 })
 
+# test_that("subgraphs OK with different order", {
+#   expect_equal(dag1[c(3,2,5)][c(2,3,5)], dag1[c(2,3,5)])
+# })

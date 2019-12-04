@@ -2,14 +2,28 @@
 % Please edit documentation in R/Types.R
 \name{topologicalOrder}
 \alias{topologicalOrder}
+\alias{isTopological}
 \title{Find topological ordering of vertices}
 \usage{
 topologicalOrder(graph)
+
+isTopological(graph, v)
 }
 \arguments{
 \item{graph}{a \code{mixedgraph} object}
+
+\item{v}{an ordering of the vertices}
 }
 \description{
 Looks for topological ordering of vertices with respect to directed edges.
 Not tested
 }
+\details{
+\code{isTopological} tests for an ordering being 
+topological.
+}
+\section{Functions}{
+\itemize{
+\item \code{isTopological}: Check if ordering is topological
+}}
+
