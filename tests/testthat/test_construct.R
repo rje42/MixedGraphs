@@ -5,6 +5,10 @@ dag2 <- dag1[c(2,3,5)]
 grv <- graphCr("1->2->3->4<->2")
 grv2 <- graphCr("z -> x -> y <- u -> x")
 
+mag1 <- graphCr("1 -> 3 <-> 2 <-> 4 <- 1")
+mag1a <- graphCr("1 -> 3 <-> 2 <-> 4 <- 1", useMatrices = TRUE)
+
+
 test_that("DAG operations correct for list of edges", {
   expect_equal(sort(unique(pa(dag1, 4, sort=0))), c(1,2))
   expect_equal(sort(pa(dag1, 4, sort=1)), c(1,2))
@@ -25,6 +29,17 @@ test_that("DAG operations correct for adjMatrix", {
   
   expect_equal(ch(dag1a, 2, sort=2), c(3,4))
   expect_equal(dec(dag1a, 2, sort=2), c(2,3,4,5))
+})
+
+test_that("MAG operations correct for list of edges", {
+  expect_equal(sort(unique(sp(mag1, 2, sort=0))), c(3,4))
+  expect_equal(sort(unique(sp(mag1a, 2, sort=0))), c(3,4))
+
+  expect_equal(pa(mag1, 4, sort=2), c(1))
+  expect_equal(pa(mag1a, 4, sort=2), c(1))
+
+  expect_equal(dec(mag1, 1, sort=2), c(1,3,4))
+  expect_equal(dec(mag1a, 1, sort=2), c(1,3,4))
 })
 
 dVerm <- districts(grv)

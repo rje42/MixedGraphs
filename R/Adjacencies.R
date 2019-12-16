@@ -213,7 +213,7 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
     new = v
     
     while (continue) {
-      out2 = which(colSums(es[out, , drop=FALSE]) > 0)
+      out2 = which(colSums(es[new, , drop=FALSE]) > 0)
       new = setdiff(out2, out)
       es[out,] = 0L
       out <- c(out, new)
@@ -497,6 +497,7 @@ skeleton = function(graph) {
 ##'
 ##' @param graph object of class \code{mixedgraph}, should be a summary graph
 ##' @param topOrder optional topological order of vertices
+##' @param maxbarren maximum number of barren nodes to consider
 ##'
 ##' @details Algorithm:
 ##' 1. Find a topological order of nodes.
@@ -504,15 +505,19 @@ skeleton = function(graph) {
 ##' 3. Induction: (i) Assume we have a list L of all ancestral sets involving Xi-1 in the order.
 ##' (ii) If an ancestral set S in L contains all parents of Xi, Xi + S is also ancestral.
 ##' 
+##' The function \code{anSets2} proceeds by adding a new barren vertex to the 
+##' set, which is not a descendant of any existing vertices.  It consequently 
+##' provides the option \code{maxbarren} to cap this at a fixed value.
+##' 
 ##' @author Ilya Shpitser
 ##' 
 ##' @export anSets
-anSets = function(graph, topOrder) {
+anSets = function(graph, topOrder, sort=1) {
   if (length(graph$v) <= 1) return(list(graph$v))
   out = list(integer(0))
   if (missing(topOrder)) topOrder <- topologicalOrder(graph)
-
-  for(node in topOrder){
+  
+  for(node in topOrder) {
     parents <- pa(graph, node)
     additions <- list()
     
@@ -524,5 +529,57 @@ anSets = function(graph, topOrder) {
     out <- c(out, additions)
   }
   
+  if (sort > 1) out <- lapply(out, sort.int)
+  
   out[-1]
+}
+
+##' @param maxbarren maximum size of barren subsets
+##' @describeIn anSets Uses different algorithm
+##' @export anSets2
+anSets2 = function(graph, topOrder, maxbarren, sort=1) {
+  
+  if (missing(maxbarren)) maxbarren <- length(graph$v)
+  if (maxbarren < 1) return(list())
+  
+    # children <- lapply(graph$v, function(x) ch(graph, x))
+  parents <- lapply(graph$v, function(x) pa(graph, x))
+  
+  if (missing(topOrder)) topOrder <- topologicalOrder(graph)
+  ancs <- list()
+  
+  for (i in topOrder) {
+    ancs[[i]] <- c(i, unique.default(unlist(ancs[parents[[i]]])))
+  }
+  
+  out <- tmp <- ancs
+  bar <- unlist(lapply(graph$v, list), recursive = FALSE)
+  b <- 2
+  
+  while (b <= maxbarren) {
+    if (b > 2) {
+      tmp <- tmp2
+      bar <- bar2
+    }
+    else {
+      tmp <- ancs
+      bar <- unlist(lapply(graph$v, list), recursive = FALSE)
+    }
+    tmp2 <- bar2 <- list()
+    
+    for (i in seq_along(tmp)) {
+      for (j in setdiff(graph$v, seq_len(last(tmp[[i]])))) {
+        if (!any(bar[[i]] %in% ancs[[j]])) {
+          tmp2 <- c(tmp2, list(unique.default(c(tmp[[i]], ancs[[j]]))))
+          bar2 <- c(bar2, list(c(bar[[i]], j)))
+        }
+      }
+    }
+    out <- c(out, tmp2)
+    b <- b+1
+  }
+  
+  if (sort > 1) out <- lapply(out, sort.int)
+  
+  out
 }
