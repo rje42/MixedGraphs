@@ -4,8 +4,7 @@
 \alias{adj}
 \title{Find adjacent vertices}
 \usage{
-adj(graph, v, etype, dir = 0, inclusive = TRUE, sort = 1,
-  force = FALSE)
+adj(graph, v, etype, dir = 0, inclusive = TRUE, sort = 1, force = FALSE)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}

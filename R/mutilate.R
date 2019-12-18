@@ -13,7 +13,8 @@
 remove_duplicate_edges <- function(edgeList, directed=TRUE, sort=FALSE) {
   if (is.matrix(edgeList)) {
     ## edgeMatrix object
-    if (nrow(edgeList) != 2 || any(edgeList <= 0)) stop("Object provided is a matrix but doesn't seem to be an edgeMatrix")
+    if (nrow(edgeList) != 2 || any(edgeList <= 0)) stop("Object provided is a matrix but 
+                                                        doesn't seem to be an edgeMatrix")
     if (ncol(edgeList) <= 1) return(edgeList)
     
     ## get a unique number representing each edge

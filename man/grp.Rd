@@ -5,8 +5,7 @@
 \alias{groups}
 \title{Group vertices by adjacencies}
 \usage{
-grp(graph, v, etype, inclusive = TRUE, dir = 0, sort = 1,
-  force = FALSE)
+grp(graph, v, etype, inclusive = TRUE, dir = 0, sort = 1, force = FALSE)
 
 groups(graph, etype)
 }
