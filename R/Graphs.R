@@ -54,7 +54,7 @@ vertexTypes <- function() {
 ##' 
 ##' @param n integer number of vertices in graph
 ##' @param v integer identifiers of vertices (length \code{n})
-##' @param edges named list of edges in graph
+##' @param edges named list of types of edge in graph
 ##' @param vnames character vector of vertex names (defaults to \code{x1}, \code{x2}, ...)
 ##' @param vtype optionally, a character vector of vertex types
 ##' 
@@ -101,13 +101,22 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
     
     ## Check all edges given as lists are valid and of length 2
     edL <- sapply(edges, is.list)
+    for (i in which(edL)) if (edL[i]) class(edges[[i]]) <- "eList"
     if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
     if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
     
     ## Check all edges given as edge matrices are valid and of length 2
     edE <- sapply(edges, is.edgeMatrix)
+    for (i in which(edE)) class(edges[[i]]) <- "edgeMatrix"
     if (any(is.na(match(unlist(edges[edE]), v)))) stop("Edges must be between vertices in the graph")
     if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
+
+    ## Check all edges given as adjacency matrices are valid
+    edA <- sapply(edges, is.adjMatrix)
+    for (i in which(edA)) {
+      if ("adjMatrix" %in% class(edges[[i]])) next
+      class(edges[[i]]) <- c("adjMatrix", class(edges[[i]]))
+    }
     
     ## Construct edge lists
     edgeList = list()
@@ -392,7 +401,7 @@ graph_equal <- function(g1, g2) {
 ##' 
 ##' @param char string of inputs given by vertex names separated by edges
 ##' @param ... other strings of further edges
-##' @param useMatrices in mixed graph representation, should the output
+##' @param useMatrices in \code{mixedgraph} representation, should the output
 ##' use adjacency matrices?
 ##' @param format type of graph format to use, options are \code{mixedgraph} 
 ##' (the default), \code{graphNEL} (and \code{graphAM}, \code{graphBAM}), 
@@ -496,7 +505,8 @@ makeGraphComplete = function (n, type = "undirected") {
   tmp = combn(n, 2)
   edges = list(list())
   for (i in seq_len(ncol(tmp))) edges[[1]][[i]] = tmp[,i]
-
+  class(edges[[1]]) <- "eList"
+  
   etys = edgeTypes()$type
   wh = pmatch(type, etys)
   if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
@@ -510,7 +520,8 @@ makeGraphComplete = function (n, type = "undirected") {
 ##' @export makeGraphChain
 makeGraphChain = function(n, type = "undirected") {
   edges = list(lapply(seq_len(max(n-1,0)), function(x) c(x, x+1)))
-
+  class(edges[[1]]) <- "eList"
+  
   etys = edgeTypes()$type
   wh = pmatch(type, etys)
   if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
@@ -526,7 +537,8 @@ makeGraphCycle = function(n, type = "undirected") {
 
   edges = list(lapply(seq_len(max(n-1,0)), function(x) c(x, x+1)))
   if (n > 2) edges[[1]][[n]] = c(n, 1)
-
+  class(edges[[1]]) <- "eList"
+  
   etys = edgeTypes()$type
   wh = pmatch(type, etys)
   if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
@@ -542,6 +554,7 @@ makeGraphStar = function(n, type = "undirected") {
   
   if (n <= 1) return(makeGraphComplete(n, type))
   edges = list(lapply(seq_len(n-1), function(x) c(x, n)))
+  class(edges[[1]]) <- "eList"
   
   etys = edgeTypes()$type
   wh = pmatch(type, etys)
