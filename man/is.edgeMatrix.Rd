@@ -2,15 +2,35 @@
 % Please edit documentation in R/Graphs.R
 \name{is.edgeMatrix}
 \alias{is.edgeMatrix}
+\alias{is.eList}
+\alias{is.adjMatrix}
+\alias{is.adjList}
 \title{Check if object could be an edgeMatrix}
 \usage{
-is.edgeMatrix(object, n)
+is.edgeMatrix(object, n, checknm = FALSE)
+
+is.eList(object, n, checknm = FALSE)
+
+is.adjMatrix(object, n, checknm = FALSE)
+
+is.adjList(object, n, checknm = FALSE)
 }
 \arguments{
 \item{object}{purported edgeMatrix}
 
-\item{n}{number of vertices in graph}
+\item{n}{(optionally) number of vertices in graph}
+
+\item{checknm}{logical: use class of object to determine answer?}
 }
 \description{
 Check if object could be an edgeMatrix
 }
+\section{Functions}{
+\itemize{
+\item \code{is.eList}: Check if object could be eList
+
+\item \code{is.adjMatrix}: Check if object could be adjMatrix
+
+\item \code{is.adjList}: Check if object could be adjList
+}}
+

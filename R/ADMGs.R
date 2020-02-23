@@ -26,6 +26,8 @@
 ##' @param graph object of class \code{mixedgraph}, must be an ADMG.
 ##' @param r logical, should recursive head definition be used? Defaults to \code{TRUE}
 ##' @param by_district logical, should intrinsic sets be grouped by district? Defaults to \code{FALSE}
+##' @param sort should output be sorted/unique?
+##' @param recall logical: is this a recalling of the function (internal use only)
 ##' 
 ##' @details \code{intrinsicSets} returns a list of integer vectors, 
 ##' each being an intrinsic set (or if \code{by_district = TRUE} 
@@ -36,13 +38,24 @@
 ##' \code{intrinsicClosure} returns an integer vector containing the closure of set.
 ##' 
 ##' @export intrinsicSets
-intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=1) {
-  print(graph)
-  out <- list()
+intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=2, recall=FALSE) {
+
+  ## on first run, check graph is a summary graph and remove undirected part
+  if(!recall) {
+    if(!is.SG(graph)) stop("Graph appears not to be a summary graph or ADMG")
+    
+    un_g <- un(graph)
+    if (length(un_g) > 0) {
+      clq <- cliques(graph[un_g])
+      graph <- graph[-un_g]
+    }
+  }
+  if (recall || length(un_g) == 0) clq <- list()
+
   districts <- districts(graph)
-  
-  if(!is.ADMG(graph)) stop("Graph appears not to be an ADMG") # could extend to MEGs
-  
+  out <- list()
+
+  ## go along each district and find intrinsic sets
   for(i in seq_along(districts)){
     if(by_district) {
       out[[i]] <- list()
@@ -50,48 +63,52 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=1) {
     dis <- districts[[i]]
     
     if(r) {
+      # if (length(dis) <= 1) {
+      if(by_district) {
+        out[[i]] <- c(out[[i]], list(dis))
+      } 
+      else {
+        out <- c(out, list(dis))
+      }
+      
+      if (length(dis) <= 1) next
+      # }
+      
       dis_subgraph <- graph[dis]
-      an_sets <- anSets(dis_subgraph)
+      ster <- sterile(dis_subgraph)
 
-      for(an_set in an_sets){
+      for(s in ster) {
+        an_set <- setdiff(dis, s)
+
         an_set_subgraph <- dis_subgraph[an_set]
         d <- districts(an_set_subgraph)
         
-        if(length(d) == 1){
-          # ans <- mapV(an_set, dis_subgraph, graph)
-          if(by_district) {
-            out[[i]] <- c(out[[i]], list(an_set))
-          } 
-          else {
-            out <- c(out, list(an_set))
-          }
-        }
+        recursed_sets <- Recall(an_set_subgraph, r, FALSE, recall=TRUE)
         
-        if(length(d) > 1){
-          recursed_sets <- Recall(an_set_subgraph, r, FALSE)
-
-          if(by_district){
-            out[[i]] <- c(out[[i]], recursed_sets)
-          } else {
-            out <- c(out, recursed_sets)
-          }
+        ## add in new sets
+        if(by_district){
+          out[[i]] <- c(out[[i]], recursed_sets)
+          if (length(d) == 1) out[[i]] <- c(out[[i]], list(an_set))
+        } else {
+          out <- c(out, recursed_sets)
+          if (length(d) == 1) out <- c(out, list(an_set))
         }
       }
     } # if (r)
     else {
       subs = powerSet(dis)[-1]
       int = logical(length(subs))
-      
-      # FOR EACH SUBSET C OF A DISTRICT, CHECK IF IT'S 'INTRINSIC'
+
+      # for each subset C of a district, check if it's intrinsic
       for (j in seq_along(subs)) {
-        # ang IS G_{an C}, SUBGRAPH FORMED BY ANCESTORS OF subs[[j]]
+        # ang is G_{an C}, subgraph formed by ancestors of subs[[j]]
         ang = graph[anc(graph, subs[[j]])]
-        # DISTRICT OF C in ang.
+        # district of C in ang.
         subdis = dis(ang, subs[[j]])
         
-        # SET C IS INTRINSIC IF IS MAXIMALLY <-> CONNECTED IN G_{an C}
-        if (length(subdis) > length(subs[[j]])) int[j] = FALSE # NOT MAXIMAL
-        else if(!all(subs[[j]] %in% dis(ang, subs[[j]][1]))) int[j] = FALSE # NOT CONNECTED
+        # set C is intrinsic if it is <-> connected in G_{an C}
+        if (length(subdis) > length(subs[[j]])) int[j] = FALSE # not maximal
+        else if(!all(subs[[j]] %in% dis(ang, subs[[j]][1]))) int[j] = FALSE # not connected
         else int[j] = TRUE # OK
       }
       
@@ -100,14 +117,20 @@ intrinsicSets <- function(graph, r = TRUE, by_district = FALSE, sort=1) {
       }
       else out = c(out, subs[int])
     }
-    
   }
   
+  ## clean up and finish
   if(by_district){
+    out <- c(list(clq), out)
+    
+    out <- rapply(out, sort.int, how = "list")
     out <- lapply(out, unique.default)
     out
   } 
   else {
+    out <- c(clq, out)
+    
+    out <- lapply(out, sort.int)
     unique.default(out)
   }
 }
@@ -127,7 +150,72 @@ intrinsicSets2 <- function(graph, r = TRUE, by_district = FALSE, maxbarren, sort
   if (by_district) d <- sapply(subs, function(x) subsetmatch(x[1], districts))
   
   if(r) {
+    # stop("function does not work for recursive heads")
+
+    out <- lapply(graph$v, function(set) intrinsicClosure(graph, set, r=TRUE))
+    n <- length(out)
+    vnam <- sapply(out, paste, collapse="")
+    liv <- rep(TRUE, n)
+    liv[lengths(liv) >= maxbarren] <- FALSE
+
+    bid <- matrix(0, n, n)
+    for (i in seq_len(n)[-1]) for (j in seq_len(i-1)) bid[i,j] <- bid[j,i] <- 1*any(sib(graph, out[[i]]) %in% out[[j]])
+    sub <- matrix(0, n, n)
+    for (i in seq_len(n)[-1]) for (j in seq_len(i-1)) sub[j,i] <- 1*is.subset(out[[j]],out[[i]])
+
+    edges <- list(directed=sub, bidirected=bid)
+
+    graph2 <- mixedgraph(v=seq_len(n), edges=edges, vnames=vnam)
+    new <- any(bidi > 0)
+
+    while (new) {
+      new <- FALSE
+      bidi <- which(graph2$edges$bidirected > 0 & upper.tri(graph2$edges$bidirected))
+      for (i in seq_len(nrow(bidi))) {
+        if (liv[bidi[i,1]] && liv[bidi[i,2]]) {
+          out[[n+1]] <- intrinsicClosure(graph, c(out[[bidi[i,1]]], out[[bidi[i,2]]]))
+          graph2 <- addNodes(graph2, 1, vnames=paste(out[[n+1]], collapse=""))
+          n <- n+1
+
+          for (j in seq_len(n-1)) {
+            graph2$edges$directed[j,n] <- 1*is.subset(out[[j]],out[[n]])
+            graph2$edges$directed[n,j] <- 1*is.subset(out[[n]],out[[j]])
+          }
+
+          new <- TRUE
+        }
+        
+        if (any(liv[dec(graph2, out[[bidi[i,1]]])]) && 
+            any(liv[dec(graph2, out[[bidi[i,2]]])])) {
+          
+          for (j in dec(graph2, out[[bidi[i,1]]])) for (k in dec(graph2, out[[bidi[i,2]]])) {
+
+            
+            if (j == 1 && k == 1) next
+            
+            out[[n+1]] <- intrinsicClosure(graph, c(out[[j]], out[[k]]))
+            graph2 <- addNodes(graph2, 1, vnames=paste(out[[n+1]], collapse=""))
+            n <- n+1
+            liv[n] <- TRUE
+            
+            for (j in seq_len(n-1)) {
+              graph2$edges$directed[j,n] <- 1*is.subset(out[[j]], out[[n]])
+              graph2$edges$directed[n,j] <- 1*is.subset(out[[n]], out[[j]])
+            }
+            
+            new <- TRUE
+            
+          }
+        }
+        
+        graph2 <- removeEdges(graph2, list(bidirected=list(bidi[i,])))
+      }
+    }
+          
     stop("function does not work for recursive heads")
+    
+    ### insert work here
+    
   } # if (r)
   else {
     # subs = powerSet(dis, maxbarren)[-1]
@@ -162,10 +250,12 @@ intrinsicSets2 <- function(graph, r = TRUE, by_district = FALSE, maxbarren, sort
   if(by_district){
     out <- tapply(out, INDEX = d[int], FUN=list)
     names(out) <- NULL
-
+    
     if (sort > 1) out <- rapply(out, sort.int, how="list")
   } 
-  else if (sort > 1) out <- lapply(out, sort.int)
+  else if (sort > 1) {
+    out <- lapply(out, sort.int)
+  }
 
   out
 }
@@ -173,24 +263,42 @@ intrinsicSets2 <- function(graph, r = TRUE, by_district = FALSE, maxbarren, sort
 ##' @describeIn intrinsicSets Get the intrinsic closure of a set
 ##' @param set set to find intrinsic closure of
 ##' @export intrinsicClosure
-intrinsicClosure <- function(graph, set, r=TRUE) {
+intrinsicClosure <- function(graph, set, r=TRUE, sort=1) {
   
-  districts <- districts(graph)
+  if (length(set) == 0) return(integer(0))
   
-  for (district in districts) {
-    if (all(set %in% district)) {
-      subgraph <- graph[district]
-      ans <- anc(subgraph, set)
+  subgraph <- graph
+  new = TRUE
+  ans <- graph$v
+  
+  if (!r) {
+    ancs <- anc(graph, set)
+    S <- dis(graph[ancs], set, sort=sort)
+    if (length(districts(graph[S])) <= 1) return(S)
+    else stop("Not contained in a single intrinsic set")
+  }
+
+  while (new) {
+    new = FALSE
+    dists <- districts(subgraph)
+    
+    wh <- subsetmatch(list(set[1]), dists)
+    if (all(set %in% dists[[wh]])) {
+      subgraph <- subgraph[dists[[wh]]]
+    }
+    else stop("Not contained in a single intrinsic set")
+    
+    ans <- anc(subgraph, set)
       
-      if (setequal(ans, district)) return(district)
-      else {
-        an_subgraph <- subgraph[ans]
-        closure <- Recall(an_subgraph, set)
-        return(closure)
-      }
+    if (setequal(ans, subgraph$v)) break
+    else {
+      subgraph <- subgraph[ans]
+      new = TRUE
     }
   }
-  stop("Error in intrinsicClosure")
+  
+  return(subgraph$v)
+  # stop("Error in intrinsicClosure - perhaps 'set' not contained in a single district?")
 }
 
 
@@ -250,6 +358,10 @@ headsTails <- function (graph, r = TRUE, by_district = FALSE, set_list, max_head
 ##' returns integer value of heads from provided list
 ##' 
 ##' @param graph object of class \code{mixedgraph}
+##' @param heads list of heads 
+##' @param v set of vertices to partition
+##' @param r logical: should recursive parameterization be used?
+##' @param head.order numeric vector in same order as heads
 ##' 
 ##' @export partition0
 partition0 = function(graph, heads, v = seq_len(graph$n), r=TRUE, head.order) {
@@ -270,6 +382,7 @@ partition0 = function(graph, heads, v = seq_len(graph$n), r=TRUE, head.order) {
 }
 
 ##' @describeIn partition0 Give factorization of heads and tails
+##' @param ht list of heads and tails
 ##' @export factorize0
 factorize0 = function (graph, v = seq_len(n), r = TRUE, ht, head.order) {
   n = graph$n

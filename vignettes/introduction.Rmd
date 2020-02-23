@@ -121,13 +121,14 @@ matrices: this will be corrected in future.
 
 ## Edge Specifications
 
-Edges can be specified in any of three ways, as an adjacency matrix (`adjMatrix`),
-a list of edges (`edgeList`), or a matrix with two rows, each of whose column
+Edges can be specified in any of four ways, as an adjacency matrix (`adjMatrix`) which may be sparse, a list of adjacencies (`adjList`), 
+a list of edges (`eList`), or a matrix with two rows, each of whose column
 corresponds to an edge (`edgeMatrix`).  
 
 These each have their own 
 useful properties: adjacency matrices generally allow things to be calculated
-most quickly with small or dense graphs, since R is well suited to working with matrices.
+most quickly with small or dense graphs, since R is well suited to working 
+with matrices.
 Finding the neighbours of a vertex is very fast; conversely using edge lists or 
 edge matrices requires searching for the edges whose end points match the 
 specification. 
@@ -218,8 +219,8 @@ the `%G%` operator allows direct evaluation and takes care
 of the format conversion for you.  
 ```{r}
 gr2 <- graphCr("1 -> 2 -> 3 -> 4 <- 2")
-gr2 %G% degree(Nodes=c(2,4))
-degree(convert(gr2, "graphNEL"), Nodes=c(2,4))
+gr2 %G% degree()
+degree(convert(gr2, "graphNEL"))
 ```
 This is based on the idea of the pipe operator `%>%`. 
 The `%G%` operator will try to determine which

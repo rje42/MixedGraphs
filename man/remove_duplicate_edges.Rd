@@ -4,10 +4,10 @@
 \alias{remove_duplicate_edges}
 \title{Remove duplicate edges}
 \usage{
-remove_duplicate_edges(edgeList, directed = TRUE, sort = FALSE)
+remove_duplicate_edges(edges, directed = TRUE, sort = FALSE)
 }
 \arguments{
-\item{edgeList}{\code{edgeList} object}
+\item{edges}{something from \code{edgeList} object}
 
 \item{directed}{are edges directed? (i.e.
 does the order of vertices matter?)}

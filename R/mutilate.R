@@ -1,6 +1,6 @@
 ##' Remove duplicate edges
 ##' 
-##' @param edgeList \code{edgeList} object
+##' @param edges something from \code{edgeList} object
 ##' @param directed are edges directed? (i.e.
 ##' does the order of vertices matter?)
 ##' @param sort should vertices in undirected edges
@@ -10,46 +10,65 @@
 ##' Check for and remove duplicate edges in a list of
 ##' edges or edgeMatrix.  Note that this will sort 
 ##' elements in 
-remove_duplicate_edges <- function(edgeList, directed=TRUE, sort=FALSE) {
-  if (is.matrix(edgeList)) {
+remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
+  if (is.adjMatrix(edges)) {
+    # if is an adjacency matrix, ensure no entries exceed 1
+    edges[edges > 1] <- 1
+    return(edges)
+  }
+  else if (is.adjList(edges, checknm=TRUE)) {
+    edges <- lapply(edges, unique.default)
+    class(edges) <- c("adjList", class(edges))
+    return(edges)
+  }
+  else if (is.edgeMatrix(edges)) {
     ## edgeMatrix object
-    if (nrow(edgeList) != 2 || any(edgeList <= 0)) stop("Object provided is a matrix but 
+    if (nrow(edges) != 2 || any(edges <= 0)) stop("Object provided is a matrix but 
                                                         doesn't seem to be an edgeMatrix")
-    if (ncol(edgeList) <= 1) return(edgeList)
+    if (ncol(edges) <= 1) return(edges)
     
     ## get a unique number representing each edge
-    k = max(edgeList) + 1L
-    char = c(t(c(1L,k)) %*% edgeList)
+    k = max(edges) + 1L
+    char = c(t(c(1L,k)) %*% edges)
     ## if undirected, check both orders and take the smaller
-    if (!directed) char = pmin(char, c(t(c(k,1L)) %*% edgeList))
+    if (!directed) char = pmin(char, c(t(c(k,1L)) %*% edges))
     dup = duplicated(char)
     
     if (sort) warning("sort = TRUE has no effect for edgeMatrix")
-    return(edgeList[,!dup,drop=FALSE])
+    return(edges[,!dup,drop=FALSE])
   }
-  else if (is.list(edgeList)) {
+  else if (is.list(edges)) {
 
-    if (directed) return(unique(edgeList))
+    if (directed) {
+      edges <- unique.default(edges)
+      return(edges)
+    }
     ## if undirected, sort entries
-    out = lapply(edgeList, sort.int)
+    out = lapply(edges, sort.int)
     dup = duplicated(out)
-    if (sort) return(out[!dup])
-    else return(edgeList[!dup])
+    if (sort) {
+      out <- out[!dup]
+      class(out) <- "eList"
+    }
+    else {
+      out <- edges[!dup]
+      class(out) <- "eList"
+    }
+    
+    return(out)
   }
   else stop("Not sure how to handle this, should be list or matrix")
-  
-  
 }
 
 ##' Add or remove edges
+##' 
+##' @param graph a \code{mixedgraph} object
+##' @param edges list of edges to be added/removed
 ##' 
 ##' @details At the moment no effort is made to 
 ##' detect duplication in addEdges().  To be added later.
 ##' Currently removeEdges() forces all edges to be
 ##' represented by adjacency matrices. 
-##' 
-##' @param graph a \code{mixedgraph} object
-##' @param edges list of edges to be added/removed
 ##' 
 ##' @export addEdges
 addEdges <- function(graph, edges) {
@@ -84,16 +103,25 @@ addEdges <- function(graph, edges) {
     if (etys[et[i]] %in% names(out$edges)) {
       ## if there are some of this type of edge already
       ## add it in the same format
-      if (is.list(out$edges[[etys[et[i]]]])) {
-        out$edges[[etys[et[i]]]] = c(out$edges[[etys[et[i]]]], edgeList(edges[[i]], directed = dir))
+      A <- out$edges[[etys[et[i]]]]
+      
+      if (is.list(A)) {
+        A = c(A, eList(edges[[i]], directed = dir))
+        class(A) <- "eList"
       }
-      else if (is.edgeMatrix(out$edges[[etys[et[i]]]])) {
-        out$edges[[etys[et[i]]]] = cbind(out$edges[[etys[et[i]]]], edgeMatrix(edges[[i]], directed = dir))
+      else if (is.edgeMatrix(A)) {
+        A = cbind(A, edgeMatrix(edges[[i]], directed = dir))
       }
-      else if (is.adjMatrix(out$edges[[etys[et[i]]]])) {
-        out$edges[[etys[et[i]]]] = out$edges[[etys[et[i]]]] + adjMatrix(edges[[i]], directed = dir)
+      else if (is.adjMatrix(A)) {
+        A = A + adjMatrix(edges[[i]], directed = dir)
+#        out$edges[[etys[et[i]]]] <- pmin(1, out$edges[[etys[et[i]]]])
+       class(A) <- "adjMatrix"
+       A[A > 1] <- 1
       }
       else stop("mixedgraph supplied seems invalid")
+      
+      ## put back edges
+      out$edges[[etys[et[i]]]] <- A
     }
     else {
       ## otherwise just add it in
@@ -134,7 +162,7 @@ removeEdges <- function(graph, edges) {
   if (any(is.na(match(unlist(edges[edE]), v)))) stop("Edges must be between vertices in the graph")
   if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
   
-  ## Now convert to adjacency matrix anyway  
+  ## Now convert to adjacency matrix anyway
   edges <- mapply(adjMatrix, edges, directed=edgeTypes()$directed[et], n=length(v), SIMPLIFY = FALSE)
   
   for (i in seq_along(et)) {
@@ -168,6 +196,15 @@ removeEdges <- function(graph, edges) {
 mutilate <- function(graph, A, etype, dir=0L) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (length(A) == 0) return(graph)
+  if (all(graph$v %in% A) && missing(etype)) {
+    edg <- graph$edges
+    for (i in seq_along(edg)) {
+      edg[[i]] <- list()
+      class(edg[[i]]) <- "eList"
+    }
+    out <- mixedgraph(v=graph$v, edges=edg, vnames=graph$vnames)
+    return(out)
+  }
   
   ## if no edge type specified, use all available types
   if (missing(etype)) {
@@ -190,20 +227,68 @@ mutilate <- function(graph, A, etype, dir=0L) {
     if (is.list(edges[[i]])) {
       ## edge list format
       rm = rep(FALSE, length(edges[[i]]))
-      if (dir >= 0) {
+      if (dir >= 0) {  # remove outgoing edges
         rm = rm | sapply(edges[[i]], function(x) x[1]) %in% A
       }
-      if (dir <= 0) {
+      if (dir <= 0) {  # remove incoming edges
         rm = rm | sapply(edges[[i]], function(x) x[2]) %in% A
       }
       edges[[i]] = edges[[i]][!rm]
+      class(edges[[i]]) <- "eList"
     }
-    else {
+    else if (is.adjMatrix(edges[[i]])) {
       ## matrix format
       if (dir >= 0) edges[[i]][A,] = 0
       if (dir <= 0) edges[[i]][,A] = 0
     }
+    else if (is.edgeMatrix(edges[[i]])) {
+      if (dir >= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][,1] %in% A), drop=FALSE]
+      if (dir <= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][,2] %in% A), drop=FALSE]
+    }
+    else stop("Edge type not recognised")
   }
   graph$edges[whEdge] <- edges
   graph
+}
+
+##' Add additional nodes to a graph
+##' 
+##' @param graph a \code{mixedgraph} object
+##' @param k the number of nodes to be added
+##' @param vnames an optional character vector of names
+##' 
+##' 
+##' 
+addNodes <- function(graph, k, vnames) {
+  n <- length(graph$vnames)
+  if (k == 0) return(graph)
+  
+  ## get new names
+  if (missing(vnames) || is.null(vnames)) {
+    vnames = paste("x", seq(n+1,n+k), sep="")
+    while (any(vnames %in% graph$vnames)) {
+      count <- n+k
+      vnames <- setdiff(vnames, graph$vnames)
+      l <- k - length(vnames)
+      vnames = paste("x", count + seq_len(l), sep="")
+      count <- count + l
+    }
+  }
+
+  ## add empty edges if necessary
+  edges <- graph$edges
+  adjM <- which(sapply(edges, function(x) "adjMatrix" %in% class(x)))
+  for (i in adjM) {
+    edges[[i]] <- matrix(0, n+k, n+k)
+  }
+  if (length(adjM) > 0) {
+    edges[adjM] <- mapply(function(x,y) {
+      x[seq_len(nrow(y)), seq_len(ncol(y))] <- y
+      class(x) <- class(y)
+      x
+    }, edges[adjM], graph$edges[adjM], SIMPLIFY = FALSE)
+  }
+
+  ## now return the enlarged graph
+  mixedgraph(v=c(graph$v, n+seq_len(k)), edges=edges, vnames=c(graph$vnames, vnames))
 }

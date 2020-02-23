@@ -14,6 +14,9 @@ anSets2(graph, topOrder, maxbarren, same_dist = FALSE, sort = 1)
 
 \item{topOrder}{optional topological order of vertices}
 
+\item{sort}{integer:1 for unique but unsorted, 2 for 
+sorted.}
+
 \item{maxbarren}{maximum size of barren subsets}
 
 \item{same_dist}{logical, should barren vertices be in the same district?}

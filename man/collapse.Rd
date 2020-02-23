@@ -4,7 +4,7 @@
 \alias{collapse}
 \title{Collapse multiple edge types to a single list or matrix}
 \usage{
-collapse(edges, v1, v2, dir = 1, matrix = FALSE)
+collapse(edges, v1, v2, dir = 1, matrix = FALSE, sparse = FALSE, sort = 1)
 }
 \arguments{
 \item{edges}{list of edges to include}
@@ -14,6 +14,10 @@ collapse(edges, v1, v2, dir = 1, matrix = FALSE)
 \item{dir}{direction}
 
 \item{matrix}{logical indicating whether to force the return of an adjacency matrix}
+
+\item{sparse}{should we use sparse matrices if available?}
+
+\item{sort}{1=unique but not sorted, 2=unique and sorted, 0=neither}
 }
 \description{
 Collapse multiple edge types to a single list or matrix
@@ -21,5 +25,8 @@ Collapse multiple edge types to a single list or matrix
 \details{
 returns an edgeMatrix or adjacency matrix for possibly multiple edge types.
 If any of the edges are specified as an adjacency matrix, then the output will also
-be an adjacency matrix.
+be an adjacency matrix, and similarly for an edgeMatrix. 
+
+If \code{v1} or \code{v2} are specified then the first and 
+second vertices must belong to these respective sets.
 }

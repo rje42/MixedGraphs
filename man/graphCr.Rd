@@ -4,14 +4,16 @@
 \alias{graphCr}
 \title{Create graph from character parsing}
 \usage{
-graphCr(char, ..., useMatrices = FALSE, format = "mixedgraph")
+graphCr(char, ..., mode = "eList", useMatrices = FALSE, format = "mixedgraph")
 }
 \arguments{
 \item{char}{string of inputs given by vertex names separated by edges}
 
 \item{...}{other strings of further edges}
 
-\item{useMatrices}{in mixed graph representation, should the output
+\item{mode}{not currently used}
+
+\item{useMatrices}{in \code{mixedgraph} representation, should the output
 use adjacency matrices?}
 
 \item{format}{type of graph format to use, options are \code{mixedgraph} 

@@ -1,21 +1,51 @@
 ##' Get adjacency matrix from list of edges
 ##' 
-##' @param edges list or data frame giving edges
+##' @param edges list or matrix giving edges
 ##' @param n total number of vertices, defaults to maximal value
 ##' @param directed logical: if TRUE edges are assumed directed
+##' @param sparse logical: use a sparse matrix?
 ##' 
 ##' @export adjMatrix
-adjMatrix = function(edges, n, directed=FALSE) {
+adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
   if (is.adjMatrix(edges)) {
     return(edges)
   }
-  else if (is.list(edges)) {
+  else if (is.adjList(edges, checknm = TRUE)) {
+    n <- length(edges)
+
+    if (sparse) {
+      out <- Matrix(0L,n,n)
+      class(out) <- c("adjMatrix", class(out))
+    }
+    else {
+      out <- matrix(0L,n,n)
+      class(out) <- c("adjMatrix", class(out))
+    }
+    
+    for (i in seq_along(edges)) {
+      if (directed) out[edges[[i]],i] <- 1
+      else out[edges[[i]],i] <- 1
+    }
+    if (!directed && !isSymmetric(out)) stop("Error in input")
+    
+    return(out)
+  }
+  else if (is.eList(edges)) {
     if (length(edges) == 0) {
       if (missing(n)) {
         warning("number of vertices not supplied, assumed to be 0")
         n = 0
       }
-      return(matrix(0L,n,n))
+      ## return zero matrix
+      if (sparse) {
+        out <- Matrix(0L,n,n)
+        class(out) <- c("adjMatrix", class(out))
+      }
+      else {
+        out <- matrix(0L,n,n)
+        class(out) <- c("adjMatrix", class(out))
+      }
+      return(out)
     }
     
     tmp <- matrix(unlist(edges), nrow=2)
@@ -28,14 +58,91 @@ adjMatrix = function(edges, n, directed=FALSE) {
   idx <- c(1, n) %*% (tmp-1) + 1
   if (!directed) idx <- c(idx, c(n, 1) %*% (tmp-1) + 1)
   
-  out <- rep(0, n*n)
-  out[idx] = 1
+  if (sparse) out <- Matrix(0, n, n, doDiag = FALSE)
+  else out <- matrix(0, n, n)
+  out[c(idx)] = 1
   
-  dim(out) <- c(n,n)
+#  dim(out) <- c(n,n)
+  class(out) <- c("adjMatrix", class(out))
   # if (!missing(vnames)) dimnames(out) <- list(vnames, vnames)
 
   out
 }
+
+##' Get adjacency list of edges
+##' 
+##' @param edges list or matrix giving edges in the form of an 
+##' \code{eList}, \code{adjMatrix} or \code{edgeMatrix}
+##' @param n total number of vertices (defaults to maximum value)
+##' @param directed logical: if \code{TRUE} edges are assumed directed
+##' @param transpose logical: if \code{TRUE} we consider children instead of parents
+##' 
+##' @details Stores adjancies by one of their vertices.  E.g. directed edges
+##' are stored indexed by the child vertex, undirected by both neighbours.
+##' 
+##' @export adjList
+adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
+  if (is.adjList(edges, checknm=TRUE)) {
+    ## nothing to do
+    return(edges)
+  }
+  else if (is.null(edges)) return(NULL)
+  else if (is.list(edges)) {
+    ## seems to be an eList
+    if (length(edges) == 0) {
+      if (missing(n)) {
+        warning("number of vertices not supplied, assumed to be 0")
+        n = 0
+      }
+      return(edges)
+    }
+    else if (missing(n)) n <- max(sapply(edges, max))
+    
+    out <- vector(mode = "list", length=n)
+    
+    for (i in seq_along(edges)) {
+      ## go through each edge and record in appropriate position on list
+      out[[edges[[i]][2]]] <- c(out[[edges[[i]][2]]], edges[[i]][1])
+      if (!directed) out[[edges[[i]][1]]] <- c(out[[edges[[i]][1]]], edges[[i]][2])
+    }
+  }  
+  else if (is.edgeMatrix(edges)) {
+    ## seems to be an edgeMatrix
+    tmp <- edges
+    if(missing(n)) n <- max(tmp)
+    out <- vector(mode="list", length=n)
+
+    for (i in seq_len(n)) {
+      wh_i <- which(edges == i)
+      mod2 <- wh_i %% 2
+      if (directed && !transpose) wh_i <- wh_i[mod2 == 0]
+      else if (directed && transpose) wh_i <- wh_i[mod2 == 1]
+      wh_i2 <- wh_i + 2*mod2 - 1
+      out[[i]] <- edges[wh_i2]
+    }
+  }
+  else if (is.adjMatrix(edges)) {
+    ## seems to be an adjMatrix
+    if (!directed) edges <- edges+t(edges)
+    out <- apply(edges, 2, function(x) which(x > 0))
+    if (is.numeric(out)) out <- unlist(lapply(out, list), recursive = FALSE)
+  }
+  else stop("Don't know what kind of edge-set this is")
+  
+  # if (missing(n)) n = max(tmp)
+  
+  # idx <- c(1, n) %*% (tmp-1) + 1
+  # if (!directed) idx <- c(idx, c(n, 1) %*% (tmp-1) + 1)
+  # 
+  # out <- rep(0, n*n)
+  # out[idx] = 1
+
+  class(out) <- "adjList"
+  # if (!missing(vnames)) dimnames(out) <- list(vnames, vnames)
+  
+  out
+}
+
 
 ##' Get edges from adjacency matrix or list
 ##' 
@@ -45,7 +152,11 @@ adjMatrix = function(edges, n, directed=FALSE) {
 ##' @export edgeMatrix
 edgeMatrix <- function(edges, directed=FALSE) {
   
-  if (length(edges)==0) return(matrix(NA, 2, 0))
+  if (length(edges)==0) {
+    out <- matrix(NA, 2, 0)
+    class(out) <- "edgeMatrix"
+    return(out)
+  }
 
   if (is.edgeMatrix(edges)) return(edges)
   if (is.adjMatrix(edges)) {
@@ -57,21 +168,45 @@ edgeMatrix <- function(edges, directed=FALSE) {
     }
     out <- matrix(c(rs,cs), nrow=2, byrow=TRUE)
   }
-  else if (is.list(edges)) {
+  else if (is.adjList(edges, checknm=TRUE)) {
+    out <- matrix(NA, 2, sum(lengths(edges)))
+    pos <- 0
+    for (i in seq_along(edges)) {
+      if (directed) {
+        out[1,pos + seq_along(edges[[i]])] <- edges[[i]]
+        out[2,pos + seq_along(edges[[i]])] <- i
+      }
+      else {
+        out[1,pos + seq_len(sum(edges[[i]] < i))] <- edges[[i]][edges[[i]] < i]
+        out[2,pos + seq_len(sum(edges[[i]] < i))] <- i
+      }
+    }
+  }
+  else if (is.list(edges) && all(lengths(edges) %in% c(0,2))) {
     out <- matrix(unlist(edges), nrow=2)
   }
+  else stop("Hyperedges not supported for this format")
+  
+  class(out) <- "edgeMatrix"
+  
   out
 }
 
 ##' Edge list
 ##' 
-##' @param edges edgeMatrix or adjacency matrix
+##' Returns an \code{eList} object from an adjacency matrix
+##' or edge matrix object.
+##' 
+##' @param edges \code{adjList}, \code{edgeMatrix} or \code{adjMatrix}
 ##' @param directed logical: if TRUE edges are assumed directed
 ##' 
-##' @export edgeList
-edgeList <- function(edges, directed=FALSE) {
+##' 
+##' @export eList
+eList <- function(edges, directed=FALSE) {
   if(is.null(edges)) {
-    return(list())
+    out <- list()
+    class(out) <- "eList"
+    return(out)
   }
   else if (is.adjMatrix(edges)) {
     rs <- row(edges)[edges > 0]
@@ -82,50 +217,97 @@ edgeList <- function(edges, directed=FALSE) {
     }
     out <- mapply(c, rs, cs, SIMPLIFY=FALSE)
   }
+  else if (is.adjList(edges, checknm=TRUE)) {
+    out <- list()
+    for (i in seq_along(edges)) {
+      if (directed) out <- c(out, lapply(edges[[i]], function(x) c(x,i)))
+      else out <- c(out, lapply(edges[[i]], function(x) c(x[x < i],i)))
+    }
+  }
   else if (is.edgeMatrix(edges)) {
      out <- mapply(c, edges[1,], edges[2,], SIMPLIFY=FALSE)
   }
   else if (is.list(edges)) out <- edges
   else stop("Not a valid edgeList")
+  class(out) <- "eList"
   out
 }
 
-##' Adjacency matrix representation
+##' Deprecated function
 ##' 
-##' Change edge representation of graph to use adjacency matrices
+##' @param edges an "eList" object
+##' @param directed logical, should edges be interpreted as directed?
+##' 
+edgeList <- function(edges, directed=FALSE) {
+  .Deprecated("eList")
+  eList(edges, directed)
+}
+
+##' Change representation of edges
+##' 
+##' Change edge representation of (part of) graph to use \code{adjMatrix},
+##' \code{adjList}, \code{eList} or \code{edgeMatrix} formats.
 ##' 
 ##' @param graph an object of class \code{mixedgraph}
 ##' @param edges character vector of edge types to change, defaults to all
+##' @param sparse logical: should sparse matrices be used?
 ##' 
 ##' @export withAdjMatrix
-withAdjMatrix <- function(graph, edges) {
+withAdjMatrix <- function(graph, edges, sparse=FALSE) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
   if (length(idx) == 0) return(graph)
 
+  ## get directed and number of vertices, then transform using adjMatrix()
   dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
   n <- length(graph$vnames)
-  graph$edges[idx] <- mapply(adjMatrix, graph$edges[idx], directed=dir, n=n, SIMPLIFY=FALSE)
+  graph$edges[idx] <- mapply(adjMatrix, graph$edges[idx], directed=dir, n=n, sparse=sparse, SIMPLIFY=FALSE)
+  
   graph
 }
 
-##' Edge list representation
-##' 
-##' Change edge representation of graph to use edge lists
-##' 
-##' @param graph an object of class \code{mixedgraph}
-##' @param edges character vector of edge types to change, defaults to all
-##' 
+##' @describeIn withAdjMatrix Change to \code{adjList} format
+##' @export withAdjList
+withAdjList <- function(graph, edges) {
+  if (missing(edges)) idx <- seq_along(graph$edges)
+  else idx <- pmatch(edges, names(graph$edges))
+  if (length(idx) == 0) return(graph)
+
+  ## get directed and number of vertices, then transform using adjList()
+  dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
+  n <- length(graph$vnames)
+  graph$edges[idx] <- mapply(adjList, graph$edges[idx], directed=dir, n=n, SIMPLIFY=FALSE)
+  
+  graph
+}
+
+##' @describeIn withAdjMatrix Change to \code{edgeMatrix} format
+##' @export withEdgeMatrix
+withEdgeMatrix <- function(graph, edges) {
+  if (missing(edges)) idx <- seq_along(graph$edges)
+  else idx <- pmatch(edges, names(graph$edges))
+  if (length(idx) == 0) return(graph)
+  
+  ## get directed and number of vertices, then transform using edgeMatrix()
+  dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
+  n <- length(graph$vnames)
+  graph$edges[idx] <- mapply(edgeMatrix, graph$edges[idx], directed=dir, n=n, SIMPLIFY=FALSE)
+  
+  graph
+}
+
+##' @describeIn withAdjMatrix Change to \code{eList} format
 ##' @export withEdgeList
 withEdgeList <- function(graph, edges) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
   if (length(idx) == 0) return(graph)
   
+  ## get directed and number of vertices, then transform using eList()
   dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
   n <- length(graph$vnames)
-  graph$edges[idx] <- mapply(edgeList, graph$edges[idx], directed=dir, SIMPLIFY=FALSE)
-  class(graph$edges) = "edgeList"
+  graph$edges[idx] <- mapply(eList, graph$edges[idx], directed=dir, SIMPLIFY=FALSE)
+  
   graph
 }
 
