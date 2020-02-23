@@ -200,7 +200,6 @@ edgeMatrix <- function(edges, directed=FALSE) {
 ##' @param edges \code{adjList}, \code{edgeMatrix} or \code{adjMatrix}
 ##' @param directed logical: if TRUE edges are assumed directed
 ##' 
-##' 
 ##' @export eList
 eList <- function(edges, directed=FALSE) {
   if(is.null(edges)) {
