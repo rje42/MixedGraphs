@@ -35,6 +35,4 @@ not a vertex of \code{graph}, an error is returned, unless \code{force=TRUE}.
 }
 \seealso{
 \code{\link{grp}} for paths
-
-repeat dir() vector with warning if necessary
 }

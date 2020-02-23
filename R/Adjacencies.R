@@ -4,13 +4,18 @@
 ##' @param v1,v2 incoming and outgoing vertices, defaults to all.
 ##' @param dir direction
 ##' @param matrix logical indicating whether to force the return of an adjacency matrix
+##' @param sparse should we use sparse matrices if available?
+##' @param sort 1=unique but not sorted, 2=unique and sorted, 0=neither
 ##' 
 ##' @details returns an edgeMatrix or adjacency matrix for possibly multiple edge types.
 ##' If any of the edges are specified as an adjacency matrix, then the output will also
-##' be an adjacency matrix.
+##' be an adjacency matrix, and similarly for an edgeMatrix. 
+##' 
+##' If \code{v1} or \code{v2} are specified then the first and 
+##' second vertices must belong to these respective sets. 
 ##' 
 ##' @export collapse
-collapse <- function(edges, v1, v2, dir=1, matrix=FALSE) {
+collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1) {
   ## repeat direction with warning if necessary
   if (length(edges) == 0 || length(unlist(edges))==0) return(matrix(NA, 2, 0))
   dir <- dir*rep(1L, length(edges))
@@ -21,14 +26,22 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE) {
   edges <- edges[!rmv]
   dir <- dir[!rmv]
   
+  ### first look for objects of class adjMatrix and adjList
   isAMat <- sapply(edges, is.adjMatrix)
+  isAList <- sapply(edges, is.adjList, checknm=TRUE)
+
   ## vertices not specified, use all
   if (missing(v1) || missing(v2)) {
     if (any(isAMat)) {
       i <- which(isAMat)[1]
       nv <- nrow(edges[[i]])
     }
+    else if (any(isAList)) {
+      i <- which(isAList)[1]
+      nv <- length(edges[[i]])
+    }
     else {
+      ## just look for biggest vertex
       nv <- max(unlist(edges))
 #      if (is.infinite(nv)) return(matrix(NA, 2, 0))
     }
@@ -40,20 +53,59 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE) {
       v2 <- seq_len(nv)
       all2 <- TRUE
     }
+    vr1 <- setdiff(seq_len(nv), v1)
+    vr2 <- setdiff(seq_len(nv), v2)
+    vr <- intersect(vr1, vr2)
   }
-    
+  
   ## if any representation is an adjacency matrix, or if forced, 
   ## then use this representation
   if (any(isAMat) || matrix) {
     ## could speed this up by not converting edge lists
-    jointMat <- matrix(0, length(v1), length(v2))
+    if (sparse) {
+      jointMat <- Matrix(0, length(v1), length(v2))
+    }
+    else jointMat <- matrix(0, length(v1), length(v2))
+    
     for (i in seq_along(edges)) {
-      if (!isAMat[i]) edges[[i]] <- adjMatrix(edges[[i]], n=nv, directed=dir[i])
+      if (!isAMat[i]) edges[[i]] <- adjMatrix(edges[[i]], n=nv, directed=dir[i], sparse=sparse)
       if (dir[i] >= 0) jointMat <- jointMat + edges[[i]][v1, v2]
       if (dir[i] <= 0) jointMat <- jointMat + t(edges[[i]][v2, v1])
     }
-    return(pmin(jointMat, 1))
+    jointMat <- pmin(jointMat, 1)
+    class(jointMat) <- c("adjMatrix", class(jointMat))
+    
+    return(jointMat)
   }
+  
+  ## if everything is an adjList, then use this representation
+  if (all(isAList)) {
+    for (i in seq_along(edges)) {
+      if (dir[i] == 1) {
+        edges[[i]][vr2] <- vector(mode="list", length=length(vr2))
+        edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,v1))
+      }
+      else if (dir[i] == 0) {
+        edges[[i]][vr] <- vector(mode="list", length=length(vr))
+        edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,c(v1,v2)))
+      }
+      else if (dir[i] == -1) {
+        edges[[i]][vr1] <- vector(mode="list", length=length(vr1))
+        edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,v2))
+      }
+    }
+    out <- unlist(purrr::transpose(edges), recursive = FALSE)
+    
+    if (sort > 0) {
+      out <- lapply(out, unique.default)
+      if (sort > 1) out <- lapply(out, sort.int)
+    }
+
+    class(out) <- c("adjList", class(out))
+
+    return(out)
+  }
+
   ## otherwise use edgeMatrices
   edges <- lapply(edges, edgeMatrix)
   ## reverse edges for direction =0,-1.  
@@ -63,6 +115,7 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE) {
   ## shortcut for all vertices, saves time
    if (all1 & all2) {
      jointEM <- do.call(cbind, edges)
+     class(jointEM) <- c("edgeMatrix", class(jointEM))
      return(jointEM)
    }
 
@@ -71,6 +124,8 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE) {
       wh <- (edges[[i]][1,] %in% v1) & (edges[[i]][2,] %in% v2)
       jointEM <- cbind(jointEM, edges[[i]][,wh])
   }
+  class(jointEM) <- c("edgeMatrix", class(jointEM))
+  
   return(jointEM)
 }
 
@@ -108,43 +163,60 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
   
  # if (missing(etype)) etype <- edgeTypes()$type
   if (missing(etype)) etype <- names(graph$edges)
-  ##' repeat dir() vector with warning if necessary
-  if (length(dir) > length(etype)) warning("More directions specified than edge types")
-  dir = dir*rep.int(1L, length(etype))
+  ## repeat dir() vector with warning if necessary
+  if (length(dir) > length(etype)) {
+    warning("More directions specified than edge types")
+    dir <- dir[seq_along(etype)]
+  }
+  else dir = dir*rep.int(1L, length(etype))
   
+  ## if undirected edges are specified as directed 
+  ## then change and give a warning
   tmp <- pmatch(etype, edgeTypes()$type)
-  dir[!edgeTypes()$directed[tmp]] <- 0L
+  if (any(is.na(tmp))) stop("Some edges not matched to a registered type")
+  if (any(!edgeTypes()$directed[tmp] & dir[rank(tmp)] != 0)) {
+    warning("Undirected edges specified as directed, changing to undirected")
+    dir[!edgeTypes()$directed[tmp]] <- 0L
+  }
   
   whEdge <- pmatch(etype,names(graph$edges))
   
   edges <- graph$edges[whEdge]
-  n <- length(graph$v)
+  # n <- length(graph$v)
   
   ## special case of one adjacency matrix to save time
-  if (length(edges) == 1 && is.adjMatrix(edges[[1]], n)) {
-    es <- edges[[1]][v,,drop=FALSE]
-    n <- ncol(es)
-    if (dir == 0) es <- es + t(edges[[1]][,v,drop=FALSE])
-    else if (dir == -1) es <- t(edges[[1]][,v,drop=FALSE])
-    return(which(.colSums(es, nrow(es), n) > 0))
+  if (length(edges) == 1 && is.adjMatrix(edges[[1]], length(graph$vnames))) {
+    es <- matrix(0, length(v), length(graph$vnames))
+
+    ## add in edges dependent on direction
+    if (dir >= 0) es <- es + edges[[1]][v,,drop=FALSE]
+    if (dir <= 0) es <- es + t(edges[[1]][,v,drop=FALSE])
+
+    return(which(colSums(es) > 0))
   }
   
   es <- collapse(edges, v1=v, dir=dir)
   
-  ## if an adjacency matrix
-  if (any(es == 0)) {
+  ## select depending on mode of output
+  if (is.adjMatrix(es)) {
+    ## this is an adjacency matrix
     d <- dim(es)
     return(which(.colSums(es, d[1], d[2]) > 0))
   }
-  ## otherwise take bottom row of es
-  if (ncol(es) == 0) return(integer(0))
-  out = es[2,]  
+  else if (is.adjList(es)) {
+    out <- unlist(es[v])
+  }
+  else if (is.edgeMatrix(es)) {
+    ## this is an edge matrix
+    if (ncol(es) == 0) return(integer(0))
+    out = es[2,]  
+  }
+  
   if (sort > 0) out <- unique.default(out)
   if (sort > 1) out <- sort.int(out)
   if (!inclusive) out = setdiff(out, v)
-  return(out)
 
-  out
+  return(out)
 }
 
 ##' Group vertices by adjacencies

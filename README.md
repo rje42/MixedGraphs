@@ -14,8 +14,8 @@ Current features:
 
 * Graphs can be quickly created 'by hand'.
 
-* Edges can be specified as adjacency matrices, lists, or a matrix of vertex 
-  numbers.
+* Edges can be specified as adjacency matrices, lists of adjacencies or 
+  edges, or a matrix of vertex numbers.
 
 * Built in edge-types include undirected, directed, bidirected and partially 
   directed.

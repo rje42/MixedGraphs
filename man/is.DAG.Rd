@@ -4,6 +4,7 @@
 \alias{is.ADMG}
 \alias{is.SG}
 \alias{is.DAG}
+\alias{is.UG}
 \title{Test type of graph}
 \usage{
 is.ADMG(graph)
@@ -11,11 +12,13 @@ is.ADMG(graph)
 is.SG(graph)
 
 is.DAG(graph)
+
+is.UG(graph)
 }
 \arguments{
 \item{graph}{\code{mixedgraph} object
 
-\code{is.DAG}, \code{is.SG}, \code{is.ADMG} 
+\code{is.UG}, \code{is.DAG}, \code{is.SG}, \code{is.ADMG}
 test whether a graph is a directed acyclic graph, 
 summary graph or acyclic directed mixed graph 
 respectively.}
@@ -28,5 +31,7 @@ Test type of graph
 \item \code{is.ADMG}: test if an ADMG
 
 \item \code{is.SG}: test if a summary graph
+
+\item \code{is.UG}: test if an undirected graph
 }}
 

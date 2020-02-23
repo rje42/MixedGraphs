@@ -2,15 +2,36 @@
 % Please edit documentation in R/Edges.R
 \name{withAdjMatrix}
 \alias{withAdjMatrix}
-\title{Adjacency matrix representation}
+\alias{withAdjList}
+\alias{withEdgeMatrix}
+\alias{withEdgeList}
+\title{Change representation of edges}
 \usage{
-withAdjMatrix(graph, edges)
+withAdjMatrix(graph, edges, sparse = FALSE)
+
+withAdjList(graph, edges)
+
+withEdgeMatrix(graph, edges)
+
+withEdgeList(graph, edges)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}
 
 \item{edges}{character vector of edge types to change, defaults to all}
+
+\item{sparse}{logical: should sparse matrices be used?}
 }
 \description{
-Change edge representation of graph to use adjacency matrices
+Change edge representation of (part of) graph to use \code{adjMatrix},
+\code{adjList}, \code{eList} or \code{edgeMatrix} formats.
 }
+\section{Functions}{
+\itemize{
+\item \code{withAdjList}: Change to \code{adjList} format
+
+\item \code{withEdgeMatrix}: Change to \code{edgeMatrix} format
+
+\item \code{withEdgeList}: Change to \code{eList} format
+}}
+

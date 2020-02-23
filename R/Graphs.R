@@ -23,7 +23,6 @@ assign("graphFormatsDF",
                   package=c("MixedGraphs", "ADMGs", "graph", "graph", "graph", "igraph", "pcalg", "ggm", "bnlearn"), stringsAsFactors=FALSE),
        envir=graphOptionsEnv)
 
-##' @export edgeTypes
 graphFormats <- function() {
   get("graphFormatsDF", envir=graphOptionsEnv)
 }
@@ -33,12 +32,13 @@ graphFormats <- function() {
 ## List of vertex types, which can be expanded [not currently supported]
 ## type     : character name of vertex type
 assign("vertexTypesDF", data.frame(type=c("random"),
-                                    hidden=FALSE), 
+                                   hidden=FALSE), 
        envir=graphOptionsEnv)
 
 ##' See list of vertex and edge types
 ##' 
 ##' Returns data frame of current edge types.
+##' 
 ##' @export edgeTypes
 edgeTypes <- function() {
   get("edgeTypesDF", envir=graphOptionsEnv)
@@ -66,7 +66,7 @@ vertexTypes <- function() {
 ##' 
 ##' @export mixedgraph
 mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
-
+  
   ## Check vertices are positive integers
   if (missing(n)) {
     n = length(v)
@@ -78,7 +78,7 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
     if (any(is.na(vtype))) stop("Some vertex types not matched")
     if (length(vtype) != n) vtype <- rep(vtype, length=n)
   }
-
+  
   if (missing(vnames) || is.null(vnames)) {
     if (length(v) > 0) vnames = paste("x", seq_len(max(v)), sep="")
     else vnames = character(0)
@@ -100,7 +100,12 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
     else if (any(duplicated(et))) stop("Repeated edge types matched")
     
     ## Check all edges given as lists are valid and of length 2
-    edL <- sapply(edges, is.list)
+    edAL <- sapply(edges, is.adjList, checknm=TRUE)
+    for (i in which(edAL)) if (edAL[i]) class(edges[[i]]) <- "adjList"
+    if (any(is.na(match(unlist(edges[edAL]), v)))) stop("Edges must be between vertices in the graph")
+
+    ## Check all edges given as edgeLists are valid and of length 2
+    edL <- sapply(edges, is.list) & !edAL
     for (i in which(edL)) if (edL[i]) class(edges[[i]]) <- "eList"
     if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
     if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
@@ -110,7 +115,7 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
     for (i in which(edE)) class(edges[[i]]) <- "edgeMatrix"
     if (any(is.na(match(unlist(edges[edE]), v)))) stop("Edges must be between vertices in the graph")
     if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
-
+    
     ## Check all edges given as adjacency matrices are valid
     edA <- sapply(edges, is.adjMatrix)
     for (i in which(edA)) {
@@ -131,7 +136,7 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
   else {
     edgeList = list()
   }
-
+  
   out = list(v=v, edges=edgeList, vnames=vnames)
   class(out) = "mixedgraph"
   return(out)
@@ -153,10 +158,13 @@ is.mixedgraph <- function(object) {
 ##' Check if object could be an edgeMatrix
 ##' 
 ##' @param object purported edgeMatrix
-##' @param n number of vertices in graph
+##' @param n (optionally) number of vertices in graph
+##' @param checknm logical: use class of object to determine answer?
 ##' 
 ##' @export is.edgeMatrix
-is.edgeMatrix <- function(object, n) {
+is.edgeMatrix <- function(object, n, checknm=FALSE) {
+  if (checknm && "edgeMatrix" %in% class(object)) return(TRUE)
+  
   if (!is.matrix(object)) return(FALSE)
   if (!missing(n) && any(object > n)) return(FALSE)
   if (nrow(object) != 2) return(FALSE)
@@ -164,24 +172,55 @@ is.edgeMatrix <- function(object, n) {
   return(TRUE)
 }
 
-##' Check if object could be an adjacency matrix
-##' 
-##' Currently assumes that entries must be non-negative
-##' 
-##' @param object purported adjMatrix
-##' @param n number of vertices in graph
-##' 
+##' @describeIn is.edgeMatrix Check if object could be eList
+##' @export is.eList
+is.eList <- function(object, n, checknm=FALSE) {
+  if (checknm && "eList" %in% class(object)) return(TRUE)
+  
+  if (!is.list(object)) return(FALSE)
+  if (!missing(n) && any(unlist(object) > n)) return(FALSE)
+  if (any(unlist(object) <= 0)) return(FALSE)
+  return(TRUE)
+}
+
+
+##' @describeIn is.edgeMatrix Check if object could be adjMatrix
 ##' @export is.adjMatrix
-is.adjMatrix <- function(object, n) {
-  if (!is.matrix(object)) return(FALSE)
+is.adjMatrix <- function(object, n, checknm=FALSE) {
+  if (checknm && "adjMatrix" %in% class(object)) return(TRUE)
+  
+  if (!is.matrix(object) && !is(object, "Matrix")) return(FALSE)
   if (!missing(n) && n != ncol(object) && n != nrow(object)) return(FALSE)
   else if (nrow(object) != ncol(object)) return(FALSE)
-  if (any(object < 0)) return(FALSE)
+  if (any(is.na(object))) return(FALSE)
+  if (any(object < 0) || any(object > 1)) return(FALSE)
   if (all(object > 0)) return(FALSE)
   return(TRUE)
 }
 
-##' @export
+##' @describeIn is.edgeMatrix Check if object could be adjList
+##' @export is.adjList
+is.adjList <- function(object, n, checknm = FALSE) {
+  if (checknm && "adjList" %in% class(object)) return(TRUE)
+  else if (checknm) return(FALSE)
+  
+  if (!is.list(object)) return(FALSE)
+  if (!missing(n) && n != length(object)) return(FALSE)
+  if (any(unlist(object) <= 0)) return(FALSE)
+  if (!missing(n) && any(unlist(object) > n)) return(FALSE)
+  
+  return(TRUE)
+}
+
+## Print a mixedgraph object
+## 
+## Prints a \code{mixedgraph} object to the standard output.
+## 
+## @param x an object of class \code{mixedgraph}
+## @param ... other arguments to \code{print}
+## 
+## @export print.mixedgraph
+##' @method print mixedgraph
 print.mixedgraph = function(x, ...) {
   n = length(x$v)
   cat("Graph with ", n, ifelse(n == 1, " vertex", " vertices"),
@@ -205,6 +244,15 @@ print.mixedgraph = function(x, ...) {
       tmp <- cbind(row(x$edges[[i]])[x$edges[[i]] > 0], col(x$edges[[i]])[x$edges[[i]] > 0])
       if(!edgeTypes()$directed[whEdge[i]]) tmp = tmp[tmp[,1] < tmp[,2],,drop=FALSE]
       
+      for (j in seq_len(nrow(tmp))) {
+        cat(x$vnames[tmp[j,1]], edgeSymb[whEdge[i]],
+            x$vnames[tmp[j,2]], "\n", sep=" ")
+      }
+    }
+    else if (is.adjList(x$edges[[i]], checknm=TRUE)) {
+      tmp <- cbind(unlist(x$edges[[i]]), rep(seq_len(n), times=lengths(x$edges[[i]])))
+      if (!edgeTypes()$directed[whEdge[i]]) tmp = tmp[tmp[,1] < tmp[,2],,drop=FALSE]
+
       for (j in seq_len(nrow(tmp))) {
         cat(x$vnames[tmp[j,1]], edgeSymb[whEdge[i]],
             x$vnames[tmp[j,2]], "\n", sep=" ")
@@ -276,6 +324,11 @@ subGraph = function (graph, v, drop=FALSE) {
       }
       return(tmp)
     }
+    else if (is.adjList(x, checknm=TRUE)) {
+      if (drop) x <- x[-v]
+      else x[v] <- vector(mode="list", length=length(v))
+      return(x)
+    }
     else if (is.list(x)) {
       if (length(x) > 0) {
         tmp <- x[sapply(x, function(y) all(y %in% v))]
@@ -303,7 +356,7 @@ subGraph = function (graph, v, drop=FALSE) {
 ##' 
 ##' Designed to make comparison of graphs easier
 ##' 
-##' @export
+## @export standardizeVertices
 standardizeVertices <- function(graph) {
   #stop("FUNCTION NOT FINISHED")
   
@@ -350,7 +403,7 @@ standardizeVertices <- function(graph) {
 ##' 
 ##' Designed to make comparison of graphs easier
 ##' 
-##' @export
+##' @export standardizeEdges
 standardizeEdges <- function(graph) {
   ## standard order for edges
   #stop("FUNCTION NOT FINISHED")
@@ -388,7 +441,7 @@ standardizeEdges <- function(graph) {
 ##' @param g1,g2 two \code{mixedgraph} objects
 ##' 
 ##' NOT TESTED
-##' @export
+##' @export graph_equal
 graph_equal <- function(g1, g2) {
   g1 <- standardizeEdges(g1)
   g2 <- standardizeEdges(g2)
@@ -401,6 +454,7 @@ graph_equal <- function(g1, g2) {
 ##' 
 ##' @param char string of inputs given by vertex names separated by edges
 ##' @param ... other strings of further edges
+##' @param mode not currently used
 ##' @param useMatrices in \code{mixedgraph} representation, should the output
 ##' use adjacency matrices?
 ##' @param format type of graph format to use, options are \code{mixedgraph} 
@@ -414,7 +468,7 @@ graph_equal <- function(g1, g2) {
 ##' graphCr("1--->2<-->3<-4","2<->4,4->5")
 ##' graphCr("1-2-3-4-1", representation="graphNEL")  # requires package 'graph'
 ##' @export graphCr
-graphCr <- function(char, ..., useMatrices=FALSE, format="mixedgraph") {
+graphCr <- function(char, ..., mode="eList", useMatrices=FALSE, format="mixedgraph") {
   out <- list(char, ...)
   # in future try to allow direct typing
   #out <- unlist(sapply(out, as.character))
@@ -474,13 +528,61 @@ graphCr <- function(char, ..., useMatrices=FALSE, format="mixedgraph") {
   v1[etype > nedgetypes] <- v2[etype > nedgetypes]
   v2[etype > nedgetypes] <- tmp
   etype = mask[etype]
-  edges <- list()
-  etys <- edgeTypes()$type
-  for (i in seq_along(v1)) {
-    edges[[etys[etype[i]]]] = c(edges[[etys[etype[i]]]], list(c(v1[i], v2[i])))
-  }
+  
   n <- max(c(v1, v2, v0))
   
+  etys <- edgeTypes()$type
+
+  ## determine output based on value of 'mode'
+  if (mode == "eList") {
+    edges <- list()
+    
+    for (i in seq_along(v1)) {
+      edges[[etys[etype[i]]]] = c(edges[[etys[etype[i]]]], list(c(v1[i], v2[i])))
+    }
+    edges <- lapply(edges, function(x) {
+      class(x) <- "eList"
+      x
+    })
+    class(edges) <- "edgeList"
+  }
+  else if (mode == "adjList") {
+    len <- length(unique(etys[etype]))
+    edges <- lapply(seq_len(len), function(x) vector(mode="list", length=n))
+    names(edges) <- unique(etys[etype])
+    
+    for (i in seq_along(v1)) {
+      edges[[etys[etype[i]]]][[v2[i]]] = c(edges[[etys[etype[i]]]][[v2[i]]], v1[i])
+      if (!edgeTypes()$directed[etype[i]]) edges[[etys[etype[i]]]][[v1[i]]] = c(edges[[etys[etype[i]]]][[v1[i]]], v2[i])
+    }
+    edges <- lapply(edges, function(x) {
+      class(x) <- "adjList"
+      x
+    })
+    # names(edges2) <- names(edges)
+    # edges <- edges2
+    class(edges) <- "edgeList"
+    
+  }
+  else if (mode == "adjMatrix") {
+    len <- length(unique(etys[etype]))
+    edges <- lapply(seq_len(len), function(x) matrix(0,n,n))
+    names(edges) <- unique(etys[etype])
+    
+    for (i in seq_along(v1)) {
+      edges[[etys[etype[i]]]][v1[i], v2[i]] = 1
+      if (!edgeTypes()$directed[etype[i]]) edges[[etys[etype[i]]]][v2[i], v1[i]] = 1
+    }
+    edges <- lapply(edges, function(x) {
+      class(x) <- c("adjMatrix", class(x))
+      x
+    })
+    # names(edges2) <- names(edges)
+    # edges <- edges2
+    class(edges) <- "edgeList"
+  }
+  
+  ## output a mixedgraph, and convert if necessary
   out <- mixedgraph(n, edges=edges, vnames=vnames)
   if (format != "mixedgraph") {
     out <- convert(out, format=format)
@@ -490,80 +592,6 @@ graphCr <- function(char, ..., useMatrices=FALSE, format="mixedgraph") {
   out
 }
 
-##' Graph Constructor Functions
-##' 
-##' @param n number of vertices
-##' @param type type of edges to use
-##' 
-##' @details Provides some construction 
-##' functions for common graphs: complete graphs, 
-##' chains, cycles and stars.
-##' 
-##' @export makeGraphComplete
-makeGraphComplete = function (n, type = "undirected") {
-  if (n < 2) return(mixedgraph(n))
-  tmp = combn(n, 2)
-  edges = list(list())
-  for (i in seq_len(ncol(tmp))) edges[[1]][[i]] = tmp[,i]
-  class(edges[[1]]) <- "eList"
-  
-  etys = edgeTypes()$type
-  wh = pmatch(type, etys)
-  if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
-  else names(edges) = etys[wh]
-
-  out = mixedgraph(n=n, edges=edges)
-  return(out)
-}
-
-##' @describeIn makeGraphComplete graph with chain of edges
-##' @export makeGraphChain
-makeGraphChain = function(n, type = "undirected") {
-  edges = list(lapply(seq_len(max(n-1,0)), function(x) c(x, x+1)))
-  class(edges[[1]]) <- "eList"
-  
-  etys = edgeTypes()$type
-  wh = pmatch(type, etys)
-  if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
-  else names(edges) = etys[wh]
-  
-  out = mixedgraph(n=n, edges=edges)
-  return(out)
-}
-
-##' @describeIn makeGraphComplete graph with cycle of edges
-##' @export makeGraphCycle
-makeGraphCycle = function(n, type = "undirected") {
-
-  edges = list(lapply(seq_len(max(n-1,0)), function(x) c(x, x+1)))
-  if (n > 2) edges[[1]][[n]] = c(n, 1)
-  class(edges[[1]]) <- "eList"
-  
-  etys = edgeTypes()$type
-  wh = pmatch(type, etys)
-  if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
-  else names(edges) = etys[wh]
-  
-  out = mixedgraph(n=n, edges=edges)
-  return(out)
-}
-
-##' @describeIn makeGraphComplete star shaped graph
-##' @export makeGraphStar
-makeGraphStar = function(n, type = "undirected") {
-  
-  if (n <= 1) return(makeGraphComplete(n, type))
-  edges = list(lapply(seq_len(n-1), function(x) c(x, n)))
-  class(edges[[1]]) <- "eList"
-  
-  etys = edgeTypes()$type
-  wh = pmatch(type, etys)
-  if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
-  else names(edges) = etys[wh]
-  
-  out = mixedgraph(n=n, edges=edges)
-  return(out)
-}
 
 
 # distail(gr, 3)

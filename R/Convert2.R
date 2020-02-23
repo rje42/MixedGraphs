@@ -52,6 +52,9 @@ conv_graphAM_mixedgraph <- function(graph) {
   requireNamespace("graph", warn.conflicts = FALSE, quietly = TRUE)
   vnames <- colnames(graph@adjMat)
   edgeMat <- list(graph@adjMat)
+  # class(edgeMat$undirected) = "adjMatrix"
+  # class(edgeMat$directed) = "adjMatrix"
+  
   names(edgeMat) <- graph::edgemode(graph)
   mixedgraph(n=length(vnames), vnames=vnames, edges=edgeMat)
 }
@@ -102,9 +105,9 @@ conv_bn_mixedgraph <- function(graph) {
 
 conv_mixedgraph_ADMG <- function(graph) {
   requireNamespace("ADMGs")
-  ud.edges <- edgeList(graph$edges$undirected)
-  d.edges <- edgeList(graph$edges$directed)
-  bi.edges <- edgeList(graph$edges$bidirected)
+  ud.edges <- eList(graph$edges$undirected)
+  d.edges <- eList(graph$edges$directed)
+  bi.edges <- eList(graph$edges$bidirected)
   nv <- length(graph$vnames)
 
   ADMGs::makeGraph(nv,

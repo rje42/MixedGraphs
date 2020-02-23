@@ -11,7 +11,7 @@ mixedgraph(n, v = seq_len(n), edges = list(), vnames, vtype)
 
 \item{v}{integer identifiers of vertices (length \code{n})}
 
-\item{edges}{named list of edges in graph}
+\item{edges}{named list of types of edge in graph}
 
 \item{vnames}{character vector of vertex names (defaults to \code{x1}, \code{x2}, ...)}
 

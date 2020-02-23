@@ -4,14 +4,16 @@
 \alias{adjMatrix}
 \title{Get adjacency matrix from list of edges}
 \usage{
-adjMatrix(edges, n, directed = FALSE)
+adjMatrix(edges, n, directed = FALSE, sparse = FALSE)
 }
 \arguments{
-\item{edges}{list or data frame giving edges}
+\item{edges}{list or matrix giving edges}
 
 \item{n}{total number of vertices, defaults to maximal value}
 
 \item{directed}{logical: if TRUE edges are assumed directed}
+
+\item{sparse}{logical: use a sparse matrix?}
 }
 \description{
 Get adjacency matrix from list of edges

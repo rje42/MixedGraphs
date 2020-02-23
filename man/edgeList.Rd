@@ -2,15 +2,15 @@
 % Please edit documentation in R/Edges.R
 \name{edgeList}
 \alias{edgeList}
-\title{Edge list}
+\title{Deprecated function}
 \usage{
 edgeList(edges, directed = FALSE)
 }
 \arguments{
-\item{edges}{edgeMatrix or adjacency matrix}
+\item{edges}{an "eList" object}
 
-\item{directed}{logical: if TRUE edges are assumed directed}
+\item{directed}{logical, should edges be interpreted as directed?}
 }
 \description{
-Edge list
+Deprecated function
 }

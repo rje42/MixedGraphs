@@ -80,6 +80,9 @@ dis = function(graph, v, sort=1) {
 ##' bidirected-connected and undirected-connected components of \code{graph}.
 ##' \code{un} finds the undirected part of \code{graph}.
 ##' 
+##' \code{cliques} uses the Bron-Kirbosch algorithm to find 
+##' maximal connected subsets.
+##' 
 ##' @export districts
 districts = function(graph) {
   groups(graph, etype="bidirected")
@@ -100,6 +103,59 @@ un <- function(graph, sort=1) {
 ##' @export neighbourhoods
 neighbourhoods = function(graph) {
   groups(graph[un(graph)], etype="undirected")
+}
+
+
+##' @describeIn districts Obtain maximal complete undirected subsets
+##' @export cliques
+cliques = function(graph) {
+
+  # ## could do this by neighbourhood
+  # neigh <- neighbourhoods(graph[un(graph)])
+
+  ## restrict to undirected part of the graph
+  if (is.UG(graph)) gr_u <- graph
+  else gr_u <- graph[un(graph)]
+
+  ## get list of neighbours  
+  nbs <- vector(mode="list", length=length(graph$vnames))
+  nbs[gr_u$v] <- lapply(gr_u$v, function(x) nb(gr_u, x))
+
+  ## call Bron-Kirbosch algorithm
+  out <- BK(R=integer(0), P=gr_u$v, X=integer(0), nbs)
+
+  out
+}
+
+## Bron-Kerbosch Algorithm
+BK <- function(R, P, X, nbs) {
+  ## if nothing else to add, then return R
+  if (length(P) == 0 && length(X) == 0) {
+    # print(R)
+    return(list(R))
+  }
+  
+  ## otherwise, make a list
+  out <- list()
+  
+  for (v in P) {
+    ## add each vertex in turn
+    nb_v <- nbs[[v]]
+    out <- c(out, BK(c(R,v), intersect(P, nb_v), intersect(X, nb_v), nbs))
+    P <- setdiff(P, v)
+    X <- c(X, v)
+  }
+  
+  # return list of cliques found
+  out
+}
+
+findCliques <- function(graph) {
+  vs <- graph$v
+  
+  for (v in vs) {
+    nb(graph, v)
+  }
 }
 
 ##' Find Markov blanket
@@ -163,7 +219,7 @@ mb = function(graph, v, A, check=TRUE, sort=1) {
 ##' @export barren
 barren = function (graph, v = graph$v) {
   if (length(v) == 0) return(integer(0))
-  if (length(v) == length(graph$v)) {
+  if (setequal(v, graph$v)) {
     ans = adj(graph, v, etype="directed", dir=-1)
     ans <- setdiff(v, ans)
   }
@@ -186,16 +242,42 @@ orphaned = function (graph, v = graph$v) {
   if (length(v) == 0) return(integer(0))
   ans = adj(graph, v, etype="directed", dir=1)
   
-  return(setdiff(v, ans))
+  out <- setdiff(v, ans)
+  
+  return(out)
 }
 
 ##' @export sterile
 ##' @describeIn barren find vertices with no children in the same set
 sterile = function(graph, v=graph$v){
-  pas = pa(graph, v)
-  sterile = setdiff(v, pas)
+  if (length(v) == 0) return(integer(0))
+  pas = adj(graph, v, etype="directed", dir=-1)
   
-  sterile
+  out <- setdiff(v, pas)
+  
+  out
+}
+
+##' Find Claudius of a (bidirected-connected) set
+##' 
+##' Find the Claudius of a (presumably) bidirected-connected set.
+##' 
+##' @param graph a \code{mixedgraph} object
+##' @param v set of vertices to consider
+##' 
+##' @details Drops strict spouses of \code{v} and any of their 
+##' descendants.
+##' 
+##' @examples 
+##' data(gr1)
+##' claudius(gr1, 1)
+##' claudius(gr1, 4)
+##' 
+##' @export claudius
+claudius <- function(graph, v) {
+  sibs <- adj(graph, v, etype="bidirected", dir=0, inclusive=FALSE)
+  
+  setdiff(graph$v, dec(graph, sibs))
 }
 
 ##' Graph skeleton
@@ -218,6 +300,8 @@ skeleton = function(graph) {
 ##'
 ##' @param graph object of class \code{mixedgraph}, should be a summary graph
 ##' @param topOrder optional topological order of vertices
+##' @param sort integer:1 for unique but unsorted, 2 for 
+##' sorted.
 ##'
 ##' @details Algorithm:
 ##' 1. Find a topological order of nodes.
@@ -256,7 +340,7 @@ anSets = function(graph, topOrder, sort=1) {
 
 ##' @param maxbarren maximum size of barren subsets
 ##' @param same_dist logical, should barren vertices be in the same district?
-##' @describeIn anSets Uses different algorithm
+##' @describeIn anSets Uses different algorithm 
 ##' @export anSets2
 anSets2 = function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
   
@@ -267,41 +351,140 @@ anSets2 = function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
   parents <- list()
   parents[graph$v] <- lapply(graph$v, function(x) pa(graph, x))
   
+  bar <- barrenSets(graph, same_dist = same_dist, sort=sort, return_anc_sets = TRUE)
+  ancs <- attr(bar, "anSets")
+
+  barSet <- list()
+    
+  for (b in seq_along(bar)) {
+    tmp <- powerSet(bar[[b]], m = maxbarren)[-1]
+    sm <- setmatch(tmp, barSet, nomatch = 0)
+    if (any(sm > 0)) tmp <- tmp[-sm]
+    barSet <- c(barSet, tmp)
+  }
+  
+  ancs <- lapply(barSet, function(x) unlist(ancs[x]))
+  
+  if (sort > 0) {
+    ancs <- lapply(ancs, unique.default)
+    if (sort > 1) ancs <- lapply(ancs, sort.int)
+  }
+
+    
+# 
+#   out <- tmp <- ancs[!sapply(ancs, is.null)]
+#   bar <- barSet # unlist(lapply(graph$v, list), recursive = FALSE)
+#   b <- 2
+# 
+#   while (b <= maxbarren) {
+#     if (b > 2) {
+#       tmp <- tmp2
+#       bar <- bar2
+#     }
+#     tmp2 <- bar2 <- list()
+# 
+#     for (i in seq_along(tmp)) {
+#       if (same_dist) {
+#         ## look for larger variables not already in
+#         set <- setdiff(dis(graph, tmp[[i]][1]), seq_len(max(bar[[i]])))
+#       }
+#       else set <- setdiff(graph$v, seq_len(max(bar[[i]])))
+# 
+#       ## go through and add in any non-ancestors
+#       for (j in set) {
+#         if (!all(ancs[[j]] %in% tmp[[i]]) && !any(bar[[i]] %in% ancs[[j]])) {
+#           tmp2 <- c(tmp2, list(unique.default(c(tmp[[i]], ancs[[j]]))))
+#           bar2 <- c(bar2, list(c(bar[[i]], j)))
+#         }
+#       }
+#     }
+# 
+#     ## if nothing new to add, then break out
+#     if (length(tmp2) == 0) break
+# 
+#     out <- c(out, tmp2)
+#     b <- b+1
+#   }
+# 
+#   if (sort > 1) out <- lapply(out, sort.int)
+  
+  # out
+  ancs
+}
+
+##' Get barren subsets
+##' 
+##' Return list of barren subsets up to specified size
+##' 
+##' @param graph object of class \code{mixedgraph}
+##' @param topOrder optionally, a topological order
+##' @param max_size integer giving maximum size to consider
+##' @param same_dist logical: should barren sets be in the same district?
+##' @param sort integer:1 for unique but unsorted, 2 for 
+##' sorted.
+##' @param return_anc_sets logical: return ancestral sets as an attribute?
+##' 
+##' @details Uses \code{clique} algorithm on a suitable undirected graph.
+##' 
+##' @export barrenSets
+barrenSets = function(graph, topOrder, max_size, same_dist=FALSE, 
+                      sort=1, return_anc_sets=FALSE) {
+  
+  if (missing(max_size)) max_size <- length(graph$v)
+  if (max_size < 1) return(list())
+  
+  # children <- lapply(graph$v, function(x) ch(graph, x))
+  parents <- list()
+  parents[graph$v] <- lapply(graph$v, function(x) pa(graph, x))
+  
   if (missing(topOrder)) topOrder <- topologicalOrder(graph)
   ancs <- list()
   
+  ## create a new undirected graph where edge v -- w exists if 
+  ## and only if v and w are incomparable in graph
+  graph2 <- mixedgraph(v=graph$v, edges=list(undirected=list()), vnames=graph$vnames) # mutilate(graph, graph$v)
+  class(graph2$edges$undirected) <- "eList"
+
   for (i in topOrder) {
     ancs[[i]] <- c(i, unique.default(unlist(ancs[parents[[i]]])))
+    graph2$edges$undirected <- c(graph2$edges$undirected, lapply(ancs[[i]][-1], function(x) c(x,i)))
   }
   
-  out <- tmp <- ancs[!sapply(ancs, is.null)]
-  bar <- unlist(lapply(graph$v, list), recursive = FALSE)
-  b <- 2
+  ### perhaps speed this up by using sparse matrices when same_dist = TRUE
+  graph2 <- withAdjMatrix(graph2, sparse = FALSE)
+  graph2$edges$undirected <- 1 - graph2$edges$undirected - diag(nrow=nrow(graph2$edges$undirected))
   
-  while (b <= maxbarren) {
-    if (b > 2) {
-      tmp <- tmp2
-      bar <- bar2
-    }
-    tmp2 <- bar2 <- list()
+  out <- list()
+   
+  if (same_dist) {
+    dis <- districts(graph)
     
-    for (i in seq_along(tmp)) {
-      if (same_dist) {
-        set <- setdiff(dis(graph, tmp[[i]][1]), seq_len(max(tmp[[i]])))
-      }
-      else set <- setdiff(graph$v, seq_len(max(tmp[[i]])))
-      for (j in set) {
-        if (!any(bar[[i]] %in% ancs[[j]])) {
-          tmp2 <- c(tmp2, list(unique.default(c(tmp[[i]], ancs[[j]]))))
-          bar2 <- c(bar2, list(c(bar[[i]], j)))
-        }
-      }
+    for (d in seq_along(dis)) {
+      out <- c(out, cliques(graph2[dis[[d]]]))
     }
-    out <- c(out, tmp2)
-    b <- b+1
+  }
+  else {
+    out <- cliques(graph2)
+  }
+  
+  ## now check if any exceed the maximum size allowed
+  lens <- lengths(out)
+  if (max_size < max(lens)) {
+    for (i in seq_along(which(lens > max_size))) out <- c(out, combn(out[[i]], max_size))
+    
+    # remove overly long sets
+    out[seq_along(lens)] <- out[seq_along(lens)][lens <= max_size]
+
+    # remove any duplicates
+    f <- function(n) sum(2^n)
+    chk <- sapply(out, f)
+    out <- out[!duplicated(chk)]
   }
   
   if (sort > 1) out <- lapply(out, sort.int)
+
+  if (return_anc_sets) attr(out, which = "anSets") <- ancs
+  else attr(out, which = "anSets") <- NULL
   
   out
 }

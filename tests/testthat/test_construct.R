@@ -7,7 +7,7 @@ grv2 <- graphCr("z -> x -> y <- u -> x")
 
 mag1 <- graphCr("1 -> 3 <-> 2 <-> 4 <- 1")
 mag1a <- graphCr("1 -> 3 <-> 2 <-> 4 <- 1", useMatrices = TRUE)
-
+mag1a <- graphCr("1 -> 3 <-> 2 <-> 4 <- 1", useMatrices = TRUE)
 
 test_that("DAG operations correct for list of edges", {
   expect_equal(sort(unique(pa(dag1, 4, sort=0))), c(1,2))
