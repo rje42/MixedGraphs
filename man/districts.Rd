@@ -14,12 +14,12 @@ un(graph, sort = 1)
 
 neighbourhoods(graph)
 
-cliques(graph)
+cliques(graph, sort = 1)
 }
 \arguments{
 \item{graph}{\code{mixedgraph} object}
 
-\item{sort}{should vertices be sorted?}
+\item{sort}{should output be sorted?  sort=3 will also sort cliques}
 }
 \description{
 The usual familial relations between vertices in

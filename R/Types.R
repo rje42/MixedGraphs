@@ -45,7 +45,7 @@ isTopological = function(graph, v) {
 ##' 
 ##' @export is.cyclic
 is.cyclic = function(graph) {
-  if (class(graph) != "mixedgraph") stop("Must be an object of class 'mixedgraph'")
+  if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
   out = tryCatch(topologicalOrder(graph), error = function(e) {
     if (e$message == "Graph is cyclic") return(NA)
     else stop(e$message)
@@ -56,7 +56,7 @@ is.cyclic = function(graph) {
 ##' @describeIn is.DAG test if an ADMG
 ##' @export is.ADMG
 is.ADMG = function(graph) {
-  if (class(graph) != "mixedgraph") stop("Must be an object of class 'mixedgraph'")
+  if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
   ## should only contain directed and bidirected edges
   wh <- names(graph$edges) %in% c("directed", "bidirected")
   if(any(lengths(graph$edges[!wh]) > 0)) return(FALSE)
@@ -67,7 +67,7 @@ is.ADMG = function(graph) {
 ##' @describeIn is.DAG test if a summary graph
 ##' @export is.SG
 is.SG = function(graph) {
-  if (class(graph) != "mixedgraph") stop("Must be an object of class 'mixedgraph'")
+  if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
   ## should only contain undirected, directed and bidirected edges
   wh <- names(graph$edges) %in% c("undirected", "directed", "bidirected")
   if(any(lengths(graph$edges[!wh]) > 0)) return(FALSE)
@@ -90,7 +90,7 @@ is.SG = function(graph) {
 ##' 
 ##' @export is.DAG
 is.DAG = function(graph) {
-  if (class(graph) != "mixedgraph") stop("Must be an object of class 'mixedgraph'")
+  if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
   ## should only contain directed edges
   if(any(lengths(graph$edges[!names(graph$edges)=="directed"]) > 0)) return(FALSE)
   
@@ -100,7 +100,7 @@ is.DAG = function(graph) {
 ##' @describeIn is.DAG test if an undirected graph
 ##' @export is.UG
 is.UG = function(graph) {
-  if (class(graph) != "mixedgraph") stop("Must be an object of class 'mixedgraph'")
+  if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
   ## should only contain undirected edges
   if(any(lengths(graph$edges[!names(graph$edges)=="undirected"]) > 0)) return(FALSE)
   

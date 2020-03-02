@@ -1,4 +1,4 @@
-## functions for using graph, igraph, PAG, ggm, igraph, bn
+## functions for using graph, igraph, PAG, ggm, igraph, bn, ADMGs
 ## Really need to tidy this up
 
 
@@ -14,7 +14,7 @@
 ##' are 
 ##' \itemize{
 ##' \item \code{\link{mixedgraph}}
-##' \item \code{ggm} an adjacency matrix as specified in the \code{ggm} package; 
+##' \item \code{ggm}, an adjacency matrix as specified in the \code{ggm} package; 
 ##' \item \code{graphNEL}, \code{graphAM}, \code{graphBAM} from the \code{graph} package;
 ##' \item \code{igraph};
 ##' \item \code{PAG}: that is, the output of \code{pc()} or \code{fci()} functions in the \code{pcalg} package;
@@ -156,11 +156,11 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   }
   else if (cur_format == "bn") {
     if (format == "graphNEL") {
-      requireNamespace("bnlearn")
+      requireNamespace("bnlearn", quietly = TRUE)
       return(bnlearn::as.graphNEL(graph))
     }
     else if (format == "graphAM") {
-      requireNamespace("bnlearn")
+      requireNamespace("bnlearn", quietly = TRUE)
       return(bnlearn::as.graphAM(graph))
     }
     

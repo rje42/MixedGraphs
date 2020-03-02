@@ -92,11 +92,7 @@ districts = function(graph) {
 ##' @param sort should vertices be sorted?
 ##' @export un
 un <- function(graph, sort=1) {
-  out <- unlist(graph$edges$undirected)
-  if (length(out) == 0) return(integer(0))
-  if (sort > 0) out <- unique.default(out)
-  if (sort > 1) out <- sort.int(out)
-  out
+  adj(graph, v=graph$v, etype="undirected", dir=0, inclusive=TRUE, sort=sort)
 }
 
 ##' @describeIn districts Obtain neighbourhoods
@@ -106,9 +102,10 @@ neighbourhoods = function(graph) {
 }
 
 
+##' @param sort should output be sorted?  sort=3 will also sort cliques
 ##' @describeIn districts Obtain maximal complete undirected subsets
 ##' @export cliques
-cliques = function(graph) {
+cliques = function(graph, sort=1) {
 
   # ## could do this by neighbourhood
   # neigh <- neighbourhoods(graph[un(graph)])
@@ -118,12 +115,18 @@ cliques = function(graph) {
   else gr_u <- graph[un(graph)]
 
   ## get list of neighbours  
-  nbs <- vector(mode="list", length=length(graph$vnames))
+  n <- length(graph$vnames)
+  nbs <- vector(mode="list", length=n)
   nbs[gr_u$v] <- lapply(gr_u$v, function(x) nb(gr_u, x))
 
   ## call Bron-Kirbosch algorithm
   out <- BK(R=integer(0), P=gr_u$v, X=integer(0), nbs)
 
+  if (sort > 1) out <- lapply(out, sort.int)
+  if (sort > 2) {
+    out <- out[order(sapply(out, function(x) sum(2^x)))]
+  }
+  
   out
 }
 

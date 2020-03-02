@@ -15,6 +15,3 @@ eList(edges, directed = FALSE)
 Returns an \code{eList} object from an adjacency matrix
 or edge matrix object.
 }
-\details{
-
-}
