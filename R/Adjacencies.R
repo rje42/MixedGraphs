@@ -203,7 +203,7 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
     d <- dim(es)
     return(which(.colSums(es, d[1], d[2]) > 0))
   }
-  else if (is.adjList(es)) {
+  else if (is.adjList(es, checknm = TRUE)) {
     out <- unlist(es[v])
   }
   else if (is.edgeMatrix(es)) {
@@ -316,7 +316,7 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
 
 ##' @export groups
 ##' @describeIn grp find equivalence classes
-groups = function(graph, etype) {
+groups = function(graph, etype, sort=1) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (missing(etype)) etype <- edgeTypes()$type
 

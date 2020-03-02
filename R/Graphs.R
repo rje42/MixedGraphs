@@ -212,14 +212,13 @@ is.adjList <- function(object, n, checknm = FALSE) {
   return(TRUE)
 }
 
-## Print a mixedgraph object
-## 
-## Prints a \code{mixedgraph} object to the standard output.
-## 
-## @param x an object of class \code{mixedgraph}
-## @param ... other arguments to \code{print}
-## 
-## @export print.mixedgraph
+##' Print a mixedgraph object
+##' 
+##' Prints a \code{mixedgraph} object to the standard output.
+##' 
+##' @param x an object of class \code{mixedgraph}
+##' @param ... other arguments to \code{print}
+##' 
 ##' @method print mixedgraph
 print.mixedgraph = function(x, ...) {
   n = length(x$v)
@@ -276,7 +275,7 @@ print.mixedgraph = function(x, ...) {
 ##' @describeIn subGraph bracket notation for subgraphs
 ##' @param ... other arguments
 ##' @method [ mixedgraph
-##' @export
+##' 
 `[.mixedgraph` = function(graph, v, ..., drop=FALSE) {
   if (missing(v)) return(graph)
   if (is.logical(v)) v <- which(v)

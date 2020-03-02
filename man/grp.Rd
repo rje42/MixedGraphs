@@ -7,7 +7,7 @@
 \usage{
 grp(graph, v, etype, inclusive = TRUE, dir = 0, sort = 1, force = FALSE)
 
-groups(graph, etype)
+groups(graph, etype, sort = 1)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}

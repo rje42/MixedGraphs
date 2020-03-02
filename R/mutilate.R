@@ -152,8 +152,12 @@ removeEdges <- function(graph, edges) {
   else if (any(is.na(et))) stop("Edge types not matched")
   else if (any(duplicated(et))) stop("Repeated edge types matched")
 
+  ## Check all edges given as adjacency lists to be added are valid
+  adL <- sapply(edges, function(x) is.adjList(x))
+  if (any(is.na(match(unlist(edges[adL]), v)))) stop("Edges must be between vertices in the graph")
+
   ## Check all edges given as lists to be added are valid and of length 2
-  edL <- sapply(edges, is.list)
+  edL <- sapply(edges, function(x) is.list(x) & !is.adjList(x))
   if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
   if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
   
@@ -224,7 +228,19 @@ mutilate <- function(graph, A, etype, dir=0L) {
   edges <- graph$edges[whEdge]  
   
   for (i in seq_along(edges)) {
-    if (is.list(edges[[i]])) {
+    if (is.adjList(edges[[i]], checknm=TRUE)) {
+      ## adjList format
+      if (dir <= 0) {
+        fill <- vector(mode="list", length = length(A))
+        edges[[i]][A] <- fill
+      }
+      if (dir >= 0) {
+        for (j in seq_along(edges[[i]])) {
+          edges[[j]] <- setdiff(edges[[j]], A)
+        }
+      }
+    }
+    else if (is.list(edges[[i]])) {
       ## edge list format
       rm = rep(FALSE, length(edges[[i]]))
       if (dir >= 0) {  # remove outgoing edges

@@ -126,15 +126,15 @@ a list of edges (`eList`), or a matrix with two rows, each of whose column
 corresponds to an edge (`edgeMatrix`).  
 
 These each have their own 
-useful properties: adjacency matrices generally allow things to be calculated
-most quickly with small or dense graphs, since R is well suited to working 
-with matrices.
-Finding the neighbours of a vertex is very fast; conversely using edge lists or 
+useful properties: adjacency matrices and lists generally allow things 
+to be calculated most quickly with small or dense graphs, since R 
+is well suited to working 
+with matrices; finding the neighbours of a vertex is very fast. 
+Conversely, using edge lists or 
 edge matrices requires searching for the edges whose end points match the 
 specification. 
 
-For larger sparse graphs the adjacency matrix may become burdensome and wasteful,
-so we can use either of the others.  The edge matrix is the most efficient,
+For larger sparse graphs the adjacency matrix may become burdensome and wasteful, even if represented sparsely itself; we can therefore use one of the other specifications.  The edge matrix is the most efficient,
 but lists are intuitive and will in future be extended to allow hypergraphs.
 
 We can force the use of adjacency matrices by applying `withAdjMatrix()`
@@ -155,22 +155,27 @@ we just specify that we want adjacency via undirected edges:
 ```{r}
 adj(gr1, v = 2, etype = "undirected")
 ```
+The built-in `nb(graph, v)` function is synonymous with 
+`adj(graph, v=v, etype="undirected")`.
+
 For edges with direction, we can specify whether we want 
 that direction to matter with the `dir` argument.  The 
 default is `0`, which specifies either direction, and 
 the alternatives `1` and `-1` specify that the direction
-must be respectively the same or opposite to the default.
-
+must be respectively the same or opposite to the default.gr1
 So, for example, to find the children of a vertex we would
 use
 ```{r}
 adj(gr1, v = 2, etype = "directed", dir = 1)
 ```
-Correspondingly using `dir = -1` would give the parents.
-Using vector valued `v` means the definitions are applied 
+The built-in `ch(graph, v)` function is synonymous with 
+`adj(graph, v=v, etype="directed", dir=1)`. Correspondingly 
+using `dir = -1` would give the parents. Using 
+vector valued `v` means the definitions are applied 
 disjuntively (i.e.\ it is the same as taking the union of 
 the scalar outcomes).
-We are free to specify multiple edge types and directions:
+
+We are also free to specify multiple edge types and directions:
 ```{r}
 adj(gr1, v = c(2,4), etype = c("undirected", "directed"), dir = c(0,-1))
 ```
@@ -225,6 +230,6 @@ degree(convert(gr2, "graphNEL"))
 This is based on the idea of the pipe operator `%>%`. 
 The `%G%` operator will try to determine which
 format is suitable for the code you provide.
-```
+```{r}
 MAPKsig %G% skeleton %G% (ggm::conComp)
 ```
