@@ -155,62 +155,6 @@ is.mixedgraph <- function(object) {
   "mixedgraph" %in% class(object)
 }
 
-##' Check if object could be an edgeMatrix
-##' 
-##' @param object purported edgeMatrix
-##' @param n (optionally) number of vertices in graph
-##' @param checknm logical: use class of object to determine answer?
-##' 
-##' @export is.edgeMatrix
-is.edgeMatrix <- function(object, n, checknm=FALSE) {
-  if (checknm && "edgeMatrix" %in% class(object)) return(TRUE)
-  
-  if (!is.matrix(object)) return(FALSE)
-  if (!missing(n) && any(object > n)) return(FALSE)
-  if (nrow(object) != 2) return(FALSE)
-  if (any(object <= 0)) return(FALSE)
-  return(TRUE)
-}
-
-##' @describeIn is.edgeMatrix Check if object could be eList
-##' @export is.eList
-is.eList <- function(object, n, checknm=FALSE) {
-  if (checknm && "eList" %in% class(object)) return(TRUE)
-  
-  if (!is.list(object)) return(FALSE)
-  if (!missing(n) && any(unlist(object) > n)) return(FALSE)
-  if (any(unlist(object) <= 0)) return(FALSE)
-  return(TRUE)
-}
-
-
-##' @describeIn is.edgeMatrix Check if object could be adjMatrix
-##' @export is.adjMatrix
-is.adjMatrix <- function(object, n, checknm=FALSE) {
-  if (checknm && "adjMatrix" %in% class(object)) return(TRUE)
-  
-  if (!is.matrix(object) && !is(object, "Matrix")) return(FALSE)
-  if (!missing(n) && n != ncol(object) && n != nrow(object)) return(FALSE)
-  else if (nrow(object) != ncol(object)) return(FALSE)
-  if (any(is.na(object))) return(FALSE)
-  if (any(object < 0) || any(object > 1)) return(FALSE)
-  if (all(object > 0)) return(FALSE)
-  return(TRUE)
-}
-
-##' @describeIn is.edgeMatrix Check if object could be adjList
-##' @export is.adjList
-is.adjList <- function(object, n, checknm = FALSE) {
-  if (checknm && "adjList" %in% class(object)) return(TRUE)
-  else if (checknm) return(FALSE)
-  
-  if (!is.list(object)) return(FALSE)
-  if (!missing(n) && n != length(object)) return(FALSE)
-  if (any(unlist(object) <= 0)) return(FALSE)
-  if (!missing(n) && any(unlist(object) > n)) return(FALSE)
-  
-  return(TRUE)
-}
 
 ##' Print a mixedgraph object
 ##' 
@@ -219,7 +163,7 @@ is.adjList <- function(object, n, checknm = FALSE) {
 ##' @param x an object of class \code{mixedgraph}
 ##' @param ... other arguments to \code{print}
 ##' 
-##' @method print mixedgraph
+##' @export 
 print.mixedgraph = function(x, ...) {
   n = length(x$v)
   cat("Graph with ", n, ifelse(n == 1, " vertex", " vertices"),
@@ -274,8 +218,7 @@ print.mixedgraph = function(x, ...) {
 
 ##' @describeIn subGraph bracket notation for subgraphs
 ##' @param ... other arguments
-##' @method [ mixedgraph
-##' 
+##' @export
 `[.mixedgraph` = function(graph, v, ..., drop=FALSE) {
   if (missing(v)) return(graph)
   if (is.logical(v)) v <- which(v)

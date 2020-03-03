@@ -18,7 +18,7 @@ only)
 
 Check for and remove duplicate edges in a list of
 edges or edgeMatrix.  Note that this will sort 
-elements in}
+elements in eList objects.}
 }
 \description{
 Remove duplicate edges
