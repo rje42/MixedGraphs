@@ -242,6 +242,64 @@ edgeList <- function(edges, directed=FALSE) {
   eList(edges, directed)
 }
 
+
+##' Check if object could be an edgeMatrix
+##' 
+##' @param object purported edgeMatrix
+##' @param n (optionally) number of vertices in graph
+##' @param checknm logical: use class of object to determine answer?
+##' 
+##' @export is.edgeMatrix
+is.edgeMatrix <- function(object, n, checknm=FALSE) {
+  if (checknm && "edgeMatrix" %in% class(object)) return(TRUE)
+  
+  if (!is.matrix(object)) return(FALSE)
+  if (!missing(n) && any(object > n)) return(FALSE)
+  if (nrow(object) != 2) return(FALSE)
+  if (any(object <= 0)) return(FALSE)
+  return(TRUE)
+}
+
+##' @describeIn is.edgeMatrix Check if object could be eList
+##' @export is.eList
+is.eList <- function(object, n, checknm=FALSE) {
+  if (checknm && "eList" %in% class(object)) return(TRUE)
+  
+  if (!is.list(object)) return(FALSE)
+  if (!missing(n) && any(unlist(object) > n)) return(FALSE)
+  if (any(unlist(object) <= 0)) return(FALSE)
+  return(TRUE)
+}
+
+
+##' @describeIn is.edgeMatrix Check if object could be adjMatrix
+##' @export is.adjMatrix
+is.adjMatrix <- function(object, n, checknm=FALSE) {
+  if (checknm && "adjMatrix" %in% class(object)) return(TRUE)
+  
+  if (!is.matrix(object) && !is(object, "Matrix")) return(FALSE)
+  if (!missing(n) && n != ncol(object) && n != nrow(object)) return(FALSE)
+  else if (nrow(object) != ncol(object)) return(FALSE)
+  if (any(is.na(object))) return(FALSE)
+  if (any(object < 0) || any(object > 1)) return(FALSE)
+  if (all(object > 0)) return(FALSE)
+  return(TRUE)
+}
+
+##' @describeIn is.edgeMatrix Check if object could be adjList
+##' @export is.adjList
+is.adjList <- function(object, n, checknm = FALSE) {
+  if (checknm && "adjList" %in% class(object)) return(TRUE)
+  else if (checknm) return(FALSE)
+  
+  if (!is.list(object)) return(FALSE)
+  if (!missing(n) && n != length(object)) return(FALSE)
+  if (any(unlist(object) <= 0)) return(FALSE)
+  if (!missing(n) && any(unlist(object) > n)) return(FALSE)
+  
+  return(TRUE)
+}
+
 ##' Change representation of edges
 ##' 
 ##' Change edge representation of (part of) graph to use \code{adjMatrix},
@@ -312,13 +370,15 @@ withEdgeList <- function(graph, edges) {
 
 ## internal function to count edges 
 ##
-## should it know whether matrix is directed or not?
 nedge2 <- function(edges, directed=TRUE) {
   if (is.adjMatrix(edges)) {
     if (directed) return(sum(edges != 0))
     else {
       return(sum(edges[upper.tri(edges)] != 0))
     }
+  }
+  else if (is.adjList(edges, checknm=TRUE)) {
+    return(sum(lengths(edges))/(2-directed))
   }
   else if (is.edgeMatrix(edges)) {
     return(ncol(edges))

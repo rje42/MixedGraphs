@@ -9,7 +9,8 @@
 ##' 
 ##' Check for and remove duplicate edges in a list of
 ##' edges or edgeMatrix.  Note that this will sort 
-##' elements in 
+##' elements in eList objects.
+##' 
 remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
   if (is.adjMatrix(edges)) {
     # if is an adjacency matrix, ensure no entries exceed 1
@@ -274,7 +275,7 @@ mutilate <- function(graph, A, etype, dir=0L) {
 ##' @param vnames an optional character vector of names
 ##' 
 ##' 
-##' 
+##' @export addNodes
 addNodes <- function(graph, k, vnames) {
   n <- length(graph$vnames)
   if (k == 0) return(graph)

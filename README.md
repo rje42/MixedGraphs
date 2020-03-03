@@ -30,7 +30,7 @@ library(MixedGraphs)
 ### Conversion
 
 The package provides functions for converting between 
-representations in the various other graph packages (e.g.\ `graph`,
+representations in the various other graph packages (e.g. `graph`,
 `igraph`, `ggm`).  This is currently partially implemented.
 We also provide a pipe function `%G%` that allows the use of
 code in another package, automatically converting the 
