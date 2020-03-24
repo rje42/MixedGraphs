@@ -15,9 +15,8 @@ topologicalOrder = function(graph) {
   out1 = orphaned(graph)
   if (length(out1) == 0) stop("Graph is cyclic")
   out3 = sterile(graph[-out1])
-  if (length(out3) == 0) stop("Graph is cyclic")
-  # out3 = setdiff(out3, out1)
-  
+  if (length(out3) == 0 && length(out1) < length(graph$v)) stop("Graph is cyclic")
+
   out2 = Recall(graph[-c(out1,out3)])
 
   return(c(out1, out2, out3))

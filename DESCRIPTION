@@ -1,6 +1,6 @@
 Package: MixedGraphs
 Title: Mixed graphs and graphical models
-Version: 0.2.016
+Version: 0.2.017
 Authors@R: person("Robin", "Evans", , "evans@stats.ox.ac.uk", role = c("aut", "cre"))
 Description: Functions for creating and manipulating graphs with arbitrary
     edge types.

@@ -337,6 +337,10 @@ anSets = function(graph, topOrder, sort=1) {
   }
   
   if (sort > 1) out <- lapply(out, sort.int)
+  if (sort > 2) {
+    ord <- order(sapply(out, function(x) sum(2^x)))
+    out <- out[ord]
+  }
   
   out[-1]
 }
@@ -354,7 +358,8 @@ anSets2 = function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
   parents <- list()
   parents[graph$v] <- lapply(graph$v, function(x) pa(graph, x))
   
-  bar <- barrenSets(graph, same_dist = same_dist, sort=sort, return_anc_sets = TRUE)
+  bar <- barrenSets(graph, max_size = maxbarren, same_dist = same_dist, 
+                    sort=sort, return_anc_sets = TRUE)
   ancs <- attr(bar, "anSets")
 
   barSet <- list()
