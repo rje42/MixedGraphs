@@ -59,7 +59,7 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1) {
   }
   
   ## if any representation is an adjacency matrix, or if forced, 
-  ## then use this representation
+  ## then use this adjMatrix
   if (any(isAMat) || matrix) {
     ## could speed this up by not converting edge lists
     if (sparse) {
@@ -192,16 +192,21 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
     if (dir >= 0) es <- es + edges[[1]][v,,drop=FALSE]
     if (dir <= 0) es <- es + t(edges[[1]][,v,drop=FALSE])
 
-    return(which(colSums(es) > 0))
+    wh <- which(colSums(es) > 0)
+    if (!inclusive) wh <- setdiff(wh, v)
+    
+    return(wh)
   }
   
   es <- collapse(edges, v1=v, dir=dir)
   
   ## select depending on mode of output
-  if (is.adjMatrix(es)) {
+  if (is.adjMatrix(es, checknm=TRUE)) {
     ## this is an adjacency matrix
     d <- dim(es)
-    return(which(.colSums(es, d[1], d[2]) > 0))
+    wh <- which(.colSums(es, d[1], d[2]) > 0)
+    if (!inclusive) wh <- setdiff(wh, v)
+    return(wh)
   }
   else if (is.adjList(es, checknm = TRUE)) {
     out <- unlist(es[v])
@@ -211,6 +216,7 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
     if (ncol(es) == 0) return(integer(0))
     out = es[2,]  
   }
+  else stop("Unrecognised edge format")
   
   if (sort > 0) out <- unique.default(out)
   if (sort > 1) out <- sort.int(out)

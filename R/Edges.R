@@ -278,8 +278,8 @@ is.adjMatrix <- function(object, n, checknm=FALSE) {
   if (checknm && "adjMatrix" %in% class(object)) return(TRUE)
   
   if (!is.matrix(object) && !is(object, "Matrix")) return(FALSE)
-  if (!missing(n) && n != ncol(object) && n != nrow(object)) return(FALSE)
-  else if (nrow(object) != ncol(object)) return(FALSE)
+  if (!missing(n) && n != ncol(object) && n != nrow(object)) return(FALSE)  
+  else if (nrow(object) != ncol(object)) return(FALSE)  ## do we really require n rows and n columns?
   if (any(is.na(object))) return(FALSE)
   if (any(object < 0) || any(object > 1)) return(FALSE)
   if (all(object > 0)) return(FALSE)
@@ -348,7 +348,7 @@ withEdgeMatrix <- function(graph, edges) {
   ## get directed and number of vertices, then transform using edgeMatrix()
   dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
   n <- length(graph$vnames)
-  graph$edges[idx] <- mapply(edgeMatrix, graph$edges[idx], directed=dir, n=n, SIMPLIFY=FALSE)
+  graph$edges[idx] <- mapply(edgeMatrix, graph$edges[idx], directed=dir, SIMPLIFY=FALSE)
   
   graph
 }

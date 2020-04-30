@@ -96,9 +96,12 @@ un <- function(graph, sort=1) {
 }
 
 ##' @describeIn districts Obtain neighbourhoods
+##' @param undirected_only logical: should vertices not adjacent to an 
+##' undirected edge be ignored?
 ##' @export neighbourhoods
-neighbourhoods = function(graph) {
-  groups(graph[un(graph)], etype="undirected")
+neighbourhoods = function(graph, undirected_only=TRUE) {
+  if (undirected_only) groups(graph[un(graph)], etype="undirected")
+  else groups(graph, etype="undirected")
 }
 
 

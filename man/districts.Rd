@@ -12,7 +12,7 @@ districts(graph)
 
 un(graph, sort = 1)
 
-neighbourhoods(graph)
+neighbourhoods(graph, undirected_only = TRUE)
 
 cliques(graph, sort = 1)
 }
@@ -20,6 +20,9 @@ cliques(graph, sort = 1)
 \item{graph}{\code{mixedgraph} object}
 
 \item{sort}{should output be sorted?  sort=3 will also sort cliques}
+
+\item{undirected_only}{logical: should vertices not adjacent to an 
+undirected edge be ignored?}
 }
 \description{
 The usual familial relations between vertices in
