@@ -14,7 +14,7 @@ un(graph, sort = 1)
 
 neighbourhoods(graph, undirected_only = TRUE)
 
-cliques(graph, sort = 1)
+cliques(graph, sort = 1, max_len)
 }
 \arguments{
 \item{graph}{\code{mixedgraph} object}
@@ -23,6 +23,8 @@ cliques(graph, sort = 1)
 
 \item{undirected_only}{logical: should vertices not adjacent to an 
 undirected edge be ignored?}
+
+\item{max_len}{maximum size of clique to consider}
 }
 \description{
 The usual familial relations between vertices in

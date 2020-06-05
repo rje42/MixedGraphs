@@ -106,12 +106,15 @@ neighbourhoods = function(graph, undirected_only=TRUE) {
 
 
 ##' @param sort should output be sorted?  sort=3 will also sort cliques
+##' @param max_len maximum size of clique to consider
 ##' @describeIn districts Obtain maximal complete undirected subsets
 ##' @export cliques
-cliques = function(graph, sort=1) {
+cliques = function(graph, sort=1, max_len) {
 
   # ## could do this by neighbourhood
   # neigh <- neighbourhoods(graph[un(graph)])
+  
+  if (missing(max_len)) max_len <- length(graph$v)
 
   ## restrict to undirected part of the graph
   if (is.UG(graph)) gr_u <- graph
@@ -123,7 +126,7 @@ cliques = function(graph, sort=1) {
   nbs[gr_u$v] <- lapply(gr_u$v, function(x) nb(gr_u, x))
 
   ## call Bron-Kirbosch algorithm
-  out <- BK(R=integer(0), P=gr_u$v, X=integer(0), nbs)
+  out <- BK(R=integer(0), P=gr_u$v, X=integer(0), nbs, max_len=max_len)
 
   if (sort > 1) out <- lapply(out, sort.int)
   if (sort > 2) {
@@ -134,9 +137,9 @@ cliques = function(graph, sort=1) {
 }
 
 ## Bron-Kerbosch Algorithm
-BK <- function(R, P, X, nbs) {
+BK <- function(R, P, X, nbs, max_len) {
   ## if nothing else to add, then return R
-  if (length(P) == 0 && length(X) == 0) {
+  if (length(R) == max_len || (length(P) == 0 && length(X) == 0)) {
     # print(R)
     return(list(R))
   }
@@ -147,7 +150,7 @@ BK <- function(R, P, X, nbs) {
   for (v in P) {
     ## add each vertex in turn
     nb_v <- nbs[[v]]
-    out <- c(out, BK(c(R,v), intersect(P, nb_v), intersect(X, nb_v), nbs))
+    out <- c(out, BK(c(R,v), intersect(P, nb_v), intersect(X, nb_v), nbs, max_len))
     P <- setdiff(P, v)
     X <- c(X, v)
   }
@@ -156,13 +159,13 @@ BK <- function(R, P, X, nbs) {
   out
 }
 
-findCliques <- function(graph) {
-  vs <- graph$v
-  
-  for (v in vs) {
-    nb(graph, v)
-  }
-}
+# findCliques <- function(graph) {
+#   vs <- graph$v
+#   
+#   for (v in vs) {
+#     nb(graph, v)
+#   }
+# }
 
 ##' Find Markov blanket
 ##' 
@@ -466,25 +469,45 @@ barrenSets = function(graph, topOrder, max_size, same_dist=FALSE,
   graph2$edges$undirected <- 1 - graph2$edges$undirected - diag(nrow=nrow(graph2$edges$undirected))
   
   out <- list()
-   
-  if (same_dist) {
-    dis <- districts(graph)
-    
-    for (d in seq_along(dis)) {
-      out <- c(out, cliques(graph2[dis[[d]]]))
+  
+  if (requireNamespace("igraph")) {
+    if (same_dist) {
+      dis <- districts(graph)
+      
+      for (d in seq_along(dis)) {
+        gr_u <- convert(graph2[dis[[d]]], "igraph")
+        tmp <- igraph::max_cliques(gr_u)
+        tmp <- lapply(tmp, function(x) match(names(x), graph$vnames))
+        out <- c(out, tmp)
+      }
+    }
+    else {
+      gr_u <- convert(graph2, "igraph")
+      tmp <- igraph::max_cliques(gr_u)
+      tmp <- lapply(tmp, function(x) match(names(x), graph$vnames))
+      out <- cliques(graph2, max_len = max_size)
     }
   }
   else {
-    out <- cliques(graph2)
+    if (same_dist) {
+      dis <- districts(graph)
+      
+      for (d in seq_along(dis)) {
+        out <- c(out, cliques(graph2[dis[[d]]], max_len = max_size))
+      }
+    }
+    else {
+      out <- cliques(graph2, max_len = max_size)
+    }
   }
   
   ## now check if any exceed the maximum size allowed
   lens <- lengths(out)
   if (max_size < max(lens)) {
-    for (i in seq_along(which(lens > max_size))) out <- c(out, combn(out[[i]], max_size))
+    for (i in which(lens > max_size)) out <- c(out, combn(out[[i]], max_size, simplify = FALSE))
     
     # remove overly long sets
-    out[seq_along(lens)] <- out[seq_along(lens)][lens <= max_size]
+    out <- out[-which(lens > max_size)]
 
     # remove any duplicates
     f <- function(n) sum(2^n)
