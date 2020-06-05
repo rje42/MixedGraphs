@@ -369,7 +369,7 @@ anSets2 = function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
     
   for (b in seq_along(bar)) {
     tmp <- powerSet(bar[[b]], m = maxbarren)[-1]
-    sm <- setmatch(tmp, barSet, nomatch = 0)
+    sm <- setmatch(barSet, tmp, nomatch = 0)
     if (any(sm > 0)) tmp <- tmp[-sm]
     barSet <- c(barSet, tmp)
   }
@@ -433,7 +433,7 @@ anSets2 = function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
 ##' @param same_dist logical: should barren sets be in the same district?
 ##' @param sort integer:1 for unique but unsorted, 2 for 
 ##' sorted.
-##' @param return_anc_sets logical: return ancestral sets as an attribute?
+##' @param return_anc_sets logical: return ancestral sets for each vertex as an attribute?
 ##' 
 ##' @details Uses \code{clique} algorithm on a suitable undirected graph.
 ##' 

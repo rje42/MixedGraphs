@@ -25,7 +25,7 @@ barrenSets(
 \item{sort}{integer:1 for unique but unsorted, 2 for 
 sorted.}
 
-\item{return_anc_sets}{logical: return ancestral sets as an attribute?}
+\item{return_anc_sets}{logical: return ancestral sets for each vertex as an attribute?}
 }
 \description{
 Return list of barren subsets up to specified size
