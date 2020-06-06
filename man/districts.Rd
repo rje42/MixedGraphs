@@ -36,7 +36,7 @@ bidirected-connected and undirected-connected components of \code{graph}.
 \code{un} finds the undirected part of \code{graph}.
 
 \code{cliques} uses the Bron-Kirbosch algorithm to find 
-maximal connected subsets.
+maximal fully-connected subsets.
 }
 \section{Functions}{
 \itemize{

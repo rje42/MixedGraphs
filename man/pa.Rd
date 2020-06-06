@@ -28,7 +28,7 @@ dec(graph, v, sort = 1)
 
 ant(graph, v, sort = 1)
 
-dis(graph, v, sort = 1)
+dis(graph, v, sort = 1, fast = FALSE)
 }
 \arguments{
 \item{graph}{\code{mixedgraph} object}
@@ -38,6 +38,8 @@ dis(graph, v, sort = 1)
 \item{sort}{integer:1 for unique but unsorted, 2 for 
 sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 then output will always be unique and sorted.}
+
+\item{fast}{optionally opt for a faster metod with adjacency matrices or lists}
 }
 \description{
 The usual familial relations between vertices in

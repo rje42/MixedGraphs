@@ -63,9 +63,36 @@ ant = function(graph, v, sort=1) {
 }
 
 ##' @describeIn pa find district of vertices
+##' @param fast optionally opt for a faster metod with adjacency matrices or lists
 ##' @export dis
-dis = function(graph, v, sort=1) {
-  grp(graph, v, etype="bidirected", dir=0, sort=sort)
+dis = function(graph, v, sort=1, fast=FALSE) {
+  if (!fast) return(grp(graph, v, etype="bidirected", dir=0, sort=sort))
+  
+  whEdge <- match("bidirected",names(graph$edges))
+  bi_edges <- graph$edges[[whEdge]]  
+
+  if ("adjList" %in% class(bi_edges)) {
+    out <- add <- v
+    while (length(add) > 0) {
+      add <- unlist(bi_edges[add])
+      add <- setdiff(add, out)
+      out <- c(out, add)
+    }
+  } 
+  else if ("adjMatrix" %in% class(bi_edges)) {
+    out <- add <- v
+    while (length(add) > 0) {
+      add <- c(which(bi_edges[add,] > 0,arr.ind = TRUE))
+      add <- setdiff(add, out)
+      out <- c(out, add)
+    }
+  } 
+  else return(grp(graph, v, etype="bidirected", dir=0, sort=sort))
+
+  if (sort > 0) out <- unique.default(out)
+  if (sort > 1) out <- sort.int(out)
+    
+  return(out)
 }
 
 ##' Familial Mixed Graph Groups
@@ -81,7 +108,7 @@ dis = function(graph, v, sort=1) {
 ##' \code{un} finds the undirected part of \code{graph}.
 ##' 
 ##' \code{cliques} uses the Bron-Kirbosch algorithm to find 
-##' maximal connected subsets.
+##' maximal fully-connected subsets.
 ##' 
 ##' @export districts
 districts = function(graph) {

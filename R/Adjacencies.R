@@ -240,6 +240,7 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
 ##' @param sort integer: 1 for unique but unsorted, 2 for 
 ##' sorted (0 for possibly repeated and unsorted).
 ##' @param force logical - should invalid \code{v} be ignored?
+## @param skipChecks guarantees that input is valid
 ##' 
 ##' @details \code{grp()} finds all vertices that can be reached from
 ##' vertices in \code{v} by edges of the specified type, and in the 
@@ -259,24 +260,33 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
 ##' @seealso \code{\link{adj}} for single edge adjacencies.
 grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
-  
-  ## only include vertices in the graph
-  if (force) v <- intersect(v, graph$v)
-  else if (any(!(v %in% graph$v))) stop("Invalid values of v")
 
+  if (force) v <- intersect(v, graph$v)
   if (length(v) == 0) return(integer(0))
-  if (missing(etype)) etype <- edgeTypes()$type
-  ##' repeat dir() vector with warning if necessary
-  if (length(dir) > length(etype)) warning("More directions specified than edge types")
-  dir = dir*rep.int(1L, length(etype))
+    
+  # if (!skipChecks) {
+    ## only include vertices in the graph
+    if (!force && any(!(v %in% graph$v))) stop("Invalid values of v")
+
+    if (missing(etype)) etype <- edgeTypes()$type
+    ##' repeat dir() vector with warning if necessary
+    if (length(dir) > length(etype)) warning("More directions specified than edge types")
+    dir = dir*rep.int(1L, length(etype))
+    
+    tmp <- pmatch(etype, edgeTypes()$type)
+    dir[!edgeTypes()$directed[tmp]] <- 0L
   
-  tmp <- pmatch(etype, edgeTypes()$type)
-  dir[!edgeTypes()$directed[tmp]] <- 0L
+    whEdge <- pmatch(etype,names(graph$edges))
   
-  whEdge <- pmatch(etype,names(graph$edges))
-  
-  edges <- graph$edges[whEdge]  
-  es <- collapse(edges, dir=dir)
+    edges <- graph$edges[whEdge]  
+    es <- collapse(edges, dir=dir)
+  # }
+  # else {
+  #   if (etype %in% names(graph$edges)) {
+  #     es <- graph$edges[etype]
+  #   }
+  #   else return(integer(0))
+  # }
   
   #   tmp = lapply(graph$edges[etype], edgeMatrix)
   #   if (!is.null(tmp)) {
@@ -286,7 +296,7 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   
   out = v
   
-  if (any(es == 0)) {
+  if (is.adjMatrix(es)) {
     continue = TRUE
     new = v
     
@@ -298,6 +308,9 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
       
       continue = (length(new) > 0)
     }
+  }
+  else if (is.adjList(es)) {
+    
   }
   else {
     if (isTRUE(ncol(es) > 0)) {

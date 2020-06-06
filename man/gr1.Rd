@@ -7,7 +7,15 @@
 \alias{grIV}
 \alias{grVerma}
 \title{Example Graphs}
-\format{These are all \code{mixedgraph} objects.}
+\format{
+These are all \code{mixedgraph} objects.
+
+An object of class \code{mixedgraph} of length 3.
+
+An object of class \code{mixedgraph} of length 3.
+
+An object of class \code{mixedgraph} of length 3.
+}
 \usage{
 gr1
 

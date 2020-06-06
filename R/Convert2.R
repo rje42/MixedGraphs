@@ -172,7 +172,23 @@ conv_mixedgraph_graphAM <- function(graph) {
 
 conv_mixedgraph_igraph <- function(graph) {
   requireNamespace("igraph")
-  igraph::igraph.from.graphNEL(conv_mixedgraph_graphNEL(graph))
+
+  graph <- withAdjMatrix(graph)
+  
+  mode <- "undirected"
+  if (!is.null(graph$edges$directed) && any(graph$edges$directed > 0)) {
+    if (!is.null(graph$edges$undirected) && any(graph$edges$undirected > 0)) {
+      stop("Both directed and undirected edges, unclear how to proceed")
+    }
+    mode <- "directed"
+    amat <- graph$edges$directed
+  }
+  else {
+    amat <- graph$edges$undirected
+  }
+  dimnames(amat) <- list(graph$vnames, graph$vnames)
+  
+  igraph::graph_from_adjacency_matrix(amat, mode=mode)
 }
 
 conv_mixedgraph_bn <- function(graph) {

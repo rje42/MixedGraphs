@@ -84,7 +84,7 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
     else vnames = character(0)
   }
   else if (length(v) > 0 && length(vnames) < max(v)) {
-    stop("Variable names vector must be at least max(v)")
+    stop("Variable names vector must have length at least max(v)")
   }
   
   if (length(edges) > 0) {
@@ -135,6 +135,7 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
   }
   else {
     edgeList = list()
+    class(edgeList) <- "edgeList"
   }
   
   out = list(v=v, edges=edgeList, vnames=vnames)
