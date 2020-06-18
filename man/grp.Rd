@@ -2,10 +2,13 @@
 % Please edit documentation in R/Adjacencies.R
 \name{grp}
 \alias{grp}
+\alias{grp2}
 \alias{groups}
 \title{Group vertices by adjacencies}
 \usage{
 grp(graph, v, etype, inclusive = TRUE, dir = 0, sort = 1, force = FALSE)
+
+grp2(v, edges, dir, inclusive, sort = 1)
 
 groups(graph, etype, sort = 1)
 }
@@ -26,6 +29,8 @@ considered: 0 = undirected, 1 = from row to column; -1 = from column to row.}
 sorted (0 for possibly repeated and unsorted).}
 
 \item{force}{logical - should invalid \code{v} be ignored?}
+
+\item{edges}{an \code{adjMatrix} or \code{adjList}}
 }
 \description{
 Generic functions for finding groups based on edge adjacencies, 
@@ -45,9 +50,14 @@ to the specified edge types).
 If any \code{v} is 
 not a vertex of \code{graph}, an error is returned, unless 
 \code{force=TRUE}.
+
+\code{grp2} is a faster version of the function for a single \code{adjMatrix}
+or \code{adjList}.
 }
 \section{Functions}{
 \itemize{
+\item \code{grp2}: Faster routine for single \code{adjMatrix} or \code{adjList}
+
 \item \code{groups}: find equivalence classes
 repeat dir() vector with warning if necessary
 }}

@@ -327,7 +327,7 @@ skeleton = function(graph) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   # e = lapply(unlist(graph$edges, recursive=FALSE), sort.int)
   # e = unique(e)
-  e = collapse(graph$edges, dir=0)
+  e = collapse(graph$edges, dir=1)
   out = mixedgraph(v=graph$v, edges=list(undirected=e), vnames=graph$vnames)
   return(out)
 }

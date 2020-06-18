@@ -53,8 +53,10 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1) {
       v2 <- seq_len(nv)
       all2 <- TRUE
     }
-    vr1 <- setdiff(seq_len(nv), v1)
-    vr2 <- setdiff(seq_len(nv), v2)
+    if (length(v1) > 0) vr1 <- seq_len(nv)[-v1]
+    else vr1 <- seq_len(nv)
+    if (length(v2) > 0) vr2 <- seq_len(nv)[-v2]
+    else vr2 <- seq_len(nv)
     vr <- intersect(vr1, vr2)
   }
   
@@ -241,6 +243,7 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
 ##' sorted (0 for possibly repeated and unsorted).
 ##' @param force logical - should invalid \code{v} be ignored?
 ## @param skipChecks guarantees that input is valid
+##' @param edges an \code{adjMatrix} or \code{adjList}
 ##' 
 ##' @details \code{grp()} finds all vertices that can be reached from
 ##' vertices in \code{v} by edges of the specified type, and in the 
@@ -255,6 +258,9 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
 ##' If any \code{v} is 
 ##' not a vertex of \code{graph}, an error is returned, unless 
 ##' \code{force=TRUE}.
+##' 
+##' \code{grp2} is a faster version of the function for a single \code{adjMatrix}
+##' or \code{adjList}.
 ##' 
 ##' @export grp
 ##' @seealso \code{\link{adj}} for single edge adjacencies.
@@ -278,8 +284,25 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   
     whEdge <- pmatch(etype,names(graph$edges))
   
-    edges <- graph$edges[whEdge]  
+    edges <- graph$edges[whEdge]
+
+    if (length(edges) == 1) {
+      if (is.adjList(edges[[1]], checknm=TRUE)) {
+        wh <- match(names(graph$edges)[whEdge], edgeTypes()$type)
+        if (dir == -1 && edgeTypes()$directed) {
+          return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive))
+        }
+        else if (dir == 0 && !edgeTypes()$directed) {
+          return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive))
+        }
+      }
+      else if (is.adjMatrix(edges[[1]], checknm=TRUE)) {
+        return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive))
+      }
+    }
+    
     es <- collapse(edges, dir=dir)
+    
   # }
   # else {
   #   if (etype %in% names(graph$edges)) {
@@ -329,6 +352,45 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   if (!inclusive) out = setdiff(out, v)
   
   if (sort > 1) out = sort.int(out)
+  
+  out
+}
+
+##' @describeIn grp Faster routine for single \code{adjMatrix} or \code{adjList}
+##' @export
+grp2 <- function(v, edges, dir, inclusive, sort=1) {
+  new <- v
+  out <- v
+  
+  if (is.adjList(edges)) {
+    ## note this only works if dir matches the type of edge (so -1 for directed, 0 for not directed)
+    while (length(new) > 0) {
+      new <- unlist(edges[new])
+      if (sort > 0) new <- setdiff(new, out)
+      out <- c(out, new)
+    }
+  }
+  else if (is.adjMatrix(edges)) {
+    if (dir == 1) edges <- t(edges)
+    else if (dir == 0) edges <- edges + t(edges)
+    
+    while (length(new) > 0) {
+      new <- which(rowSums(edges[,new,drop=FALSE]) > 0)
+      if (sort > 0) new <- setdiff(new, out)
+      out <- c(out, new)
+    }
+  }
+  # else if (is.eList(edges)) {
+  #   
+  # }
+  # else if (is.edgeMatrix(edges)) {
+  #   
+  # }
+  else stop("Not a valid approach for this function")
+  
+  if (!inclusive) out <- setdiff(out, v)
+  
+  if (sort > 1) out <- sort.int(out)
   
   out
 }
