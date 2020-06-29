@@ -14,3 +14,6 @@
 
 ##' @describeIn gr1 The Verma graph
 "grVerma"
+
+##' @describeIn gr1 Jamie's 'double' Verma graph
+"grJamie"

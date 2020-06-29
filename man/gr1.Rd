@@ -6,9 +6,12 @@
 \alias{gr2}
 \alias{grIV}
 \alias{grVerma}
+\alias{grJamie}
 \title{Example Graphs}
 \format{
 These are all \code{mixedgraph} objects.
+
+An object of class \code{mixedgraph} of length 3.
 
 An object of class \code{mixedgraph} of length 3.
 
@@ -24,6 +27,8 @@ gr2
 grIV
 
 grVerma
+
+grJamie
 }
 \description{
 Some example graphs for illustration.
@@ -35,6 +40,8 @@ Some example graphs for illustration.
 \item \code{grIV}: The instrumental variables graph
 
 \item \code{grVerma}: The Verma graph
+
+\item \code{grJamie}: Jamie's 'double' Verma graph
 }}
 
 \keyword{datasets}
