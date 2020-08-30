@@ -19,8 +19,8 @@ Add or remove edges
 }
 \details{
 At the moment no effort is made to 
-detect duplication in addEdges().  To be added later.
-Currently removeEdges() forces all edges to be
+detect duplication in \code{addEdges()}.  To be added later.
+Currently \code{removeEdges()} forces all edges to be
 represented by adjacency matrices.
 }
 \section{Functions}{

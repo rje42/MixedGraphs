@@ -39,15 +39,24 @@ assign("vertexTypesDF", data.frame(type=c("random"),
 ##' 
 ##' Returns data frame of current edge types.
 ##' 
-##' @export edgeTypes
+##' @export
 edgeTypes <- function() {
   get("edgeTypesDF", envir=graphOptionsEnv)
 }
 
 ##' @describeIn edgeTypes See vertex types
-##' @export vertexTypes
+##' @export
 vertexTypes <- function() {
   get("vertexTypesDF", envir=graphOptionsEnv)
+}
+
+##' Get vertex names
+##' 
+##' @param graph an object of class \code{mixedgraph}
+##' 
+##' @export
+vnames <- function(graph) {
+  graph$vnames
 }
 
 ##' Construct a mixed graph
@@ -64,7 +73,7 @@ vertexTypes <- function() {
 ##' 
 ##' @seealso \code{\link{graphCr}}.
 ##' 
-##' @export mixedgraph
+##' @export
 mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
   
   ## Check vertices are positive integers
@@ -105,23 +114,26 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
     if (any(is.na(match(unlist(edges[edAL]), v)))) stop("Edges must be between vertices in the graph")
 
     ## Check all edges given as edgeLists are valid and of length 2
-    edL <- sapply(edges, is.list) & !edAL
+    edL <- sapply(edges, is.eList, checknm=TRUE)
     for (i in which(edL)) if (edL[i]) class(edges[[i]]) <- "eList"
     if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
     if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
     
     ## Check all edges given as edge matrices are valid and of length 2
-    edE <- sapply(edges, is.edgeMatrix)
+    edE <- sapply(edges, is.edgeMatrix, checknm=TRUE)
     for (i in which(edE)) class(edges[[i]]) <- "edgeMatrix"
     if (any(is.na(match(unlist(edges[edE]), v)))) stop("Edges must be between vertices in the graph")
     if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
     
     ## Check all edges given as adjacency matrices are valid
-    edA <- sapply(edges, is.adjMatrix)
+    edA <- sapply(edges, is.adjMatrix, checknm=TRUE)
     for (i in which(edA)) {
       if ("adjMatrix" %in% class(edges[[i]])) next
       class(edges[[i]]) <- c("adjMatrix", class(edges[[i]]))
     }
+    
+    ## refuse to continue if edge types not unambiguously specified
+    if (!all(edAL | edL | edE | edA)) stop("Edge types not all given")
     
     ## Construct edge lists
     edgeList = list()
@@ -151,7 +163,7 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
 ##' 
 ##' @details Returns \code{TRUE} or \code{FALSE}
 ##' 
-##' @export is.mixedgraph
+##' @export
 is.mixedgraph <- function(object) {
   "mixedgraph" %in% class(object)
 }
@@ -251,7 +263,7 @@ subGraph = function (graph, v, drop=FALSE) {
   if (length(v) == length(graph$v)) return(graph)
 
   edges = lapply(graph$edges, function(x) {
-    if (is.adjMatrix(x)) {
+    if (is.adjMatrix(x, checknm=TRUE)) {
       if (drop) return(x[v,v,drop=FALSE])
       else {
         x[-v,] = x[,-v] = 0L
@@ -272,7 +284,7 @@ subGraph = function (graph, v, drop=FALSE) {
       else x[v] <- vector(mode="list", length=length(v))
       return(x)
     }
-    else if (is.list(x)) {
+    else if (is.eList(x)) {
       if (length(x) > 0) {
         tmp <- x[sapply(x, function(y) all(y %in% v))]
         
@@ -281,10 +293,16 @@ subGraph = function (graph, v, drop=FALSE) {
           tmp <- lapply(tmp, function(x) mask[x])
           if (any(sapply(tmp, function(x) any(is.na(x))))) stop("Something went wrong with the mask")
         }
+        class(tmp) <- "eList"
         return(tmp)
       }
-      else return(list())
+      else {
+        tmp <- list()
+        class(tmp) <- "eList"
+        return(tmp)
+      }
     }
+    else stop("Edge type not identified")
   })
 
   if (drop) out = list(v=seq_along(v), edges=edges, vnames=graph$vnames[v])

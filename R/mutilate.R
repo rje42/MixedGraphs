@@ -67,8 +67,8 @@ remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
 ##' @param edges list of edges to be added/removed
 ##' 
 ##' @details At the moment no effort is made to 
-##' detect duplication in addEdges().  To be added later.
-##' Currently removeEdges() forces all edges to be
+##' detect duplication in \code{addEdges()}.  To be added later.
+##' Currently \code{removeEdges()} forces all edges to be
 ##' represented by adjacency matrices. 
 ##' 
 ##' @export addEdges
@@ -89,12 +89,12 @@ addEdges <- function(graph, edges) {
   else if (any(duplicated(et))) stop("Repeated edge types matched")
   
   ## Check all edges given as lists to be added are valid and of length 2
-  edL <- sapply(edges, is.list)
+  edL <- sapply(edges, is.eList, checknm=TRUE)
   if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
   if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
   
   ## Check all edges given as edge matrices to be added are valid and of length 2
-  edE <- sapply(edges, is.edgeMatrix)
+  edE <- !edL & sapply(edges, is.edgeMatrix, checknm=TRUE)
   if (any(is.na(match(unlist(edges[edE]), v)))) stop("Edges must be between vertices in the graph")
   if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
 
@@ -241,7 +241,7 @@ mutilate <- function(graph, A, etype, dir=0L) {
         }
       }
     }
-    else if (is.list(edges[[i]])) {
+    else if (is.eList(edges[[i]])) {
       ## edge list format
       rm = rep(FALSE, length(edges[[i]]))
       if (dir >= 0) {  # remove outgoing edges

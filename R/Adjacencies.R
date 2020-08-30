@@ -181,13 +181,13 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
     dir[!edgeTypes()$directed[tmp]] <- 0L
   }
   
+  ## get edge types
   whEdge <- pmatch(etype,names(graph$edges))
-  
   edges <- graph$edges[whEdge]
   # n <- length(graph$v)
   
   ## special case of one adjacency matrix to save time
-  if (length(edges) == 1 && is.adjMatrix(edges[[1]], length(graph$vnames))) {
+  if (length(edges) == 1 && is.adjMatrix(edges[[1]], length(graph$vnames), checknm=TRUE)) {
     es <- matrix(0, length(v), length(graph$vnames))
 
     ## add in edges dependent on direction

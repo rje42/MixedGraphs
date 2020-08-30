@@ -10,16 +10,29 @@
 ##' 
 ##' @export topologicalOrder
 topologicalOrder = function(graph) {
-  if (length(graph$v) <= 1 || length(graph$edges$directed) == 0) return(graph$v)
+  n <- length(graph$v)
+  if (n <= 1 || length(graph$edges$directed) == 0) return(graph$v)
   
-  out1 = orphaned(graph)
-  if (length(out1) == 0) stop("Graph is cyclic")
-  out3 = sterile(graph[-out1])
-  if (length(out3) == 0 && length(out1) < length(graph$v)) stop("Graph is cyclic")
-
-  out2 = Recall(graph[-c(out1,out3)])
-
-  return(c(out1, out2, out3))
+  graph_d <- withAdjMatrix(graph, "directed")
+  
+  out <- orphaned(graph)
+  left <- setdiff(graph$v, out)
+  
+  while (length(out) < n) {
+    out <- c(out, orphaned(graph, left))
+    left <- setdiff(left, out)
+  }
+  
+  return(out)
+  
+  # out1 = orphaned(graph)
+  # if (length(out1) == 0) stop("Graph is cyclic")
+  # out3 = sterile(graph[-out1])
+  # if (length(out3) == 0 && length(out1) < length(graph$v)) stop("Graph is cyclic")
+  # 
+  # out2 = Recall(graph[-c(out1,out3)])
+  # 
+  # return(c(out1, out2, out3))
 }
 
 ##' @describeIn topologicalOrder Check if ordering is topological

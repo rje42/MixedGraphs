@@ -1,6 +1,8 @@
 ##' Moralize
 ##' 
 ##' @param graph an object of class \code{mixedgraph}
+##' 
+##' @export
 moralize <- function(graph) {
   if (length(graph$v) <= 1) return(graph)
   out <- skeleton(graph)
@@ -8,12 +10,9 @@ moralize <- function(graph) {
   pa_dists <- lapply(dists, function(x) union(x, pa(graph, x)))
   
   n <- max(graph$v)
-  using_am = sapply(graph$edges, is.adjMatrix)
-  if (any(using_am)) {
-    n <- nrow(graph$edges[[which(using_am)[1]]])
-  }
-  extra <- matrix(0,n,n)
-  
+  using_am = sapply(graph$edges, is.adjMatrix, n=n, checknm=TRUE)
+  extra <- adjMatrix(n=n)
+
   ## check parents/spouses for each are joined
   for (i in seq_along(dists)) {
     extra[pa_dists[[i]],pa_dists[[i]]] = 1
@@ -28,6 +27,8 @@ moralize <- function(graph) {
 ##' 
 ##' @param graph an object of class \code{mixedgraph}
 ##' @param A,B,C sets of vertices in \code{graph}
+##' 
+##' @export
 m_sep <- function(graph, A, B, C) {
   if (missing(C)) C = integer(0)
   

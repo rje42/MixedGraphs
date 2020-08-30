@@ -483,7 +483,7 @@ barrenSets = function(graph, topOrder, max_size, same_dist=FALSE,
   
   ## create a new undirected graph where edge v -- w exists if 
   ## and only if v and w are incomparable in graph
-  graph2 <- mixedgraph(v=graph$v, edges=list(undirected=list()), vnames=graph$vnames) # mutilate(graph, graph$v)
+  graph2 <- mixedgraph(v=graph$v, edges=list(undirected=eList()), vnames=graph$vnames) # mutilate(graph, graph$v)
   class(graph2$edges$undirected) <- "eList"
 
   for (i in topOrder) {

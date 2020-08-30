@@ -7,7 +7,17 @@
 ##' 
 ##' @export adjMatrix
 adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
-  if (is.adjMatrix(edges)) {
+  if (missing(edges)) {
+    if (sparse) {
+      out <- Matrix(0L,n,n)
+    }
+    else {
+      out <- matrix(0L,n,n)
+    }
+    class(out) <- c("adjMatrix", class(out))
+    return(out)
+  }
+  if (is.adjMatrix(edges, checknm=TRUE)) {
     return(edges)
   }
   else if (is.adjList(edges, checknm = TRUE)) {
@@ -52,6 +62,7 @@ adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
   }  
   else if (is.edgeMatrix(edges)) tmp <- edges
   else if (is.null(edges)) return(NULL)
+  else stop("Failed to identify edge type")
   
   if (missing(n)) n = max(tmp)
   
@@ -82,12 +93,16 @@ adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
 ##' 
 ##' @export adjList
 adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
+  if (missing(edges) || length(edges) == 0L) {
+    out <- rep(list(integer(0)), n)
+    return(out)
+  }
   if (is.adjList(edges, checknm=TRUE)) {
     ## nothing to do
     return(edges)
   }
   else if (is.null(edges)) return(NULL)
-  else if (is.list(edges)) {
+  else if (is.eList(edges)) {
     ## seems to be an eList
     if (length(edges) == 0) {
       if (missing(n)) {
@@ -152,7 +167,7 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
 ##' @export edgeMatrix
 edgeMatrix <- function(edges, directed=FALSE) {
   
-  if (length(edges)==0) {
+  if (missing(edges) || length(edges) == 0) {
     out <- matrix(NA, 2, 0)
     class(out) <- "edgeMatrix"
     return(out)
@@ -202,7 +217,7 @@ edgeMatrix <- function(edges, directed=FALSE) {
 ##' 
 ##' @export eList
 eList <- function(edges, directed=FALSE) {
-  if(is.null(edges)) {
+  if(missing(edges) || is.null(edges)) {
     out <- list()
     class(out) <- "eList"
     return(out)
@@ -251,7 +266,8 @@ edgeList <- function(edges, directed=FALSE) {
 ##' 
 ##' @export is.edgeMatrix
 is.edgeMatrix <- function(object, n, checknm=FALSE) {
-  if (checknm && "edgeMatrix" %in% class(object)) return(TRUE)
+  if("edgeMatrix" %in% class(object)) return(TRUE)
+  else if (checknm || any(c("adjList", "eList", "adjMatrix") %in% class(object))) return(FALSE)
   
   if (!is.matrix(object)) return(FALSE)
   if (!missing(n) && any(object > n)) return(FALSE)
@@ -263,7 +279,8 @@ is.edgeMatrix <- function(object, n, checknm=FALSE) {
 ##' @describeIn is.edgeMatrix Check if object could be eList
 ##' @export is.eList
 is.eList <- function(object, n, checknm=FALSE) {
-  if (checknm && "eList" %in% class(object)) return(TRUE)
+  if ("eList" %in% class(object)) return(TRUE)
+  else if (checknm || any(c("adjList", "adjMatrix", "edgeMatrix") %in% class(object))) return(FALSE)
   
   if (!is.list(object)) return(FALSE)
   if (!missing(n) && any(unlist(object) > n)) return(FALSE)
@@ -275,7 +292,8 @@ is.eList <- function(object, n, checknm=FALSE) {
 ##' @describeIn is.edgeMatrix Check if object could be adjMatrix
 ##' @export is.adjMatrix
 is.adjMatrix <- function(object, n, checknm=FALSE) {
-  if (checknm && "adjMatrix" %in% class(object)) return(TRUE)
+  if("adjMatrix" %in% class(object)) return(TRUE)
+  else if (checknm || any(c("adjList", "eList", "edgeMatrix") %in% class(object))) return(FALSE)
   
   if (!is.matrix(object) && !is(object, "Matrix")) return(FALSE)
   if (!missing(n) && n != ncol(object) && n != nrow(object)) return(FALSE)  
@@ -289,14 +307,23 @@ is.adjMatrix <- function(object, n, checknm=FALSE) {
 ##' @describeIn is.edgeMatrix Check if object could be adjList
 ##' @export is.adjList
 is.adjList <- function(object, n, checknm = FALSE) {
-  if (checknm && "adjList" %in% class(object)) return(TRUE)
-  else if (checknm) return(FALSE)
+  if("adjList" %in% class(object)) return(TRUE)
+  else if (checknm || any(c("adjMatrix", "eList", "edgeMatrix") %in% class(object))) return(FALSE)
   
+  ## check it is a list
   if (!is.list(object)) return(FALSE)
-  if (!missing(n) && n != length(object)) return(FALSE)
+  if (!missing(n)) {
+    ## if n is known, check length and values make sense
+    if(n != length(object)) return(FALSE)
+    if (any(unlist(object) > n)) return(FALSE)
+  }
+  else {
+    ## if n is not known, check length makes sense with values
+    min_n <- max(unlist(object))
+    if (!is.infinite(min_n) && length(object) < min_n) return(FALSE)
+  }
   if (any(unlist(object) <= 0)) return(FALSE)
-  if (!missing(n) && any(unlist(object) > n)) return(FALSE)
-  
+
   return(TRUE)
 }
 
@@ -383,9 +410,11 @@ nedge2 <- function(edges, directed=TRUE) {
   else if (is.edgeMatrix(edges)) {
     return(ncol(edges))
   }
-  else if (is.list(edges)) {
+  else if (is.eList(edges)) {
     return(length(edges))
   }
+  else if(is.null(edges)) return(0L)
+  else stop("Edge type not recognised")
 }
 
 ##' Give number of edges
