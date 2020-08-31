@@ -33,8 +33,7 @@ adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
     }
     
     for (i in seq_along(edges)) {
-      if (directed) out[edges[[i]],i] <- 1
-      else out[edges[[i]],i] <- 1
+      out[edges[[i]],i] <- 1
     }
     if (!directed && !isSymmetric(out)) stop("Error in input")
     
@@ -158,6 +157,15 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
   out
 }
 
+revAdjList <- function(object) {
+  n <- length(object)
+  out <- vector(mode="list", length=n)
+  for (i in seq_len(n)) {
+    out[object[[i]]] <- lapply(out[object[[i]]], function(x) c(x,i))
+  }
+  class(out) <- "adjList"
+  out
+}
 
 ##' Get edges from adjacency matrix or list
 ##' 
@@ -174,7 +182,7 @@ edgeMatrix <- function(edges, directed=FALSE) {
   }
 
   if (is.edgeMatrix(edges)) return(edges)
-  if (is.adjMatrix(edges)) {
+  else if (is.adjMatrix(edges)) {
     rs <- row(edges)[edges > 0]
     cs <- col(edges)[edges > 0]
     if (!directed) {
@@ -190,14 +198,16 @@ edgeMatrix <- function(edges, directed=FALSE) {
       if (directed) {
         out[1,pos + seq_along(edges[[i]])] <- edges[[i]]
         out[2,pos + seq_along(edges[[i]])] <- i
+        pos <- pos + length(edges[[i]])
       }
       else {
         out[1,pos + seq_len(sum(edges[[i]] < i))] <- edges[[i]][edges[[i]] < i]
         out[2,pos + seq_len(sum(edges[[i]] < i))] <- i
+        pos <- pos + length(edges[[i]][edges[[i]] < i])
       }
     }
   }
-  else if (is.list(edges) && all(lengths(edges) %in% c(0,2))) {
+  else if (is.eList(edges) && all(lengths(edges) %in% c(0,2))) {
     out <- matrix(unlist(edges), nrow=2)
   }
   else stop("Hyperedges not supported for this format")
@@ -242,6 +252,7 @@ eList <- function(edges, directed=FALSE) {
      out <- mapply(c, edges[1,], edges[2,], SIMPLIFY=FALSE)
   }
   else if (is.list(edges)) out <- edges
+  else if (is.numeric(edges) && length(edges) == 2) out <- list(edges)
   else stop("Not a valid edgeList")
   class(out) <- "eList"
   out
@@ -265,7 +276,7 @@ edgeList <- function(edges, directed=FALSE) {
 ##' @param checknm logical: use class of object to determine answer?
 ##' 
 ##' @export is.edgeMatrix
-is.edgeMatrix <- function(object, n, checknm=FALSE) {
+is.edgeMatrix <- function(object, n, checknm=TRUE) {
   if("edgeMatrix" %in% class(object)) return(TRUE)
   else if (checknm || any(c("adjList", "eList", "adjMatrix") %in% class(object))) return(FALSE)
   
@@ -278,7 +289,7 @@ is.edgeMatrix <- function(object, n, checknm=FALSE) {
 
 ##' @describeIn is.edgeMatrix Check if object could be eList
 ##' @export is.eList
-is.eList <- function(object, n, checknm=FALSE) {
+is.eList <- function(object, n, checknm=TRUE) {
   if ("eList" %in% class(object)) return(TRUE)
   else if (checknm || any(c("adjList", "adjMatrix", "edgeMatrix") %in% class(object))) return(FALSE)
   
@@ -291,7 +302,7 @@ is.eList <- function(object, n, checknm=FALSE) {
 
 ##' @describeIn is.edgeMatrix Check if object could be adjMatrix
 ##' @export is.adjMatrix
-is.adjMatrix <- function(object, n, checknm=FALSE) {
+is.adjMatrix <- function(object, n, checknm=TRUE) {
   if("adjMatrix" %in% class(object)) return(TRUE)
   else if (checknm || any(c("adjList", "eList", "edgeMatrix") %in% class(object))) return(FALSE)
   
@@ -306,7 +317,7 @@ is.adjMatrix <- function(object, n, checknm=FALSE) {
 
 ##' @describeIn is.edgeMatrix Check if object could be adjList
 ##' @export is.adjList
-is.adjList <- function(object, n, checknm = FALSE) {
+is.adjList <- function(object, n, checknm = TRUE) {
   if("adjList" %in% class(object)) return(TRUE)
   else if (checknm || any(c("adjMatrix", "eList", "edgeMatrix") %in% class(object))) return(FALSE)
   
@@ -395,6 +406,17 @@ withEdgeList <- function(graph, edges) {
   graph
 }
 
+##' @describeIn graphOps number of edges
+##' @export nedge
+nedge <- function (graph, edges) {
+  if (missing(edges)) idx <- seq_along(graph$edges)
+  else idx <- pmatch(edges, names(graph$edges))
+  if (length(idx) == 0) return(0L)
+  
+  dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
+  sum(mapply(nedge2, graph$edges[idx], dir))
+}
+
 ## internal function to count edges 
 ##
 nedge2 <- function(edges, directed=TRUE) {
@@ -416,24 +438,3 @@ nedge2 <- function(edges, directed=TRUE) {
   else if(is.null(edges)) return(0L)
   else stop("Edge type not recognised")
 }
-
-##' Give number of edges
-##' 
-##' @param graph an object of class \code{mixedgraph}
-##' @param edges character vector of edge types to include, defaults to all
-##' 
-##' Uses an internal function \code{nedge2} to count for
-##' each type of edge separately.  
-##' Do we want this to apply to graphs or edge lists
-##' or both?
-##' 
-##' @export nedge
-nedge <- function (graph, edges) {
-  if (missing(edges)) idx <- seq_along(graph$edges)
-  else idx <- pmatch(edges, names(graph$edges))
-  if (length(idx) == 0) return(0L)
-  
-  dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
-  sum(mapply(nedge2, graph$edges[idx], dir))
-}
-

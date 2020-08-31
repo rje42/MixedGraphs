@@ -65,6 +65,7 @@ remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
 ##' 
 ##' @param graph a \code{mixedgraph} object
 ##' @param edges list of edges to be added/removed
+##' @param ... edges to be added with arguments matching names of edge types
 ##' 
 ##' @details At the moment no effort is made to 
 ##' detect duplication in \code{addEdges()}.  To be added later.
@@ -72,9 +73,12 @@ remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
 ##' represented by adjacency matrices. 
 ##' 
 ##' @export addEdges
-addEdges <- function(graph, edges) {
+addEdges <- function(graph, edges #, ...
+                     ## add in code to put edges in more directly
+                     ) {
   out <- graph
   v <- graph$v
+  # args <- list(...)
   
   etys = edgeTypes()$type
   
@@ -106,7 +110,7 @@ addEdges <- function(graph, edges) {
       ## add it in the same format
       A <- out$edges[[etys[et[i]]]]
       
-      if (is.list(A)) {
+      if (is.eList(A)) {
         A = c(A, eList(edges[[i]], directed = dir))
         class(A) <- "eList"
       }
@@ -118,6 +122,10 @@ addEdges <- function(graph, edges) {
 #        out$edges[[etys[et[i]]]] <- pmin(1, out$edges[[etys[et[i]]]])
        class(A) <- "adjMatrix"
        A[A > 1] <- 1
+      }
+      else if (is.adjList(A)) {
+        A <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], directed=dir))
+        class(A) <- "adjList"
       }
       else stop("mixedgraph supplied seems invalid")
       

@@ -6,6 +6,7 @@
 ##' @param matrix logical indicating whether to force the return of an adjacency matrix
 ##' @param sparse should we use sparse matrices if available?
 ##' @param sort 1=unique but not sorted, 2=unique and sorted, 0=neither
+##' @param rev logical: should directed \code{adjList}s have the direction inverted if \code{dir=1}?
 ##' 
 ##' @details returns an edgeMatrix or adjacency matrix for possibly multiple edge types.
 ##' If any of the edges are specified as an adjacency matrix, then the output will also
@@ -15,7 +16,7 @@
 ##' second vertices must belong to these respective sets. 
 ##' 
 ##' @export collapse
-collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1) {
+collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, rev=FALSE) {
   ## repeat direction with warning if necessary
   if (length(edges) == 0 || length(unlist(edges))==0) return(matrix(NA, 2, 0))
   dir <- dir*rep(1L, length(edges))
@@ -84,6 +85,15 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1) {
   if (all(isAList)) {
     for (i in seq_along(edges)) {
       if (dir[i] == 1) {
+        if (rev) {
+          edges[[i]] <- revAdjList(edges[[i]])
+          tmp <- vr1
+          vr1 <- vr2
+          vr2 <- tmp
+          tmp <- v1
+          v1 <- v2
+          v2 <- tmp
+        }
         edges[[i]][vr2] <- vector(mode="list", length=length(vr2))
         edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,v1))
       }
@@ -96,6 +106,7 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1) {
         edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,v2))
       }
     }
+    names(edges) <- NULL
     out <- unlist(purrr::transpose(edges), recursive = FALSE)
     
     if (sort > 0) {
@@ -200,7 +211,8 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
     return(wh)
   }
   
-  es <- collapse(edges, v1=v, dir=dir)
+  ## collapse edges into one representation
+  es <- collapse(edges, v1=v, dir=dir, rev=TRUE)
   
   ## select depending on mode of output
   if (is.adjMatrix(es, checknm=TRUE)) {
@@ -212,6 +224,8 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
   }
   else if (is.adjList(es, checknm = TRUE)) {
     out <- unlist(es[v])
+    # if (dir <= 0) out <- unlist(es[v])
+    # else out <- which(sapply(es, function(x) any(v %in% x)))
   }
   else if (is.edgeMatrix(es)) {
     ## this is an edge matrix
@@ -269,40 +283,42 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
 
   if (force) v <- intersect(v, graph$v)
   if (length(v) == 0) return(integer(0))
-    
+  
   # if (!skipChecks) {
-    ## only include vertices in the graph
-    if (!force && any(!(v %in% graph$v))) stop("Invalid values of v")
-
-    if (missing(etype)) etype <- edgeTypes()$type
-    ##' repeat dir() vector with warning if necessary
-    if (length(dir) > length(etype)) warning("More directions specified than edge types")
-    dir = dir*rep.int(1L, length(etype))
-    
-    tmp <- pmatch(etype, edgeTypes()$type)
-    dir[!edgeTypes()$directed[tmp]] <- 0L
+  ## only include vertices in the graph
+  if (!force && any(!(v %in% graph$v))) stop("Invalid values of v")
   
-    whEdge <- pmatch(etype,names(graph$edges))
+  if (missing(etype)) etype <- edgeTypes()$type
+  ##' repeat dir() vector with warning if necessary
+  if (length(dir) > length(etype)) warning("More directions specified than edge types")
+  dir = dir*rep.int(1L, length(etype))
   
-    edges <- graph$edges[whEdge]
-
-    if (length(edges) == 1) {
-      if (is.adjList(edges[[1]], checknm=TRUE)) {
-        wh <- match(names(graph$edges)[whEdge], edgeTypes()$type)
-        if (dir == -1 && edgeTypes()$directed) {
-          return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive))
-        }
-        else if (dir == 0 && !edgeTypes()$directed) {
-          return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive))
-        }
-      }
-      else if (is.adjMatrix(edges[[1]], checknm=TRUE)) {
+  tmp <- pmatch(etype, edgeTypes()$type)
+  dir[!edgeTypes()$directed[tmp]] <- 0L
+  
+  whEdge <- pmatch(etype,names(graph$edges))
+  
+  edges <- graph$edges[whEdge]
+  
+  if (length(edges) == 1) {
+    if (is.adjList(edges[[1]], checknm=TRUE)) {
+      wh <- match(names(graph$edges)[whEdge], edgeTypes()$type)
+      if (dir == -1 && edgeTypes()$directed) {
         return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive))
       }
+      else if (dir == 0 && !edgeTypes()$directed) {
+        return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive))
+      }
+      # else stop("This won't work")
     }
-    
-    es <- collapse(edges, dir=dir)
-    
+    else if (is.adjMatrix(edges[[1]], checknm=TRUE)) {
+      return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive))
+    }
+  }
+  
+  
+  es <- collapse(edges, dir=dir, rev=TRUE)
+  
   # }
   # else {
   #   if (etype %in% names(graph$edges)) {
@@ -319,7 +335,19 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   
   out = v
   
-  if (is.adjMatrix(es)) {
+  if (is.adjList(es)) {
+    continue = TRUE
+    new = v
+    
+    while (continue) {
+      out2 <- unlist(es[new])
+      new <- setdiff(out2, out)
+      out <- c(out, new)
+      
+      continue = (length(new) > 0)
+    }
+  }
+  else if (is.adjMatrix(es)) {
     continue = TRUE
     new = v
     
@@ -332,10 +360,7 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
       continue = (length(new) > 0)
     }
   }
-  else if (is.adjList(es)) {
-    
-  }
-  else {
+  else if (is.edgeMatrix(es)) {
     if (isTRUE(ncol(es) > 0)) {
       continue = TRUE
       new = v
@@ -349,8 +374,12 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
       }
     }
   }
+  else if (is.eList(es)) stop("Shouldn't be an eList object")
+  
+  ## if not inclusive, then remove elements of v
   if (!inclusive) out = setdiff(out, v)
   
+  ## sort if requested
   if (sort > 1) out = sort.int(out)
   
   out
@@ -406,17 +435,23 @@ groups = function(graph, etype, sort=1) {
   edges <- graph$edges[whEdge[!is.na(whEdge)]]
   es <- collapse(edges, dir=0)
   
-  grp = rep(0,length(graph$vnames))
+  grp = rep(0, length(vnames(graph)))
   grp[graph$v] = seq_along(graph$v)  
   
-  if (any(es == 0)) {
+  if (is.adjList(es, n=length(vnames(graph)))) {
+    for (i in seq_along(es)[graph$v]) {
+      if (length(es[[i]]) > 0) grp[i] <- min(grp[c(i, es[[i]])])
+      if (grp[i] == 0) stop("Should be in a group")
+    }
+  }
+  else if (is.adjMatrix(es)) {
     for (i in seq_len(ncol(es))) {
       g1 = grp[i]
       g2s = grp[which(es[,i] > 0)]
       grp[grp %in% g2s] = g1
     }
   }
-  else {
+  else if (is.edgeMatrix(es)) {
     for (i in seq_len(ncol(es))) {
       g1 = grp[es[1,i]]
       g2 = grp[es[2,i]]
