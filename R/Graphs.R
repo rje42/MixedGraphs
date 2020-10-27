@@ -252,12 +252,12 @@ print.mixedgraph = function(x, ...) {
 ##' @describeIn subGraph bracket notation for subgraphs
 ##' @param ... other arguments
 ##' @export
-`[.mixedgraph` = function(graph, v, ..., drop=FALSE) {
-  if (missing(v)) return(graph)
-  if (is.logical(v)) v <- which(v)
+`[.mixedgraph` = function(graph, v, ..., drop=FALSE, etype) {
+  if (missing(v)) v <- graph$v
+  else if (is.logical(v)) v <- which(v)
   v = v[v != 0]  # remove 0s
   if (length(v) > 0 && all(v < 0)) v = setdiff(graph$v, -v)
-  subGraph(graph, v, drop=drop)
+  subGraph(graph, v, drop=drop, etype=etype)
 }
 
 ##' Take induced vertex subgraph of mixedgraph
@@ -267,9 +267,15 @@ print.mixedgraph = function(x, ...) {
 ##' @param drop force removed vertices to be dropped from representation in adjacency matrices?
 ##' 
 ##' @export subGraph
-subGraph = function (graph, v, drop=FALSE) {
+subGraph = function (graph, v, drop=FALSE, etype) {
 
-  if (is.logical(v)) v <- which(v)
+  if (!missing(etype)) {
+    etype <- intersect(etype, names(graph$edges))
+    graph$edges <- graph$edges[etype]
+  }
+  
+  if (missing(v)) v <- graph$v
+  else if (is.logical(v)) v <- which(v)
   #  v = v[v <= graph$n]
   
   if (length(v) == 0) {
