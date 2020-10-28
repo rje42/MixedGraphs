@@ -70,8 +70,7 @@ is.cyclic = function(graph) {
 is.ADMG = function(graph) {
   if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
   ## should only contain directed and bidirected edges
-  wh <- names(graph$edges) %in% c("directed", "bidirected")
-  if(any(lengths(graph$edges[!wh]) > 0)) return(FALSE)
+  if(nedge(graph, setdiff(names(graph$edges), c("directed", "bidirected"))) > 0) return(FALSE)
   
   return(!is.cyclic(graph))
 }
@@ -81,8 +80,8 @@ is.ADMG = function(graph) {
 is.SG = function(graph) {
   if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
   ## should only contain undirected, directed and bidirected edges
-  wh <- names(graph$edges) %in% c("undirected", "directed", "bidirected")
-  if(any(lengths(graph$edges[!wh]) > 0)) return(FALSE)
+  if(nedge(graph, setdiff(names(graph$edges), c("undirected", "directed", "bidirected"))) > 0) return(FALSE)
+  
   v <- graph$v
   nbs <- nb(graph, v)
   if (length(intersect(ch(graph, v), nbs)) ||

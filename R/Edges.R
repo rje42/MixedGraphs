@@ -244,9 +244,17 @@ eList <- function(edges, directed=FALSE) {
   else if (is.adjList(edges, checknm=TRUE)) {
     out <- list()
     for (i in seq_along(edges)) {
-      if (directed) out <- c(out, lapply(edges[[i]], function(x) c(x,i)))
-      else out <- c(out, lapply(edges[[i]], function(x) c(x[x < i],i)))
+      tmp <- edges[[i]]
+      if (!directed) tmp <- tmp[tmp < i]
+      
+      if (length(tmp) > 0) out <- c(out, lapply(tmp, function(x) c(x,i)))
+      # if (directed) out <- c(out, lapply(tmp, function(x) c(x,i)))
+      # else {
+      #   out <- c(out, lapply(tmp, function(x) c(x[x < i],i)))
+      # }
     }
+    
+    # assertthat::are_equal(lengths(out), rep(2L, length(out)))
   }
   else if (is.edgeMatrix(edges)) {
      out <- mapply(c, edges[1,], edges[2,], SIMPLIFY=FALSE)
@@ -254,7 +262,9 @@ eList <- function(edges, directed=FALSE) {
   else if (is.list(edges)) out <- edges
   else if (is.numeric(edges) && length(edges) == 2) out <- list(edges)
   else stop("Not a valid edgeList")
+  
   class(out) <- "eList"
+  
   out
 }
 

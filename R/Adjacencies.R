@@ -18,7 +18,7 @@
 ##' @export collapse
 collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, rev=FALSE) {
   ## repeat direction with warning if necessary
-  if (length(edges) == 0 || length(unlist(edges))==0) return(matrix(NA, 2, 0))
+  if (length(edges) == 0 || length(unlist(edges))==0) return(edgeMatrix())
   dir <- dir*rep(1L, length(edges))
   
   all1 <- all2 <- FALSE
@@ -29,7 +29,7 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, r
   
   ### first look for objects of class adjMatrix and adjList
   isAMat <- sapply(edges, is.adjMatrix)
-  isAList <- sapply(edges, is.adjList, checknm=TRUE)
+  isAList <- sapply(edges, is.adjList)
 
   ## vertices not specified, use all
   if (missing(v1) || missing(v2)) {
@@ -107,14 +107,14 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, r
       }
     }
     names(edges) <- NULL
-    out <- unlist(purrr::transpose(edges), recursive = FALSE)
+    out <- lapply(purrr::transpose(edges), unlist)
     
     if (sort > 0) {
       out <- lapply(out, unique.default)
       if (sort > 1) out <- lapply(out, sort.int)
     }
 
-    class(out) <- c("adjList", class(out))
+    class(out) <- "adjList"
 
     return(out)
   }
@@ -126,9 +126,9 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, r
   edges <- c(edges, lapply(edges[dir == 0], function(x) x[2:1,,drop=FALSE]))
 
   ## shortcut for all vertices, saves time
-   if (all1 & all2) {
+   if (all1 && all2) {
      jointEM <- do.call(cbind, edges)
-     class(jointEM) <- c("edgeMatrix", class(jointEM))
+     class(jointEM) <- "edgeMatrix"
      return(jointEM)
    }
 
@@ -137,7 +137,7 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, r
       wh <- (edges[[i]][1,] %in% v1) & (edges[[i]][2,] %in% v2)
       jointEM <- cbind(jointEM, edges[[i]][,wh])
   }
-  class(jointEM) <- c("edgeMatrix", class(jointEM))
+  class(jointEM) <- "edgeMatrix"
   
   return(jointEM)
 }
@@ -193,7 +193,7 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
   }
   
   ## get edge types
-  whEdge <- pmatch(etype,names(graph$edges))
+  whEdge <- na.omit(pmatch(etype,names(graph$edges)))
   edges <- graph$edges[whEdge]
   # n <- length(graph$v)
   
@@ -232,6 +232,7 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
     if (ncol(es) == 0) return(integer(0))
     out = es[2,]  
   }
+  else if (length(edges) == 0) return(integer(0)) 
   else stop("Unrecognised edge format")
   
   if (sort > 0) out <- unique.default(out)
@@ -304,21 +305,20 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
     if (is.adjList(edges[[1]], checknm=TRUE)) {
       wh <- match(names(graph$edges)[whEdge], edgeTypes()$type)
       if (dir == -1 && edgeTypes()$directed) {
-        return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive))
+        return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive, sort=sort))
       }
       else if (dir == 0 && !edgeTypes()$directed) {
-        return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive))
+        return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive, sort=sort))
       }
       # else stop("This won't work")
     }
     else if (is.adjMatrix(edges[[1]], checknm=TRUE)) {
-      return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive))
+      return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive, sort=sort))
     }
   }
-  
-  
+
   es <- collapse(edges, dir=dir, rev=TRUE)
-  
+
   # }
   # else {
   #   if (etype %in% names(graph$edges)) {
@@ -326,15 +326,15 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   #   }
   #   else return(integer(0))
   # }
-  
+
   #   tmp = lapply(graph$edges[etype], edgeMatrix)
   #   if (!is.null(tmp)) {
   #     es = do.call(cbind, tmp)
   #   }
   #   else es = matrix(NA, ncol=0, nrow=2)
-  
+
   out = v
-  
+
   if (is.adjList(es)) {
     continue = TRUE
     new = v

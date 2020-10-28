@@ -1,4 +1,4 @@
-mg1 <- graphCr("1 -> 2 <-> 3 <-> 4 <- 2",useMatrices = TRUE)
+mg1 <- graphCr("1 -> 2 <-> 3 <-> 4 <- 2", mode = "adjMatrix")
 
 test_that("DAG topology is plausible", {
   expect_true(isTopological(mg1, topologicalOrder(mg1)))

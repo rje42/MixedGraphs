@@ -327,7 +327,7 @@ skeleton = function(graph) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   # e = lapply(unlist(graph$edges, recursive=FALSE), sort.int)
   # e = unique(e)
-  e = collapse(graph$edges, dir=1)
+  e = collapse(graph$edges, dir=0)
   out = mixedgraph(v=graph$v, edges=list(undirected=e), vnames=graph$vnames)
   return(out)
 }
@@ -467,8 +467,10 @@ anSets2 = function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
 ##' 
 ##' @details Uses \code{clique} algorithm on a suitable undirected graph.
 ##' 
+##' @warning Does't work for cyclic graphs.
+##' 
 ##' @export barrenSets
-barrenSets = function(graph, topOrder, max_size, same_dist=FALSE, 
+barrenSets <- function(graph, topOrder, max_size, same_dist=FALSE, 
                       sort=1, return_anc_sets=FALSE) {
   
   if (missing(max_size)) max_size <- length(graph$v)
@@ -479,16 +481,17 @@ barrenSets = function(graph, topOrder, max_size, same_dist=FALSE,
   parents[graph$v] <- lapply(graph$v, function(x) pa(graph, x))
   
   if (missing(topOrder)) topOrder <- topologicalOrder(graph)
-  ancs <- list()
+  ancs <- vector(mode="list", length = length(parents))
   
   ## create a new undirected graph where edge v -- w exists if 
   ## and only if v and w are incomparable in graph
   graph2 <- mixedgraph(v=graph$v, edges=list(undirected=eList()), vnames=graph$vnames) # mutilate(graph, graph$v)
-  class(graph2$edges$undirected) <- "eList"
+  # class(graph2$edges$undirected) <- "eList"
 
   for (i in topOrder) {
     ancs[[i]] <- c(i, unique.default(unlist(ancs[parents[[i]]])))
-    graph2$edges$undirected <- c(graph2$edges$undirected, lapply(ancs[[i]][-1], function(x) c(x,i)))
+    graph2 <- addEdges(graph2, list(un = eList(lapply(ancs[[i]][-1], function(x) c(x,i)))))
+    # graph2$edges$undirected <- c(graph2$edges$undirected, lapply(ancs[[i]][-1], function(x) c(x,i)))
   }
   
   ### perhaps speed this up by using sparse matrices when same_dist = TRUE

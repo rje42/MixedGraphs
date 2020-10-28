@@ -1,7 +1,7 @@
 set.seed(123)
 n <- 10
 u10 <- makeGraphComplete(n)
-u10 <- removeEdges(u10, list(un=combn(n,2, simplify = FALSE)[sample(choose(n,2), n)]))
+u10 <- removeEdges(u10, list(un=eList(combn(n,2, simplify = FALSE)[sample(choose(n,2), n)])))
 u10 <- withEdgeList(u10)
 
 ui10 <- convert(u10, "igraph")
