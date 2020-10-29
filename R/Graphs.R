@@ -8,8 +8,8 @@ graphOptionsEnv <- new.env()
 ## hyper    : is this a hyper edge? [Not yet supported.]
 assign("edgeTypesDF", 
        data.frame(type=c("undirected", "directed", "bidirected", "partially directed", "partially undirected", "not directed"),
-                  char=c("---","-->","<->", ".->", ".--", ".-."),
-                  revchar=c(NA, "<--" ,NA, "<-.", "--.", NA),
+                  char=c("---","-->","<->", "o->", "o--", "o-o"),
+                  revchar=c(NA, "<--" ,NA, "<-o", "--o", NA),
                   directed=c(FALSE, TRUE, FALSE, TRUE, TRUE, FALSE),
                   hyper=c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE), stringsAsFactors=FALSE),
        envir=graphOptionsEnv)
@@ -130,12 +130,6 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
     for (i in which(edAL)) if (edAL[i]) class(edges[[i]]) <- "adjList"
     if (any(is.na(match(unlist(edges[edAL]), v)))) stop("Edges must be between vertices in the graph")
 
-    ## Check all edges given as edgeLists are valid and of length 2
-    edL <- sapply(edges, is.eList, checknm=TRUE)
-    for (i in which(edL)) if (edL[i]) class(edges[[i]]) <- "eList"
-    if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
-    if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
-    
     ## Check all edges given as edge matrices are valid and of length 2
     edE <- sapply(edges, is.edgeMatrix, checknm=TRUE)
     for (i in which(edE)) class(edges[[i]]) <- "edgeMatrix"
@@ -148,6 +142,13 @@ mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
       if ("adjMatrix" %in% class(edges[[i]])) next
       class(edges[[i]]) <- c("adjMatrix", class(edges[[i]]))
     }
+    
+    ## Check all edges given as edgeLists are valid and of length 2
+    edL <- sapply(edges, is.eList, checknm=FALSE)
+    for (i in which(edL)) if (edL[i]) class(edges[[i]]) <- "eList"
+    if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
+    if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
+    
     
     ## refuse to continue if edge types not unambiguously specified
     if (!all(edAL | edL | edE | edA)) stop("Edge types not all given")
@@ -265,6 +266,7 @@ print.mixedgraph = function(x, ...) {
 ##' @param graph a \code{mixedgraph} object
 ##' @param v vertices to keep
 ##' @param drop force removed vertices to be dropped from representation in adjacency matrices?
+##' @param etype edge types to keep (defaults to all)
 ##' 
 ##' @export subGraph
 subGraph = function (graph, v, drop=FALSE, etype) {

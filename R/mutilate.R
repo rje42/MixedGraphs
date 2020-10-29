@@ -24,8 +24,8 @@ remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
   }
   else if (is.edgeMatrix(edges)) {
     ## edgeMatrix object
-    if (nrow(edges) != 2 || any(edges <= 0)) stop("Object provided is a matrix but 
-                                                        doesn't seem to be an edgeMatrix")
+    # if (nrow(edges) != 2 || any(edges <= 0)) stop("Object provided is a matrix but
+    #                                                     doesn't seem to be an edgeMatrix or adjMatrix")
     if (ncol(edges) <= 1) return(edges)
     
     ## get a unique number representing each edge
@@ -38,10 +38,10 @@ remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
     if (sort) warning("sort = TRUE has no effect for edgeMatrix")
     return(edges[,!dup,drop=FALSE])
   }
-  else if (is.list(edges)) {
-
+  else if (is.eList(edges) || is.list(edges)) {
     if (directed) {
       edges <- unique.default(edges)
+      class(edges) <- "eList"
       return(edges)
     }
     ## if undirected, sort entries
@@ -73,13 +73,14 @@ remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
 ##' represented by adjacency matrices. 
 ##' 
 ##' @export addEdges
-addEdges <- function(graph, edges #, ...
+addEdges <- function(graph, edges, ...
                      ## add in code to put edges in more directly
                      ) {
   out <- graph
   v <- graph$v
-  # args <- list(...)
   
+  args <- list(...)
+  if (length(args) > 0) edges <- do.call(makeEdgeList, args)
   etys = edgeTypes()$type
   
   if (!is.list(edges)) stop("'edges' must be a list named with edge types")
@@ -92,13 +93,16 @@ addEdges <- function(graph, edges #, ...
   if (any(is.na(et))) stop("Edge types not matched")
   else if (any(duplicated(et))) stop("Repeated edge types matched")
   
+  ## make sure edges have integer values
+  
+  
   ## Check all edges given as lists to be added are valid and of length 2
   edL <- sapply(edges, is.eList, checknm=TRUE)
   if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
   if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
   
   ## Check all edges given as edge matrices to be added are valid and of length 2
-  edE <- !edL & sapply(edges, is.edgeMatrix, checknm=TRUE)
+  edE <- !edL & sapply(edges, is.edgeMatrix)
   if (any(is.na(match(unlist(edges[edE]), v)))) stop("Edges must be between vertices in the graph")
   if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
 
@@ -118,7 +122,7 @@ addEdges <- function(graph, edges #, ...
         A = cbind(A, edgeMatrix(edges[[i]], directed = dir))
       }
       else if (is.adjMatrix(A)) {
-        A = A + adjMatrix(edges[[i]], directed = dir)
+        A = A + adjMatrix(edges[[i]], n=nrow(A), directed = dir)
 #        out$edges[[etys[et[i]]]] <- pmin(1, out$edges[[etys[et[i]]]])
        class(A) <- "adjMatrix"
        A[A > 1] <- 1
@@ -145,13 +149,25 @@ addEdges <- function(graph, edges #, ...
   out
 }
 
+## NEED TO SORT OUT ALL ARGUMENT
 ##' @describeIn addEdges remove edges
 ##' @export removeEdges
-removeEdges <- function(graph, edges) {
+removeEdges <- function(graph, edges, ...) {
   out <- withAdjMatrix(graph)
   v <- graph$v
   
-  etys = edgeTypes()$type
+  # if ("all" %in% names(args)) {
+  #   all <- args$all
+  #   args <- args[names(args != "all")]
+  # }
+  
+  args <- makeEdgeList(...)
+  if (length(args) > 0) edges <- args
+  
+  if (!("edgeList" %in% class(edges))) class(edges) <- "edgeList"
+  
+  ## now have an edgeList
+  etys <- edgeTypes()$type
   if (is.null(names(edges))) et = seq_along(edges)
   else et = pmatch(names(edges), etys)
   if (length(et) == 1 && is.na(et)) {
@@ -190,7 +206,39 @@ removeEdges <- function(graph, edges) {
   out 
 }
 
-
+## Make an edgeList from a collection of edges
+## 
+## @param ... list of named edge objects
+## 
+## @export
+makeEdgeList <- function(...) {
+  
+  ## get arguments, and return an empty list if necessary
+  args <- list(...)
+  if (length(args) == 0) {
+    class(args) <- "edgeList"
+    return(args)
+  }
+  
+  ## otherwise, compare to standard edge types
+  etys = edgeTypes()$type
+  if (length(args) > 0) {
+    wh <- pmatch(names(args), etys)
+    names(args)[!is.na(wh)] <- etys[na.omit(wh)]
+    
+    if (any(is.na(wh))) {
+      warning(paste("edge types", paste(names(args)[is.na(wh)], collapse=", "), "not matched"))
+      args <- args[!is.na(wh)]
+    }
+    
+    ## define edges to be an edgeList consisting of entries from ...
+    edges <- args
+    class(edges) <- "edgeList"
+  }
+  
+  edges
+}
+  
 ##' Delete edges
 ##' 
 ##' Remove edges adjacent to set of vertices

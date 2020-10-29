@@ -19,7 +19,7 @@ moralize <- function(graph) {
   }
   diag(extra) = 0
   
-  out = addEdges(out, list(undirected=extra))
+  out = addEdges(out, undirected=extra)
   return(out)
 }
 

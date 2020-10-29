@@ -2,9 +2,12 @@
 % Please edit documentation in R/Adjacencies.R
 \name{adj}
 \alias{adj}
+\alias{adjacent}
 \title{Find adjacent vertices}
 \usage{
 adj(graph, v, etype, dir = 0, inclusive = TRUE, sort = 1, force = FALSE)
+
+adjacent(graph, v1, v2, etype, dir = 0)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}
@@ -24,6 +27,8 @@ sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 then output will always be unique and sorted.}
 
 \item{force}{logical - should invalid \code{v} be ignored?}
+
+\item{v1, v2}{vertices between which to test for adjacency}
 }
 \description{
 Generic function for finding adjacent vertices based on any kind of edge.
@@ -32,6 +37,20 @@ Generic function for finding adjacent vertices based on any kind of edge.
 The argument \code{directed} is recycled for multiple edge types, but 
 has no effect for edges without a specified direction.  If any \code{v} is 
 not a vertex of \code{graph}, an error is returned, unless \code{force=TRUE}.
+
+The function \code{adjacent} tests for a particular adjacency between
+two vertices.
+}
+\section{Functions}{
+\itemize{
+\item \code{adjacent}: Test for adjacency
+}}
+
+\examples{
+adj(gr1, v=1, etype="directed")
+adj(gr1, v=1, etype="directed", dir=-1)
+adjacent(gr1, 1, 3, etype="directed", dir=1)
+
 }
 \seealso{
 \code{\link{grp}} for paths

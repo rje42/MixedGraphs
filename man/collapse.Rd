@@ -4,7 +4,16 @@
 \alias{collapse}
 \title{Collapse multiple edge types to a single list or matrix}
 \usage{
-collapse(edges, v1, v2, dir = 1, matrix = FALSE, sparse = FALSE, sort = 1)
+collapse(
+  edges,
+  v1,
+  v2,
+  dir = 1,
+  matrix = FALSE,
+  sparse = FALSE,
+  sort = 1,
+  rev = FALSE
+)
 }
 \arguments{
 \item{edges}{list of edges to include}
@@ -18,6 +27,8 @@ collapse(edges, v1, v2, dir = 1, matrix = FALSE, sparse = FALSE, sort = 1)
 \item{sparse}{should we use sparse matrices if available?}
 
 \item{sort}{1=unique but not sorted, 2=unique and sorted, 0=neither}
+
+\item{rev}{logical: should directed \code{adjList}s have the direction inverted if \code{dir=1}?}
 }
 \description{
 Collapse multiple edge types to a single list or matrix

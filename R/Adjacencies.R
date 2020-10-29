@@ -162,6 +162,14 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, r
 ##' has no effect for edges without a specified direction.  If any \code{v} is 
 ##' not a vertex of \code{graph}, an error is returned, unless \code{force=TRUE}.
 ##' 
+##' The function \code{adjacent} tests for a particular adjacency between
+##' two vertices.  
+##' 
+##' @examples
+##' adj(gr1, v=1, etype="directed")
+##' adj(gr1, v=1, etype="directed", dir=-1)
+##' adjacent(gr1, 1, 3, etype="directed", dir=1)
+##' 
 ##' @export adj
 ##' 
 ##' @seealso \code{\link{grp}} for paths
@@ -238,8 +246,17 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
   if (sort > 0) out <- unique.default(out)
   if (sort > 1) out <- sort.int(out)
   if (!inclusive) out = setdiff(out, v)
+  
+  out <- as.integer(out)
 
   return(out)
+}
+
+##' @describeIn adj Test for adjacency
+##' @param v1,v2 vertices between which to test for adjacency
+##' @export 
+adjacent <- function(graph, v1, v2, etype, dir=0) {
+  v2 %in% adj(graph, v1, etype=etype, dir=dir)
 }
 
 ##' Group vertices by adjacencies
@@ -282,12 +299,12 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
 grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
 
+  # if (!skipChecks) {
+  ## only include vertices in the graph unless force=TRUE
   if (force) v <- intersect(v, graph$v)
+  else if (any(!(v %in% graph$v))) stop("Invalid values of v")
   if (length(v) == 0) return(integer(0))
   
-  # if (!skipChecks) {
-  ## only include vertices in the graph
-  if (!force && any(!(v %in% graph$v))) stop("Invalid values of v")
   
   if (missing(etype)) etype <- edgeTypes()$type
   ##' repeat dir() vector with warning if necessary
@@ -381,6 +398,7 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   
   ## sort if requested
   if (sort > 1) out = sort.int(out)
+  out <- as.integer(out)
   
   out
 }
@@ -420,6 +438,7 @@ grp2 <- function(v, edges, dir, inclusive, sort=1) {
   if (!inclusive) out <- setdiff(out, v)
   
   if (sort > 1) out <- sort.int(out)
+  out <- as.integer(out)
   
   out
 }

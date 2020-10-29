@@ -5,9 +5,9 @@
 \alias{subGraph}
 \title{Take induced vertex subgraph of mixedgraph}
 \usage{
-\method{[}{mixedgraph}(graph, v, ..., drop = FALSE)
+\method{[}{mixedgraph}(graph, v, ..., drop = FALSE, etype)
 
-subGraph(graph, v, drop = FALSE)
+subGraph(graph, v, drop = FALSE, etype)
 }
 \arguments{
 \item{graph}{a \code{mixedgraph} object}
@@ -17,6 +17,8 @@ subGraph(graph, v, drop = FALSE)
 \item{...}{other arguments}
 
 \item{drop}{force removed vertices to be dropped from representation in adjacency matrices?}
+
+\item{etype}{edge types to keep (defaults to all)}
 }
 \description{
 Take induced vertex subgraph of mixedgraph

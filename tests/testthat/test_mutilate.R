@@ -7,11 +7,14 @@ test_that("mutilate for incoming edges works", {
 })
 
 test_that("addEdges works", {
-  expect_equivalent(addEdges(mg1, list(undirected=eList(c(3,5)))), mg2)
+  expect_equivalent(standardizeEdges(addEdges(mg1, undirected=eList(c(3,5)))), 
+                    standardizeEdges(mg2))
+  expect_equivalent(standardizeEdges(addEdges(mg1, makeEdgeList(undirected=eList(c(3,5))))), 
+                    standardizeEdges(mg2))
 })
 
 test_that("removeEdges works", {
-  mg3 <- removeEdges(mg2, list(un=eList(c(5,3))))
+  mg3 <- removeEdges(mg2, un=eList(c(5,3)))
   expect_equal(mg3, withAdjMatrix(mg1))
 })
 
@@ -30,11 +33,11 @@ test_that("mutilate for incoming edges works", {
 })
 
 test_that("addEdges works", {
-  expect_equal(addEdges(mg1, list(un=eList(c(3,5)))), mg2)
+  expect_equal(addEdges(mg1, edges=makeEdgeList(un=eList(c(3,5)))), mg2)
 })
 
 test_that("removeEdges works", {
-  mg3 <- removeEdges(mg2, list(un=eList(c(5,3))))
+  mg3 <- removeEdges(mg2, un=eList(c(5,3)))
   expect_equal(mg3, withAdjMatrix(mg1))
 })
 

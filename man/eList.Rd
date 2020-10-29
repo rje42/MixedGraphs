@@ -7,11 +7,16 @@
 eList(edges, directed = FALSE)
 }
 \arguments{
-\item{edges}{\code{adjList}, \code{edgeMatrix} or \code{adjMatrix}}
+\item{edges}{\code{adjList}, \code{edgeMatrix}, \code{adjMatrix}, or a \code{list} of pairs of edges}
 
 \item{directed}{logical: if TRUE edges are assumed directed}
 }
 \description{
 Returns an \code{eList} object from an adjacency matrix
 or edge matrix object.
+}
+\details{
+The \code{directed} argument is important; if omitted, 
+then some edges may be recorded only once, even though they are present 
+in both directions.
 }

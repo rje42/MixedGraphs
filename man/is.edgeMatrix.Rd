@@ -7,13 +7,13 @@
 \alias{is.adjList}
 \title{Check if object could be an edgeMatrix}
 \usage{
-is.edgeMatrix(object, n, checknm = FALSE)
+is.edgeMatrix(object, n, checknm = TRUE)
 
-is.eList(object, n, checknm = FALSE)
+is.eList(object, n, checknm = TRUE)
 
-is.adjMatrix(object, n, checknm = FALSE)
+is.adjMatrix(object, n, checknm = TRUE)
 
-is.adjList(object, n, checknm = FALSE)
+is.adjList(object, n, checknm = TRUE)
 }
 \arguments{
 \item{object}{purported edgeMatrix}

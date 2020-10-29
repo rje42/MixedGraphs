@@ -467,7 +467,7 @@ anSets2 = function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
 ##' 
 ##' @details Uses \code{clique} algorithm on a suitable undirected graph.
 ##' 
-##' @warning Does't work for cyclic graphs.
+##' \strong{Warning:} Doesn't work for cyclic graphs.
 ##' 
 ##' @export barrenSets
 barrenSets <- function(graph, topOrder, max_size, same_dist=FALSE, 

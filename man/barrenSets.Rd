@@ -32,4 +32,6 @@ Return list of barren subsets up to specified size
 }
 \details{
 Uses \code{clique} algorithm on a suitable undirected graph.
+
+\strong{Warning:} Doesn't work for cyclic graphs.
 }

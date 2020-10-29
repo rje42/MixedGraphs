@@ -97,10 +97,10 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
     return(out)
   }
   if (is.adjList(edges, checknm=TRUE)) {
-    ## nothing to do
+    ## nothing to do, just check everything is an integer
+    edges <- lapply(edges, as.integer)
     return(edges)
   }
-  else if (is.null(edges)) return(NULL)
   else if (is.eList(edges)) {
     ## seems to be an eList
     if (length(edges) == 0) {
@@ -141,6 +141,7 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
     out <- apply(edges, 2, function(x) which(x > 0))
     if (is.numeric(out)) out <- unlist(lapply(out, list), recursive = FALSE)
   }
+  else if (is.null(edges)) return(NULL)
   else stop("Don't know what kind of edge-set this is")
   
   # if (missing(n)) n = max(tmp)
@@ -151,6 +152,8 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
   # out <- rep(0, n*n)
   # out[idx] = 1
 
+  out <- lapply(out, as.integer)
+  
   class(out) <- "adjList"
   # if (!missing(vnames)) dimnames(out) <- list(vnames, vnames)
   
@@ -212,6 +215,7 @@ edgeMatrix <- function(edges, directed=FALSE) {
   }
   else stop("Hyperedges not supported for this format")
   
+  out[] <- as.integer(out)
   class(out) <- "edgeMatrix"
   
   out
@@ -222,12 +226,17 @@ edgeMatrix <- function(edges, directed=FALSE) {
 ##' Returns an \code{eList} object from an adjacency matrix
 ##' or edge matrix object.
 ##' 
-##' @param edges \code{adjList}, \code{edgeMatrix} or \code{adjMatrix}
+##' @param edges \code{adjList}, \code{edgeMatrix}, \code{adjMatrix}, or a \code{list} of pairs of edges
 ##' @param directed logical: if TRUE edges are assumed directed
+##' 
+##' @details The \code{directed} argument is important; if omitted, 
+##' then some edges may be recorded only once, even though they are present 
+##' in both directions.
 ##' 
 ##' @export eList
 eList <- function(edges, directed=FALSE) {
-  if(missing(edges) || is.null(edges)) {
+  if (!is.logical(directed)) stop("argument 'directed' must be logical")
+  if (missing(edges) || is.null(edges)) {
     out <- list()
     class(out) <- "eList"
     return(out)
@@ -263,6 +272,7 @@ eList <- function(edges, directed=FALSE) {
   else if (is.numeric(edges) && length(edges) == 2) out <- list(edges)
   else stop("Not a valid edgeList")
   
+  out <- lapply(out, as.integer)
   class(out) <- "eList"
   
   out
