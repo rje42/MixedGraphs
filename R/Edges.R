@@ -289,6 +289,40 @@ edgeList <- function(edges, directed=FALSE) {
 }
 
 
+##' Make an edgeList from a collection of edges
+##' 
+##' @param ... list of named edge objects
+##' 
+##' @export
+makeEdgeList <- function(...) {
+  
+  ## get arguments, and return an empty list if necessary
+  args <- list(...)
+  if (length(args) == 0) {
+    class(args) <- "edgeList"
+    return(args)
+  }
+  
+  ## otherwise, compare to standard edge types
+  etys = edgeTypes()$type
+  if (length(args) > 0) {
+    wh <- pmatch(names(args), etys)
+    names(args)[!is.na(wh)] <- etys[na.omit(wh)]
+    
+    if (any(is.na(wh))) {
+      warning(paste("edge types", paste(names(args)[is.na(wh)], collapse=", "), "not matched"))
+      args <- args[!is.na(wh)]
+    }
+    
+    ## define edges to be an edgeList consisting of entries from ...
+    edges <- args
+    class(edges) <- "edgeList"
+  }
+  
+  edges
+}
+
+
 ##' Check if object could be an edgeMatrix
 ##' 
 ##' @param object purported edgeMatrix

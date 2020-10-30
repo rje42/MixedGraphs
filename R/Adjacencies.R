@@ -321,10 +321,10 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   if (length(edges) == 1) {
     if (is.adjList(edges[[1]], checknm=TRUE)) {
       wh <- match(names(graph$edges)[whEdge], edgeTypes()$type)
-      if (dir == -1 && edgeTypes()$directed) {
+      if (dir == -1 && edgeTypes()$directed[wh]) {
         return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive, sort=sort))
       }
-      else if (dir == 0 && !edgeTypes()$directed) {
+      else if (dir == 0 && !edgeTypes()$directed[wh]) {
         return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive, sort=sort))
       }
       # else stop("This won't work")
