@@ -31,7 +31,9 @@ Convenience function for quickly constructing graphs with character input
 }
 \details{
 Symbols \code{-<>=*|:} are assumed to be part of an edge, so
-cannot be used in node names using this function.
+cannot be used in node names using this function.  Note that if we want
+an edge with an \code{o} on the end (e.g. \code{o->}) then we must 
+leave a space between the \code{o} and the variable name.
 }
 \examples{
 graphCr("1--->2<-->3<-4","2<->4,4->5")
