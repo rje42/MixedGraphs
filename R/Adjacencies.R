@@ -458,10 +458,23 @@ groups = function(graph, etype, sort=1) {
   grp[graph$v] = seq_along(graph$v)  
   
   if (is.adjList(es, n=length(vnames(graph)))) {
+    grp0 <- grp
     for (i in seq_along(es)[graph$v]) {
-      if (length(es[[i]]) > 0) grp[i] <- min(grp[c(i, es[[i]])])
-      if (grp[i] == 0) stop("Should be in a group")
+      if (grp[i] < grp0[i]) next
+      
+      vs <- c(i)
+      new <- es[[i]]
+      while (length(new) > 0) {
+        vs <- c(vs, new)
+        new <- setdiff(unlist(es[new]), vs)
+      }
+      grp[vs] <- min(grp[vs])
     }
+    
+    # for (i in seq_along(es)[graph$v]) {
+    #   if (length(es[[i]]) > 0) grp[c(i, es[[i]])] <- min(grp[c(i, es[[i]])])  ### NEED TO CHECK THIS!
+    #   if (grp[i] == 0) stop("Should be in a group")
+    # }
   }
   else if (is.adjMatrix(es)) {
     for (i in seq_len(ncol(es))) {

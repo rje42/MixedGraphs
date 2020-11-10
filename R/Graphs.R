@@ -424,7 +424,9 @@ standardizeEdges <- function(graph) {
     }
     
     graph$edges[[i]] = graph$edges[[i]][ord]
+    class(graph$edges[[i]]) <- "eList"
   }
+  class(graph$edges) <- "edgeList"
   
   graph
 }

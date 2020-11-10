@@ -405,12 +405,17 @@ is.adjList <- function(object, n, checknm = TRUE) {
 withAdjMatrix <- function(graph, edges, sparse=FALSE) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
-  if (length(idx) == 0) return(graph)
+  if (length(idx) == 0) {
+    class(graph$edges) <- "edgeList"
+    return(graph)
+  }
 
   ## get directed and number of vertices, then transform using adjMatrix()
   dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
   n <- length(graph$vnames)
   graph$edges[idx] <- mapply(adjMatrix, graph$edges[idx], directed=dir, n=n, sparse=sparse, SIMPLIFY=FALSE)
+  
+  class(graph$edges) <- "edgeList"
   
   graph
 }
@@ -420,12 +425,17 @@ withAdjMatrix <- function(graph, edges, sparse=FALSE) {
 withAdjList <- function(graph, edges) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
-  if (length(idx) == 0) return(graph)
+  if (length(idx) == 0) {
+    class(graph$edges) <- "edgeList"
+    return(graph)
+  }
 
   ## get directed and number of vertices, then transform using adjList()
   dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
   n <- length(graph$vnames)
   graph$edges[idx] <- mapply(adjList, graph$edges[idx], directed=dir, n=n, SIMPLIFY=FALSE)
+  
+  class(graph$edges) <- "edgeList"
   
   graph
 }
@@ -435,12 +445,17 @@ withAdjList <- function(graph, edges) {
 withEdgeMatrix <- function(graph, edges) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
-  if (length(idx) == 0) return(graph)
+  if (length(idx) == 0) {
+    class(graph$edges) <- "edgeList"
+    return(graph)
+  }
   
   ## get directed and number of vertices, then transform using edgeMatrix()
   dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
   n <- length(graph$vnames)
   graph$edges[idx] <- mapply(edgeMatrix, graph$edges[idx], directed=dir, SIMPLIFY=FALSE)
+  
+  class(graph$edges) <- "edgeList"
   
   graph
 }
@@ -450,12 +465,17 @@ withEdgeMatrix <- function(graph, edges) {
 withEdgeList <- function(graph, edges) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
-  if (length(idx) == 0) return(graph)
+  if (length(idx) == 0) {
+    class(graph$edges) <- "edgeList"
+    return(graph)
+  }
   
   ## get directed and number of vertices, then transform using eList()
   dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
   n <- length(graph$vnames)
   graph$edges[idx] <- mapply(eList, graph$edges[idx], directed=dir, SIMPLIFY=FALSE)
+  
+  class(graph$edges) <- "edgeList"
   
   graph
 }
