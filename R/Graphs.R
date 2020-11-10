@@ -478,8 +478,9 @@ graphCr <- function(char, ..., mode="adjList", useMatrices=FALSE, format="mixedg
   out <- gsub("[-]+", "-", out)
   out <- gsub("[=]+", "=", out)
   out <- gsub("[ ]+", " ", out)
-  out <- gsub("([A-Z0-9a-z]+[^o])([o]{0,1})([-<>=*.|:]+)([o]{0,1})", "\\1 \\2\\3\\4", out)
-  out <- gsub("([o]{0,1})([-<>=*.|:]+)([o]{0,1})([^o][A-Z0-9a-z]+)", "\\1\\2\\3 \\4", out)
+  # out <- gsub("([:alnum:]*)([-<>=*.|:]+)", "\\1 \\2", out)
+  out <- gsub("([:alnum:]*[A-Za-np-z0-9])([o]{0,1})([-<>=*.|:]+)([o]{0,1})", "\\1 \\2\\3\\4", out)
+  out <- gsub("([o]{0,1})([-<>=*.|:]+)([o]{0,1})([A-Za-np-z0-9][:alnum:]*)", "\\1\\2\\3 \\4", out)
   out <- strsplit(out, " ")
   out <- lapply(out, function(x) x[x != ""])
 
