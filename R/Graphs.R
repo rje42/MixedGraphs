@@ -11,7 +11,8 @@ assign("edgeTypesDF",
                   char=c("---","-->","<->", "o->", "o--", "o-o"),
                   revchar=c(NA, "<--" ,NA, "<-o", "--o", NA),
                   directed=c(FALSE, TRUE, FALSE, TRUE, TRUE, FALSE),
-                  hyper=c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE), stringsAsFactors=FALSE),
+                  hyper=c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE),
+                  abbrv=c("un", "dir", "bi", "pdir", "pun", "non"), stringsAsFactors=FALSE),
        envir=graphOptionsEnv)
 
 

@@ -19,7 +19,12 @@ topologicalOrder = function(graph) {
   left <- setdiff(graph$v, out)
   
   while (length(out) < n) {
-    out <- c(out, orphaned(graph, left))
+    rm <- orphaned(graph, left)
+    if (length(rm) == 0) {
+      warning("No topological order found: graph is cyclic")
+      return(NA)
+    }
+    out <- c(out, rm)
     left <- setdiff(left, out)
   }
   
@@ -58,11 +63,15 @@ isTopological = function(graph, v) {
 ##' @export is.cyclic
 is.cyclic = function(graph) {
   if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
-  out = tryCatch(topologicalOrder(graph), error = function(e) {
-    if (e$message == "Graph is cyclic") return(NA)
-    else stop(e$message)
-    })
-  return(any(is.na(out)))
+  ord <- suppressWarnings(topologicalOrder(graph))
+  if (any(is.na(ord))) return(TRUE)
+  
+  # out = tryCatch(topologicalOrder(graph), warning = function(e) {
+  #   if (e$message == "No topological order found: graph is cyclic") return(TRUE)
+  #   else stop(e$message)
+  #   })
+  # return(any(is.na(out)))
+  return(FALSE)
 }
 
 ##' @describeIn is.DAG test if an ADMG

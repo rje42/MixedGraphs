@@ -8,6 +8,11 @@ gr2a <- graphCr("1 <--> 2 -> 3 <-> 4 <-- 2, 1 --> 4 --> 6, 2 <-> 5", mode="adjMa
 gr2b <- graphCr("1 <--> 2 -> 3 <-> 4 <-- 2, 1 --> 4 --> 6, 2 <-> 5", mode="eList")
 gr2c <- graphCr("1 <--> 2 -> 3 <-> 4 <-- 2, 1 --> 4 --> 6, 2 <-> 5", mode="edgeMatrix")
 
+gr3 <- makeGraphCycle(5, "directed")
+# gr3a <- graphCr("1 <--> 2 -> 3 <-> 4 <-- 2, 1 --> 4 --> 6, 2 <-> 5", mode="adjMatrix")
+# gr3b <- graphCr("1 <--> 2 -> 3 <-> 4 <-- 2, 1 --> 4 --> 6, 2 <-> 5", mode="eList")
+# gr3c <- graphCr("1 <--> 2 -> 3 <-> 4 <-- 2, 1 --> 4 --> 6, 2 <-> 5", mode="edgeMatrix")
+
 
 test_that("is.SG and is.ADMG work", {
   expect_true(is.SG(gr1))
@@ -46,3 +51,8 @@ test_that("pa, ch, sib, dis, anc, dec, consistent", {
   expect_equal(dec(gr2, 2, sort=2), dec(gr2c, 2, sort=2))
 })
 
+test_that("test is.cyclic()", {
+  expect_true(is.cyclic(gr3))
+  expect_false(is.cyclic(gr1))
+  expect_false(is.cyclic(gr2))
+})
