@@ -244,7 +244,7 @@ conv_PAG_mixedgraph <- function(graph) {
 conv_mixedgraph_PAG <- function(graph) {
   # requireNamespace("methods")
 
-  n <- length(graph$v)
+  n <- nv(graph)
   graph <- withEdgeList(graph)
 
   out <- matrix(0, n, n)
@@ -295,6 +295,10 @@ conv_mixedgraph_PAG <- function(graph) {
 
   dimnames(out) = list(graph$vnames, graph$vnames)
 
+  class(out) = "amat"
+  attr(out, "type") = "pag"
+  
   ## bit of a hack, stores as FCI algorithm output
-  methods::new("fciAlgo", amat=out)
+  # methods::new("fciAlgo", amat=out)
+  out
 }

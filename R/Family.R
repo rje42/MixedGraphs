@@ -384,7 +384,7 @@ anSets = function(graph, topOrder, sort=1) {
 ##' @export anSets2
 anSets2 = function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
   
-  if (missing(maxbarren)) maxbarren <- length(graph$v)
+  if (missing(maxbarren) || maxbarren > nv(graph)) maxbarren <- nv(graph)
   if (maxbarren < 1) return(list())
   
   # children <- lapply(graph$v, function(x) ch(graph, x))
@@ -473,63 +473,66 @@ anSets2 = function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
 barrenSets <- function(graph, topOrder, max_size, same_dist=FALSE, 
                       sort=1, return_anc_sets=FALSE) {
   
-  if (missing(max_size)) max_size <- length(graph$v)
+  if (missing(max_size) || max_size > nv(graph)) max_size <- nv(graph)
   if (max_size < 1) return(list())
   
   # children <- lapply(graph$v, function(x) ch(graph, x))
-  parents <- list()
-  parents[graph$v] <- lapply(graph$v, function(x) pa(graph, x))
+  parents <- withAdjList(graph, "directed")$edges$directed
+  # parents <- list()
+  # parents[graph$v] <- lapply(graph$v, function(x) pa(graph, x))
   
   if (missing(topOrder)) topOrder <- topologicalOrder(graph)
   ancs <- vector(mode="list", length = length(parents))
   
   ## create a new undirected graph where edge v -- w exists if 
   ## and only if v and w are incomparable in graph
-  graph2 <- mixedgraph(v=graph$v, edges=list(undirected=eList()), vnames=graph$vnames) # mutilate(graph, graph$v)
+  adjM <- adjMatrix(n=length(graph$vnames))
+  adjM[graph$v, graph$v] = 1 - diag(nrow=nv(graph))
+  graph2 <- mixedgraph(v=graph$v, edges=list(undirected=adjM), vnames=graph$vnames) # mutilate(graph, graph$v)
   # class(graph2$edges$undirected) <- "eList"
 
   for (i in topOrder) {
     ancs[[i]] <- c(i, unique.default(unlist(ancs[parents[[i]]])))
-    graph2 <- addEdges(graph2, list(un = eList(lapply(ancs[[i]][-1], function(x) c(x,i)))))
+    graph2 <- removeEdges(graph2, list(un = eList(lapply(ancs[[i]][-1], function(x) c(x,i)))))
     # graph2$edges$undirected <- c(graph2$edges$undirected, lapply(ancs[[i]][-1], function(x) c(x,i)))
   }
   
   ### perhaps speed this up by using sparse matrices when same_dist = TRUE
-  graph2 <- withAdjMatrix(graph2, sparse = FALSE)
-  graph2$edges$undirected <- 1 - graph2$edges$undirected - diag(nrow=nrow(graph2$edges$undirected))
+  # graph2 <- withAdjMatrix(graph2, sparse = FALSE)
+  # graph2$edges$undirected[v,v] <- 1 - graph2$edges$undirected[v,v] - diag(nrow=nv(graph2))
   
   out <- list()
   
-  if (requireNamespace("igraph")) {
-    if (same_dist) {
-      dis <- districts(graph)
-      
-      for (d in seq_along(dis)) {
-        gr_u <- convert(graph2[dis[[d]]], "igraph")
-        tmp <- igraph::max_cliques(gr_u)
-        tmp <- lapply(tmp, function(x) match(names(x), graph$vnames))
-        out <- c(out, tmp)
-      }
-    }
-    else {
-      gr_u <- convert(graph2, "igraph")
-      tmp <- igraph::max_cliques(gr_u)
-      tmp <- lapply(tmp, function(x) match(names(x), graph$vnames))
-      out <- cliques(graph2, max_len = max_size)
+  # if (requireNamespace("igraph")) {
+  #   if (same_dist) {
+  #     dis <- districts(graph)
+  #     
+  #     for (d in seq_along(dis)) {
+  #       gr_u <- convert(graph2[dis[[d]]], "igraph")
+  #       tmp <- igraph::max_cliques(gr_u)
+  #       tmp <- lapply(tmp, function(x) match(names(x), graph$vnames))
+  #       out <- c(out, tmp)
+  #     }
+  #   }
+  #   else {
+  #     gr_u <- convert(graph2, "igraph")
+  #     tmp <- igraph::max_cliques(gr_u)
+  #     tmp <- lapply(tmp, function(x) match(names(x), graph$vnames))
+  #     out <- cliques(graph2, max_len = max_size)
+  #   }
+  # }
+  # else {
+  if (same_dist) {
+    dis <- districts(graph)
+    
+    for (d in seq_along(dis)) {
+      out <- c(out, cliques(graph2[dis[[d]]], max_len = max_size))
     }
   }
   else {
-    if (same_dist) {
-      dis <- districts(graph)
-      
-      for (d in seq_along(dis)) {
-        out <- c(out, cliques(graph2[dis[[d]]], max_len = max_size))
-      }
-    }
-    else {
-      out <- cliques(graph2, max_len = max_size)
-    }
+    out <- cliques(graph2, max_len = max_size)
   }
+  # }
   
   ## now check if any exceed the maximum size allowed
   lens <- lengths(out)

@@ -197,7 +197,7 @@ removeEdges <- function(graph, edges, ...) {
   for (i in seq_along(et)) {
     if (etys[et[i]] %in% names(out$edges)) {
       ## if these edges are present remove them
-      out$edges[[etys[et[i]]]] = out$edges[[etys[et[i]]]] - edges[[i]]
+      out$edges[[etys[et[i]]]][graph$v, graph$v] = out$edges[[etys[et[i]]]][graph$v, graph$v] - edges[[i]]
       if (any(out$edges[[etys[et[i]]]] < 0)) stop("Tried to remove edge not present")
     }
     ## else just ignore 

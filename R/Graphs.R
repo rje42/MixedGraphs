@@ -293,7 +293,11 @@ subGraph = function (graph, v, drop=FALSE, etype) {
 
   edges = lapply(graph$edges, function(x) {
     if (is.adjMatrix(x, checknm=TRUE)) {
-      if (drop) return(x[v,v,drop=FALSE])
+      if (drop) {
+        out <- x[v,v,drop=FALSE]
+        class(out) <- "adjMatrix"
+        return(out)
+      }
       else {
         x[-v,] = x[,-v] = 0L
         return(x)
@@ -306,6 +310,7 @@ subGraph = function (graph, v, drop=FALSE, etype) {
         tmp <- apply(tmp, 1:2, function(x) mask[x])
         if (any(is.na(tmp))) stop("Something went wrong with the mask")
       }
+      class(tmp) <- "edgeMatrix"
       return(tmp)
     }
     else if (is.adjList(x, checknm=TRUE)) {
