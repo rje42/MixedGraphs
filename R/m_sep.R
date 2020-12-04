@@ -4,13 +4,13 @@
 ##' 
 ##' @export
 moralize <- function(graph) {
-  if (length(graph$v) <= 1) return(graph)
+  if (nv(graph) <= 1) return(graph)
   out <- skeleton(graph)
   dists <- districts(graph)
   pa_dists <- lapply(dists, function(x) union(x, pa(graph, x)))
   
-  n <- max(graph$v)
-  using_am = sapply(graph$edges, is.adjMatrix, n=n, checknm=TRUE)
+  n <- length(graph$vnames)
+  using_am = sapply(graph$edges, is.adjMatrix, checknm=TRUE)
   extra <- adjMatrix(n=n)
 
   ## check parents/spouses for each are joined
@@ -36,7 +36,7 @@ m_sep <- function(graph, A, B, C) {
   if (length(A) == 0 || length(B) == 0) return(TRUE)
   if (length(intersect(A, B)) > 0) return(FALSE)
   vs <- ant(graph, c(A,B,C))
-  graph2 <- withAdjMatrix(graph[vs,drop=TRUE])
+  graph2 <- withAdjMatrix(graph[vs])
   
   ## moralize, remove edges from C
   mg <- moralize(graph2)

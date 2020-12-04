@@ -271,15 +271,20 @@ print.mixedgraph = function(x, ...) {
 ##' 
 ##' @export subGraph
 subGraph = function (graph, v, drop=FALSE, etype) {
-
+  
+  v <- sort.int(v)
+  
+  if (missing(v)) {
+    if (missing(etype)) return(graph)
+    v <- graph$v
+  }
+  else if (is.logical(v)) v <- which(v)
+  #  v = v[v <= graph$n]
+  
   if (!missing(etype)) {
     etype <- intersect(etype, names(graph$edges))
     graph$edges <- graph$edges[etype]
   }
-  
-  if (missing(v)) v <- graph$v
-  else if (is.logical(v)) v <- which(v)
-  #  v = v[v <= graph$n]
   
   if (length(v) == 0) {
     if (drop) out = mixedgraph(n=0)
@@ -294,7 +299,7 @@ subGraph = function (graph, v, drop=FALSE, etype) {
   edges = lapply(graph$edges, function(x) {
     if (is.adjMatrix(x, checknm=TRUE)) {
       if (drop) {
-        out <- x[v,v,drop=FALSE]
+        out <- x[v,v,drop=FALSE]  # note a different 'drop' argument!
         class(out) <- "adjMatrix"
         return(out)
       }
@@ -308,15 +313,22 @@ subGraph = function (graph, v, drop=FALSE, etype) {
       if (drop) {
         mask <- match(seq_len(max(v)), v)
         tmp <- apply(tmp, 1:2, function(x) mask[x])
-        if (any(is.na(tmp))) stop("Something went wrong with the mask")
+        if (any(is.na(tmp))) stop("Something went wrong with the mask (edgeMatrix)")
       }
       class(tmp) <- "edgeMatrix"
       return(tmp)
     }
     else if (is.adjList(x, checknm=TRUE)) {
-      if (drop) x <- x[v]
-      else x[-v] <- vector(mode="list", length=length(x)-length(v))
-      x <- lapply(x, function(w) intersect(w, v))
+      if (drop) {
+        x <- x[v]
+        mask <- match(graph$v, v)
+        x <- lapply(x, function(w) mask[intersect(w, v)])
+        if (any(is.na(unlist(x)))) stop("Something went wrong with the mask (adjList)")
+      }
+      else {
+        x[-v] <- vector(mode="list", length=length(x)-length(v))
+        x <- lapply(x, function(w) intersect(w, v))
+      }
       class(x) <- "adjList"
       return(x)
     }

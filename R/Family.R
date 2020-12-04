@@ -388,7 +388,7 @@ anSets2 = function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
   if (maxbarren < 1) return(list())
   
   # children <- lapply(graph$v, function(x) ch(graph, x))
-  parents <- list()
+  parents <- vector("list", nv(graph))
   parents[graph$v] <- lapply(graph$v, function(x) pa(graph, x))
   
   bar <- barrenSets(graph, max_size = maxbarren, same_dist = same_dist, 
@@ -474,7 +474,22 @@ barrenSets <- function(graph, topOrder, max_size, same_dist=FALSE,
                       sort=1, return_anc_sets=FALSE) {
   
   if (missing(max_size) || max_size > nv(graph)) max_size <- nv(graph)
-  if (max_size < 1) return(list())
+  if (max_size < 1) {
+    out <- list()
+    if (return_anc_sets) {
+      attr(out, "anSets") <- list()
+    }
+    return(out)
+  }
+  else if (max_size == 1) {
+    out <- lapply(graph$v, FUN = function(x) x)
+    if (return_anc_sets) {
+      tmp <- vector("list", length=length(graph$vnames))
+      tmp[graph$v] <- lapply(graph$v, function(v) anc(graph, v))
+      attr(out, "anSets") <- tmp
+    }
+    return(out)
+  }
   
   # children <- lapply(graph$v, function(x) ch(graph, x))
   parents <- withAdjList(graph, "directed")$edges$directed

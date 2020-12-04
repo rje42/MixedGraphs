@@ -122,13 +122,25 @@ addEdges <- function(graph, edges, ...
         A = cbind(A, edgeMatrix(edges[[i]], directed = dir))
       }
       else if (is.adjMatrix(A)) {
-        A = A + adjMatrix(edges[[i]], n=nrow(A), directed = dir)
+        if (nrow(edges[[i]]) == nv(graph)) {
+          A[v,v] = A[v,v] + adjMatrix(edges[[i]], n=nrow(A), directed = dir)
+        }
+        else {
+          A = A + adjMatrix(edges[[i]], n=nrow(A), directed = dir)
+        }
 #        out$edges[[etys[et[i]]]] <- pmin(1, out$edges[[etys[et[i]]]])
        class(A) <- "adjMatrix"
        A[A > 1] <- 1
       }
       else if (is.adjList(A)) {
-        A <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], directed=dir))
+        if (length(edges[[i]]) == nv(graph)) {
+          A[v] <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], directed=dir))
+        }
+        else {
+          A <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], directed=dir))
+        }
+        
+        # A <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], directed=dir))
         class(A) <- "adjList"
       }
       else stop("mixedgraph supplied seems invalid")
