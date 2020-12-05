@@ -6,6 +6,7 @@
 \alias{makeGraphChain}
 \alias{makeGraphCycle}
 \alias{makeGraphStar}
+\alias{makeGraphGrid}
 \title{Graph Constructor Functions}
 \usage{
 makeGraphComplete(n, type = "undirected")
@@ -16,12 +17,18 @@ makeGraphChain(n, type = "undirected")
 
 makeGraphCycle(n, type = "undirected")
 
-makeGraphStar(n, type = "undirected")
+makeGraphStar(n, type = "undirected", out = FALSE)
+
+makeGraphGrid(n, m = n, type = "undirected")
 }
 \arguments{
-\item{n}{number of vertices}
+\item{n}{number of vertices (or rows for a grid)}
 
 \item{type}{type of edges to use}
+
+\item{out}{should edges be directed out from the centre?}
+
+\item{m}{number of columns}
 }
 \description{
 Graph Constructor Functions
@@ -40,5 +47,7 @@ chains, cycles and stars.
 \item \code{makeGraphCycle}: graph with cycle of edges
 
 \item \code{makeGraphStar}: star shaped graph
+
+\item \code{makeGraphGrid}: grid of vertices
 }}
 

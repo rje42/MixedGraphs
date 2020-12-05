@@ -122,7 +122,7 @@ addEdges <- function(graph, edges, ...
         A = cbind(A, edgeMatrix(edges[[i]], directed = dir))
       }
       else if (is.adjMatrix(A)) {
-        if (nrow(edges[[i]]) == nv(graph)) {
+        if (is.adjMatrix(edges[[i]]) && nrow(edges[[i]]) == nv(graph)) {
           A[v,v] = A[v,v] + adjMatrix(edges[[i]], n=nrow(A), directed = dir)
         }
         else {

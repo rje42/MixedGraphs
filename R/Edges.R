@@ -94,6 +94,7 @@ adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
 adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
   if (missing(edges) || length(edges) == 0L) {
     out <- rep(list(integer(0)), n)
+    class(out) <- "adjList"
     return(out)
   }
   if (is.adjList(edges, checknm=TRUE)) {
@@ -108,6 +109,7 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
         warning("number of vertices not supplied, assumed to be 0")
         n = 0
       }
+      class(edges) <- "adjList"
       return(edges)
     }
     else if (missing(n)) n <- max(sapply(edges, max))
