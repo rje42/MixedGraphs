@@ -98,6 +98,7 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, r
         edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,v1))
       }
       else if (dir[i] == 0) {
+        edges[[i]] <- symAdjList(edges[[i]])
         edges[[i]][vr] <- vector(mode="list", length=length(vr))
         edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,c(v1,v2)))
       }

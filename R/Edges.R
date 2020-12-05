@@ -162,12 +162,23 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
   out
 }
 
+## Get reverse directions for edges
 revAdjList <- function(object) {
   n <- length(object)
   out <- vector(mode="list", length=n)
   for (i in seq_len(n)) {
     out[object[[i]]] <- lapply(out[object[[i]]], function(x) c(x,i))
   }
+  class(out) <- "adjList"
+  out
+}
+
+## Make adjList symmetric
+symAdjList <- function(object, unq=TRUE) {
+  object_r <- revAdjList(object)
+  if (unq) out <- mapply(function(x,y) sort.int(unique.default(c(x,y))), object, object_r)
+  else out <- mapply(c, object, object_r)
+  
   class(out) <- "adjList"
   out
 }
