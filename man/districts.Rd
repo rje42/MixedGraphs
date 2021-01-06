@@ -8,7 +8,7 @@
 \alias{cliques}
 \title{Familial Mixed Graph Groups}
 \usage{
-districts(graph)
+districts(graph, ...)
 
 un(graph, sort = 1)
 
@@ -18,6 +18,8 @@ cliques(graph, sort = 1, max_len)
 }
 \arguments{
 \item{graph}{\code{mixedgraph} object}
+
+\item{...}{other arguments, not currently used}
 
 \item{sort}{should output be sorted?  sort=3 will also sort cliques}
 

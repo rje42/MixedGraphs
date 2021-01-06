@@ -102,6 +102,7 @@ dis = function(graph, v, sort=1, fast=FALSE) {
 ##' 
 ##' @aliases neighbourhoods, un
 ##' @param graph \code{mixedgraph} object
+##' @param ... other arguments, not currently used
 ##' 
 ##' @details \code{districts} and \code{neighbourhoods} find the
 ##' bidirected-connected and undirected-connected components of \code{graph}.
@@ -110,8 +111,13 @@ dis = function(graph, v, sort=1, fast=FALSE) {
 ##' \code{cliques} uses the Bron-Kirbosch algorithm to find 
 ##' maximal fully-connected subsets.
 ##' 
-##' @export districts
-districts = function(graph) {
+##' @export
+districts <- function (graph, ...) {
+  UseMethod("districts")
+}
+
+##' @export
+districts.default <- function(graph, ...) {
   groups(graph, etype="bidirected")
 }
 

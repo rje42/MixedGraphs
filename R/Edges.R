@@ -176,8 +176,8 @@ revAdjList <- function(object) {
 ## Make adjList symmetric
 symAdjList <- function(object, unq=TRUE) {
   object_r <- revAdjList(object)
-  if (unq) out <- mapply(function(x,y) sort.int(unique.default(c(x,y))), object, object_r)
-  else out <- mapply(c, object, object_r)
+  if (unq) out <- mapply(function(x,y) sort.int(unique.default(c(x,y))), object, object_r, SIMPLIFY = FALSE)
+  else out <- mapply(c, object, object_r, SIMPLIFY = FALSE)
   
   class(out) <- "adjList"
   out
