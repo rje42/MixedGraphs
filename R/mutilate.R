@@ -232,7 +232,7 @@ removeEdges <- function(graph, edges, ...) {
 ##' but ones into \code{A} are preserved; for \code{dir=-1} the reverse,
 ##' and for \code{dir=0} (the default), direction is irrelevant.
 ##' 
-##' @export mutilate
+##' @export 
 mutilate <- function(graph, A, etype, dir=0L) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (length(A) == 0) return(graph)
@@ -271,10 +271,9 @@ mutilate <- function(graph, A, etype, dir=0L) {
         edges[[i]][A] <- fill
       }
       if (dir >= 0) {
-        for (j in seq_along(edges[[i]])) {
-          edges[[j]] <- setdiff(edges[[j]], A)
-        }
+        edges[[i]] <- lapply(edges[[i]], function(x) setdiff(x, A))
       }
+      class(edges[[i]]) <- "adjList"
     }
     else if (is.eList(edges[[i]])) {
       ## edge list format
