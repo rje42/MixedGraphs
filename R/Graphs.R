@@ -202,44 +202,66 @@ print.mixedgraph = function(x, ...) {
       ifelse(n == 0,"",":  "), sep="")
   cat(x$vnames[x$v], "\n\n", sep="  ")
   
+  print.edgeList(x$edges, x$vnames)
+  
+  invisible(x)
+}
+
+print.edgeList <- function(x, vnames, ...) {
+  
+  if (length(x) == 0) return(invisible(x))
+  
   # get list of edge symbols
-  whEdge <- match(names(x$edges), edgeTypes()$type)
+  whEdge <- match(names(x), edgeTypes()$type)
   edgeSymb <- edgeTypes()$char
   
-  for (i in seq_along(x$edges)) {
-    ## think about a print method for edges
-    
-    if (is.edgeMatrix(x$edges[[i]])) {
-      tmp <- x$edges[[i]]
+  if (missing(vnames)) {
+    adjM <- sapply(x, is.adjMatrix)
+    if (any(adjM)) n_v <- nrow(x[which(adjM)[1]])
+    else {
+      adjL <- sapply(x, is.adjList)
+      if (any(adjL)) n_v <- length(x[which(adjL)[1]])
+      else {
+        oth <- sapply(x, is.edgeMatrix(x) || is.eList(x))
+        if (any(oth)) n_v <- max(unlist(x[oth]))
+        else stop("No valid edgetypes")
+      }
+    }
+    vnames <- paste0("x", seq_len(n_v))
+  }
+  
+  for (i in seq_along(x)) {
+    if (is.edgeMatrix(x[[i]])) {
+      tmp <- x[[i]]
       for (j in seq_len(ncol(tmp))) {
-        cat(x$vnames[tmp[1,j]], edgeSymb[whEdge[i]],
-            x$vnames[tmp[2,j]], "\n", sep=" ")
+        cat(vnames[tmp[1,j]], edgeSymb[whEdge[i]],
+            vnames[tmp[2,j]], "\n", sep=" ")
       }      
     }
-    else if (is.adjMatrix(x$edges[[i]])) {
-      if (all(x$edges[[i]]==0)) next
-      tmp <- cbind(row(x$edges[[i]])[x$edges[[i]] > 0], col(x$edges[[i]])[x$edges[[i]] > 0])
+    else if (is.adjMatrix(x[[i]])) {
+      if (all(x[[i]]==0)) next
+      tmp <- cbind(row(x[[i]])[x[[i]] > 0], col(x[[i]])[x[[i]] > 0])
       if(!edgeTypes()$directed[whEdge[i]]) tmp = tmp[tmp[,1] < tmp[,2],,drop=FALSE]
       
       for (j in seq_len(nrow(tmp))) {
-        cat(x$vnames[tmp[j,1]], edgeSymb[whEdge[i]],
-            x$vnames[tmp[j,2]], "\n", sep=" ")
+        cat(vnames[tmp[j,1]], edgeSymb[whEdge[i]],
+            vnames[tmp[j,2]], "\n", sep=" ")
       }
     }
-    else if (is.adjList(x$edges[[i]], checknm=TRUE)) {
-      tmp <- cbind(unlist(x$edges[[i]]), rep(x$v, times=lengths(x$edges[[i]][x$v])))
+    else if (is.adjList(x[[i]], checknm=TRUE)) {
+      tmp <- cbind(unlist(x[[i]]), rep(x$v, times=lengths(x[[i]][x$v])))
       if (!edgeTypes()$directed[whEdge[i]]) tmp = tmp[tmp[,1] < tmp[,2],,drop=FALSE]
-
+      
       for (j in seq_len(nrow(tmp))) {
-        cat(x$vnames[tmp[j,1]], edgeSymb[whEdge[i]],
-            x$vnames[tmp[j,2]], "\n", sep=" ")
+        cat(vnames[tmp[j,1]], edgeSymb[whEdge[i]],
+            vnames[tmp[j,2]], "\n", sep=" ")
       }
     }
-    else if (is.eList(x$edges[[i]])) {
-      if (!is.null(x$edges[[i]]) && length(x$edges[[i]]) > 0) {
-        for (j in seq_along(x$edges[[i]])) {
-          cat(x$vnames[x$edges[[i]][[j]][1]], edgeSymb[whEdge[i]],
-              x$vnames[x$edges[[i]][[j]][2]], "\n", sep=" ")
+    else if (is.eList(x[[i]])) {
+      if (!is.null(x[[i]]) && length(x[[i]]) > 0) {
+        for (j in seq_along(x[[i]])) {
+          cat(vnames[x[[i]][[j]][1]], edgeSymb[whEdge[i]],
+              vnames[x[[i]][[j]][2]], "\n", sep=" ")
         }
         #        cat("\n")
       }
@@ -248,7 +270,7 @@ print.mixedgraph = function(x, ...) {
   }    
   cat("\n")
   
-  invisible(x)
+  return(invisible(x))
 }
 
 ##' @describeIn subGraph bracket notation for subgraphs
@@ -367,7 +389,7 @@ subGraph = function (graph, v, drop=FALSE, etype) {
 ##' 
 ##' Designed to make comparison of graphs easier
 ##' 
-## @export standardizeVertices
+## @export
 standardizeVertices <- function(graph) {
   #stop("FUNCTION NOT FINISHED")
   
@@ -414,7 +436,7 @@ standardizeVertices <- function(graph) {
 ##' 
 ##' Designed to make comparison of graphs easier
 ##' 
-##' @export standardizeEdges
+##' @export
 standardizeEdges <- function(graph) {
   ## standard order for edges
   #stop("FUNCTION NOT FINISHED")
@@ -482,7 +504,7 @@ graph_equal <- function(g1, g2) {
 ##' @examples
 ##' graphCr("1--->2<-->3<-4","2<->4,4->5")
 ##' graphCr("1-2-3-4-1", representation="graphNEL")  # requires package 'graph'
-##' @export graphCr
+##' @export
 graphCr <- function(char, ..., mode="adjList", useMatrices=FALSE, format="mixedgraph") {
   if (useMatrices) {
     warning("useMatrices argument is deprecated")
@@ -501,7 +523,10 @@ graphCr <- function(char, ..., mode="adjList", useMatrices=FALSE, format="mixedg
   out <- gsub("([o]{0,1})([-<>=*.|:]+)([o]{0,1})([A-Za-np-z0-9][:alnum:]*)", "\\1\\2\\3 \\4", out)
   out <- strsplit(out, " ")
   out <- lapply(out, function(x) x[x != ""])
+  out <- out[lengths(lapply(out, nchar)) > 0]
 
+  if (length(out) == 0 ) return(mixedgraph(0))
+  
   em <- matrix(unlist(lapply(out, function(x) {
       k <- length(x)
       if (k == 1) return(matrix("", 3, 0))

@@ -7,11 +7,17 @@ grv_a <- graphCr("1->2->3->4<->2", mode="adjMatrix")
 grv_b <- graphCr("1 -> 2 -> 3 -> 4 <-> 2", mode="edgeMatrix")
 grv_c <- graphCr("1 -> 2 -> 3 -> 4 <-> 2", mode="eList")
 grv2 <- graphCr("z -> x -> y <- u -> x")
+gr0 <- graphCr("")
+gr0a <- graphCr("   ")
 
 mag1 <- graphCr("1 -> 3 <-> 2 <-> 4 <- 1")
 mag1a <- graphCr("1 -> 3 <-> 2 <-> 4 <- 1", mode = "adjMatrix")
 mag1b <- graphCr("1 -> 3 <-> 2 <-> 4 <- 1", mode = "edgeMatrix")
 mag1c <- graphCr("1 -> 3 <-> 2 <-> 4 <- 1", mode = "eList")
+
+test_that("empty graphs can be constructed", {
+  expect_equal(gr0, gr0a)
+})
 
 test_that("DAG operations correct for list of edges", {
   expect_equal(sort(unique(pa(dag1, 4, sort=0))), c(1,2))
