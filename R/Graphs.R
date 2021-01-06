@@ -229,6 +229,7 @@ print.edgeList <- function(x, vnames, ...) {
     }
     vnames <- paste0("x", seq_len(n_v))
   }
+  else n_v <- length(vnames)
   
   for (i in seq_along(x)) {
     if (is.edgeMatrix(x[[i]])) {
@@ -249,7 +250,7 @@ print.edgeList <- function(x, vnames, ...) {
       }
     }
     else if (is.adjList(x[[i]], checknm=TRUE)) {
-      tmp <- cbind(unlist(x[[i]]), rep(x$v, times=lengths(x[[i]][x$v])))
+      tmp <- cbind(unlist(x[[i]]), rep(seq_len(n_v), times=lengths(x[[i]][seq_len(n_v)])))
       if (!edgeTypes()$directed[whEdge[i]]) tmp = tmp[tmp[,1] < tmp[,2],,drop=FALSE]
       
       for (j in seq_len(nrow(tmp))) {
