@@ -140,8 +140,8 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
   else if (is.adjMatrix(edges)) {
     ## seems to be an adjMatrix
     if (!directed) edges <- edges+t(edges)
-    out <- apply(edges, 2, function(x) which(x > 0))
-    if (is.numeric(out)) out <- unlist(lapply(out, list), recursive = FALSE)
+    out <- unlist(apply(edges, 2, function(x) list(which(x > 0))), recursive=FALSE)
+    # if (is.numeric(out)) out <- unlist(lapply(out, list), recursive = FALSE)
   }
   else if (is.null(edges)) return(NULL)
   else stop("Don't know what kind of edge-set this is")
