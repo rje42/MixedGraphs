@@ -328,11 +328,28 @@ addNodes <- function(graph, k, vnames) {
 
   ## add empty edges if necessary
   edges <- graph$edges
-  adjM <- which(sapply(edges, function(x) "adjMatrix" %in% class(x)))
-  for (i in adjM) {
-    edges[[i]] <- matrix(0, n+k, n+k)
+  adjM <- which(sapply(edges, is.adjMatrix))
+  adjL <- which(sapply(edges, is.adjList))
+  # for (i in adjM) {
+  #   edges[[i]] <- matrix(0, n+k, n+k)
+  # }
+  
+  if (length(adjL) > 0) {
+    for (i in adjL) {
+      lens <- lengths(graph$edges[[adjL[i]]])
+      graph$edges[[adjL[i]]][lens == 0] <- list(integer(0))
+      
+      edges[[i]] <- vector("list", length=n+k)
+      edges[[i]][seq_len(n)] <- graph$edges[[i]]
+      # for (j in seq_len(n)) edges[[i]][[j]] <- graph$edges[[i]][[j]]
+      edges[[i]][n + seq_len(k)] <- list(integer(0))
+      class(edges[[i]]) <- "adjList"
+    }
   }
+  
   if (length(adjM) > 0) {
+    edges[adjM] <- matrix(0, n+k, n+k)
+    
     edges[adjM] <- mapply(function(x,y) {
       x[seq_len(nrow(y)), seq_len(ncol(y))] <- y
       class(x) <- class(y)
