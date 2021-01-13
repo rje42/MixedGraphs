@@ -39,6 +39,7 @@ remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
     return(edges[,!dup,drop=FALSE])
   }
   else if (is.eList(edges) || is.list(edges)) {
+    edges <- lapply(edges, as.integer)
     if (directed) {
       edges <- unique.default(edges)
       class(edges) <- "eList"
@@ -49,13 +50,13 @@ remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
     dup = duplicated(out)
     if (sort) {
       out <- out[!dup]
-      class(out) <- "eList"
     }
     else {
       out <- edges[!dup]
-      class(out) <- "eList"
     }
-    
+
+    class(out) <- "eList"
+        
     return(out)
   }
   else stop("Not sure how to handle this, should be list or matrix")
@@ -66,14 +67,15 @@ remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
 ##' @param graph a \code{mixedgraph} object
 ##' @param edges list of edges to be added/removed
 ##' @param ... edges to be added with arguments matching names of edge types
+##' @param remDup logical: should we check for duplicate edges?
 ##' 
 ##' @details At the moment no effort is made to 
 ##' detect duplication in \code{addEdges()}.  To be added later.
 ##' Currently \code{removeEdges()} forces all edges to be
 ##' represented by adjacency matrices. 
 ##' 
-##' @export addEdges
-addEdges <- function(graph, edges, ...
+##' @export
+addEdges <- function(graph, edges, ..., remDup = TRUE
                      ## add in code to put edges in more directly
                      ) {
   out <- graph
@@ -106,6 +108,10 @@ addEdges <- function(graph, edges, ...
   if (any(is.na(match(unlist(edges[edE]), v)))) stop("Edges must be between vertices in the graph")
   if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
 
+  ## Check for other list objects
+  oth <- !edL & !edE & sapply(edges, is.list)
+  if (any(oth)) stop("Not a valid edgeList member object")
+  
   for (i in seq_along(et)) {
     dir <- edgeTypes()$directed[et[i]]
     
@@ -120,6 +126,7 @@ addEdges <- function(graph, edges, ...
       }
       else if (is.edgeMatrix(A)) {
         A = cbind(A, edgeMatrix(edges[[i]], directed = dir))
+        class(A) <- "edgeMatrix"
       }
       else if (is.adjMatrix(A)) {
         if (is.adjMatrix(edges[[i]]) && nrow(edges[[i]]) == nv(graph)) {
@@ -153,7 +160,8 @@ addEdges <- function(graph, edges, ...
       dimnames(edges[[i]]) <- NULL   # drop dimnames
       out$edges[[etys[et[i]]]] <- edges[[i]]
     }
-    if (!is.adjMatrix(out$edges[[etys[et[i]]]])) {
+    if (remDup && !is.adjMatrix(out$edges[[etys[et[i]]]])) {
+      
       out$edges[[etys[et[i]]]] = remove_duplicate_edges(out$edges[[etys[et[i]]]], directed=dir)
     }
   }
@@ -163,7 +171,7 @@ addEdges <- function(graph, edges, ...
 
 ## NEED TO SORT OUT ALL ARGUMENT
 ##' @describeIn addEdges remove edges
-##' @export removeEdges
+##' @export
 removeEdges <- function(graph, edges, ...) {
   out <- withAdjMatrix(graph)
   v <- graph$v

@@ -5,7 +5,7 @@
 \alias{removeEdges}
 \title{Add or remove edges}
 \usage{
-addEdges(graph, edges, ...)
+addEdges(graph, edges, ..., remDup = TRUE)
 
 removeEdges(graph, edges, ...)
 }
@@ -15,6 +15,8 @@ removeEdges(graph, edges, ...)
 \item{edges}{list of edges to be added/removed}
 
 \item{...}{edges to be added with arguments matching names of edge types}
+
+\item{remDup}{logical: should we check for duplicate edges?}
 }
 \description{
 Add or remove edges

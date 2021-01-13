@@ -263,7 +263,6 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
     ## this is an edge matrix
     if (ncol(es) == 0) return(integer(0))
     out = es[2,]
-    if (!inclusive) wh <- setdiff(wh, v)
   }
   else if (is.eList(es)) stop("Shouldn't be an eList object")
   else stop("Not a valid edgeList element")
