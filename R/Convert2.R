@@ -160,12 +160,15 @@ conv_mixedgraph_graphAM <- function(graph) {
       stop("Both directed and undirected edges, unclear how to proceed")
     }
     mode <- "directed"
-    amat <- collapse(graph$edges["directed"], dir=1, matrix=TRUE)
+    amat <- withAdjMatrix(graph[etype="directed"])$edges$directed
+    if (nv(graph) < length(graph$vnames)) amat <- amat[graph$v, graph$v, drop=FALSE]
   }
   else {
-    amat <- collapse(graph$edges["undirected"], dir=0, matrix=TRUE)
+    amat <- withAdjMatrix(graph[etype="undirected"])$edges$undirected
+    if (nv(graph) < length(graph$vnames)) amat <- amat[graph$v, graph$v, drop=FALSE]
   }
   colnames(amat) <- graph$vnames[graph$v]
+  class(amat) <- "matrix"
 
   graph::graphAM(amat, edgemode = mode)
 }

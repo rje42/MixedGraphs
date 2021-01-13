@@ -12,7 +12,8 @@ collapse(
   matrix = FALSE,
   sparse = FALSE,
   sort = 1,
-  rev = FALSE
+  rev = FALSE,
+  double_up = FALSE
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ collapse(
 \item{sort}{1=unique but not sorted, 2=unique and sorted, 0=neither}
 
 \item{rev}{logical: should directed \code{adjList}s have the direction inverted if \code{dir=1}?}
+
+\item{double_up}{logical: should edges with \code{dir=0} be repeated in both directions for an edgeMatrix?}
 }
 \description{
 Collapse multiple edge types to a single list or matrix

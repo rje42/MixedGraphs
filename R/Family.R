@@ -154,7 +154,7 @@ cliques = function(graph, sort=1, max_len) {
   else gr_u <- graph[un(graph)]
 
   ## get list of neighbours  
-  n <- length(graph$vnames)
+  n <- nv(graph)
   nbs <- vector(mode="list", length=n)
   nbs[gr_u$v] <- lapply(gr_u$v, function(x) nb(gr_u, x))
 

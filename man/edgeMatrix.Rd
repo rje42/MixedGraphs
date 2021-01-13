@@ -4,12 +4,14 @@
 \alias{edgeMatrix}
 \title{Get edges from adjacency matrix or list}
 \usage{
-edgeMatrix(edges, directed = FALSE)
+edgeMatrix(edges, directed = FALSE, double = FALSE)
 }
 \arguments{
 \item{edges}{list or adjacency matrix of edges}
 
 \item{directed}{logical: if TRUE edges are assumed directed}
+
+\item{double}{logical: if TRUE, edges are written in both directions}
 }
 \description{
 Get edges from adjacency matrix or list

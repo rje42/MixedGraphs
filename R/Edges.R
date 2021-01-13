@@ -187,9 +187,10 @@ symAdjList <- function(object, unq=TRUE) {
 ##' 
 ##' @param edges list or adjacency matrix of edges
 ##' @param directed logical: if TRUE edges are assumed directed
+##' @param double logical: if TRUE, edges are written in both directions
 ##' 
 ##' @export edgeMatrix
-edgeMatrix <- function(edges, directed=FALSE) {
+edgeMatrix <- function(edges, directed=FALSE, double=FALSE) {
   
   if (missing(edges) || length(edges) == 0) {
     out <- matrix(NA, 2, 0)
@@ -197,7 +198,13 @@ edgeMatrix <- function(edges, directed=FALSE) {
     return(out)
   }
 
-  if (is.edgeMatrix(edges)) return(edges)
+  if (is.edgeMatrix(edges)) {
+    if (double) {
+      edges <- cbind(edges, edges[2:1,])
+      edges <- unique.matrix(edges, MARGIN=2)
+    }
+    return(edges)
+  }
   else if (is.adjMatrix(edges)) {
     rs <- row(edges)[edges > 0]
     cs <- col(edges)[edges > 0]
@@ -227,6 +234,12 @@ edgeMatrix <- function(edges, directed=FALSE) {
     out <- matrix(unlist(edges), nrow=2)
   }
   else stop("Hyperedges not supported for this format")
+  
+  if (double) {
+    ## requested to double edges, do this
+    out <- cbind(out, out[2:1,])
+    out <- unique.matrix(out, MARGIN=2)
+  }
   
   out[] <- as.integer(out)
   class(out) <- "edgeMatrix"

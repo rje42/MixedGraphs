@@ -7,6 +7,7 @@
 ##' @param sparse should we use sparse matrices if available?
 ##' @param sort 1=unique but not sorted, 2=unique and sorted, 0=neither
 ##' @param rev logical: should directed \code{adjList}s have the direction inverted if \code{dir=1}?
+##' @param double_up logical: should edges with \code{dir=0} be repeated in both directions for an edgeMatrix?
 ##' 
 ##' @details returns an edgeMatrix or adjacency matrix for possibly multiple edge types.
 ##' If any of the edges are specified as an adjacency matrix, then the output will also
@@ -16,7 +17,7 @@
 ##' second vertices must belong to these respective sets. 
 ##' 
 ##' @export collapse
-collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, rev=FALSE) {
+collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, rev=FALSE, double_up=FALSE) {
   ## repeat direction with warning if necessary
   if (length(edges) == 0 || length(unlist(edges))==0) return(edgeMatrix())
   dir <- dir*rep(1L, length(edges))
@@ -31,7 +32,7 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, r
   isAMat <- sapply(edges, is.adjMatrix)
   isAList <- sapply(edges, is.adjList)
 
-  ## vertices not specified, use all
+  ## if vertices not specified, use all
   if (missing(v1) || missing(v2)) {
     if (any(isAMat)) {
       i <- which(isAMat)[1]
@@ -46,6 +47,7 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, r
       nv <- max(unlist(edges))
 #      if (is.infinite(nv)) return(matrix(NA, 2, 0))
     }
+    ## if vertices not specified, use all
     if(missing(v1)) {
       v1 <- seq_len(nv)
       all1 <- TRUE
@@ -121,10 +123,12 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, r
   }
 
   ## otherwise use edgeMatrices
-  edges <- lapply(edges, edgeMatrix)
-  ## reverse edges for direction =0,-1.  
+  if (double_up) {
+    edges <- mapply(edgeMatrix, edges, double=(dir==0), SIMPLIFY = FALSE)
+  }
+  else edges <- lapply(edges, edgeMatrix)
+  ## reverse edges for direction =-1.
   edges[dir < 0] <- lapply(edges[dir < 0], function(x) x[2:1,,drop=FALSE])
-  edges <- c(edges, lapply(edges[dir == 0], function(x) x[2:1,,drop=FALSE]))
 
   ## shortcut for all vertices, saves time
    if (all1 && all2) {
@@ -133,6 +137,10 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, r
      return(jointEM)
    }
 
+  # ## need to duplicate undirected edges
+  # edges <- c(edges, lapply(edges[dir == 0], function(x) x[2:1,,drop=FALSE]))
+  
+  ## get the edgeMatrix to return
   jointEM <- matrix(NA, ncol=0, nrow=2)
   for (i in seq_along(edges)) {
       wh <- (edges[[i]][1,] %in% v1) & (edges[[i]][2,] %in% v2)
@@ -142,6 +150,18 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, r
   
   return(jointEM)
 }
+
+# ## wrapper for collapse to deal with directionality problem
+# collapse2 <- function (edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, rev=FALSE) {
+#   isAMat <- sapply(edges, is.adjMatrix)
+#   isAList <- sapply(edges, is.adjList)
+#   
+#   if (any(isAMat) || all(isAList) || matrix) collapse(edges, v1, v2, dir=dir, matrix=matrix, sparse=sparse, sort=sort, rev=rev)
+#   else {
+#     edges2 <- lapply(edges, edgeMatrix, directed=FALSE)
+#     collapse(edges2, v1, v2, dir=dir, matrix=FALSE, sparse=sparse, sort=sort)
+#   }
+# }
 
 ##' Find adjacent vertices
 ##' 
@@ -220,18 +240,21 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
     return(wh)
   }
   
+  ## if no edges then return an empty vector
+  if (length(edges) == 0) return(integer(0))
+  
   ## collapse edges into one representation
-  es <- collapse(edges, v1=v, dir=dir, rev=TRUE)
+  es <- collapse(edges, v1=v, dir=dir, rev=TRUE, double_up=TRUE)
   
   ## select depending on mode of output
-  if (is.adjMatrix(es, checknm=TRUE)) {
+  if (is.adjMatrix(es)) {
     ## this is an adjacency matrix
     d <- dim(es)
     wh <- which(.colSums(es, d[1], d[2]) > 0)
     if (!inclusive) wh <- setdiff(wh, v)
     return(wh)
   }
-  else if (is.adjList(es, checknm = TRUE)) {
+  else if (is.adjList(es)) {
     out <- unlist(es[v])
     # if (dir <= 0) out <- unlist(es[v])
     # else out <- which(sapply(es, function(x) any(v %in% x)))
@@ -239,10 +262,11 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
   else if (is.edgeMatrix(es)) {
     ## this is an edge matrix
     if (ncol(es) == 0) return(integer(0))
-    out = es[2,]  
+    out = es[2,]
+    if (!inclusive) wh <- setdiff(wh, v)
   }
-  else if (length(edges) == 0) return(integer(0)) 
-  else stop("Unrecognised edge format")
+  else if (is.eList(es)) stop("Shouldn't be an eList object")
+  else stop("Not a valid edgeList element")
   
   if (sort > 0) out <- unique.default(out)
   if (sort > 1) out <- sort.int(out)
@@ -335,7 +359,7 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
     }
   }
 
-  es <- collapse(edges, dir=dir, rev=TRUE)
+  es <- collapse(edges, dir=dir, rev=TRUE, double_up=TRUE)
 
   # }
   # else {
@@ -385,6 +409,7 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
       
       while (continue) {
         out2 = es[2, es[1,] %in% new]
+        out2 = es[2, es[1,] %in% new]
         
         new = unique.default(out2[!(out2 %in% out)])
         out = c(out, new)
@@ -393,6 +418,7 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
     }
   }
   else if (is.eList(es)) stop("Shouldn't be an eList object")
+  else stop("Not a valid edgeList element")
   
   ## if not inclusive, then remove elements of v
   if (!inclusive) out = setdiff(out, v)
@@ -453,12 +479,12 @@ groups = function(graph, etype, sort=1) {
   ##' repeat dir() vector with warning if necessary
   whEdge <- pmatch(etype,names(graph$edges))
   edges <- graph$edges[whEdge[!is.na(whEdge)]]
-  es <- collapse(edges, dir=0)
+  es <- collapse(edges, dir=0, double_up = TRUE)
   
   grp = rep(0, length(vnames(graph)))
   grp[graph$v] = seq_along(graph$v)  
   
-  if (is.adjList(es, n=length(vnames(graph)))) {
+  if (is.adjList(es, n=nv(graph))) {
     grp0 <- grp
     for (i in seq_along(es)[graph$v]) {
       if (grp[i] < grp0[i]) next
@@ -492,6 +518,7 @@ groups = function(graph, etype, sort=1) {
       grp[grp == g2] = g1
     }
   }
+  else stop("eLists assumed not possible from collapse()")
   
   out = list()
   for (i in unique.default(grp[grp>0])) {
