@@ -36,7 +36,9 @@ remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
     dup = duplicated(char)
     
     if (sort) warning("sort = TRUE has no effect for edgeMatrix")
-    return(edges[,!dup,drop=FALSE])
+    edges <- edges[,!dup,drop=FALSE]
+    class(edges) <- "edgeMatrix"
+    return(edges)
   }
   else if (is.eList(edges) || is.list(edges)) {
     edges <- lapply(edges, as.integer)
@@ -140,11 +142,12 @@ addEdges <- function(graph, edges, ..., remDup = TRUE
        A[A > 1] <- 1
       }
       else if (is.adjList(A)) {
+        nv_orig <- length(A)
         if (length(edges[[i]]) == nv(graph)) {
-          A[v] <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], directed=dir))
+          A[v] <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], n=nv_orig, directed=dir))[v]
         }
         else {
-          A <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], directed=dir))
+          A <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], n=nv_orig, directed=dir))
         }
         
         # A <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], directed=dir))
@@ -161,7 +164,6 @@ addEdges <- function(graph, edges, ..., remDup = TRUE
       out$edges[[etys[et[i]]]] <- edges[[i]]
     }
     if (remDup && !is.adjMatrix(out$edges[[etys[et[i]]]])) {
-      
       out$edges[[etys[et[i]]]] = remove_duplicate_edges(out$edges[[etys[et[i]]]], directed=dir)
     }
   }
