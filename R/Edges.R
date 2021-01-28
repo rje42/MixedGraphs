@@ -124,17 +124,24 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
   }  
   else if (is.edgeMatrix(edges)) {
     ## seems to be an edgeMatrix
-    tmp <- edges
-    if(missing(n)) n <- max(tmp)
+
+    if (transpose) edges <- edges[2:1,,drop=FALSE]
+    
+    # tmp <- edges
+    if(missing(n)) n <- max(edges)
     out <- vector(mode="list", length=n)
 
     for (i in seq_len(n)) {
-      wh_i <- which(edges == i)
-      mod2 <- wh_i %% 2
-      if (directed && !transpose) wh_i <- wh_i[mod2 == 0]
-      else if (directed && transpose) wh_i <- wh_i[mod2 == 1]
-      wh_i2 <- wh_i + 2*mod2 - 1
-      out[[i]] <- edges[wh_i2]
+      if (directed) {
+        wh_i <- which(edges[2,] == i)
+        out[[i]] <- edges[1,wh_i]
+      }
+      else {
+        wh_i <- which(apply(edges, MARGIN=2, FUN=function(x) any(x==i)))
+        mod2 <- wh_i %% 2
+        wh_i2 <- wh_i + 2*mod2 - 1
+        out[[i]] <- edges[wh_i2]
+      }
     }
   }
   else if (is.adjMatrix(edges)) {
