@@ -315,8 +315,9 @@ mutilate <- function(graph, A, etype, dir=0L) {
       if (dir <= 0) edges[[i]][,A] = 0
     }
     else if (is.edgeMatrix(edges[[i]])) {
-      if (dir >= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][,1] %in% A), drop=FALSE]
-      if (dir <= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][,2] %in% A), drop=FALSE]
+      if (dir >= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][1,] %in% A), drop=FALSE]
+      if (dir <= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][2,] %in% A), drop=FALSE]
+      class(edges[[i]]) <- "edgeMatrix"
     }
     else stop("Edge type not recognised")
   }
