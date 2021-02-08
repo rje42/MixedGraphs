@@ -3,7 +3,6 @@
 ##' The usual familial relations between vertices in
 ##' mixed graphs.
 ##' 
-##' @aliases ch
 ##' @param graph \code{mixedgraph} object
 ##' @param v collection of vertices
 ##' @param sort integer:1 for unique but unsorted, 2 for 
@@ -12,59 +11,68 @@
 ##' 
 ##' @details \code{pa}, \code{ch}, \code{sp} and \code{nb} find the 
 ##' parents, children, spouses and neighbours of \code{v} respectively.
-##' \code{anc}, \code{dec}, \code{ant}, \code{dis} finds the ancestors
-##' descendants, anterior and district of \code{v} respectively.
+##' \code{anc}, \code{dec}, \code{ant}, \code{dis}, \code{nhd} finds the ancestors
+##' descendants, anterior, district and neighbourhood of \code{v} respectively.
 ##' 
-##' @export pa
+##' @name family
+NULL
+
+##' @describeIn family find parents of vertices
 pa = function(graph, v, sort=1) {
   adj(graph, v, etype="directed", dir=-1, inclusive=TRUE, sort=sort)
 }
 
-##' @describeIn pa find children of vertices
-##' @export ch 
+##' @describeIn family find children of vertices
+##' @export 
 ch = function(graph, v, sort=1) {
   adj(graph, v, etype="directed", dir=1, inclusive=TRUE, sort=sort)
 }
 
-##' @describeIn pa find spouses (siblings) of vertices
-##' @export sp
+##' @describeIn family find spouses (siblings) of vertices
+##' @export 
 sp = function(graph, v, sort=1) {
   adj(graph, v, etype="bidirected", dir=0, inclusive=TRUE, sort=sort)
 }
 
-##' @describeIn pa find siblings (spouses) of vertices
-##' @export sib
+##' @describeIn family find siblings (spouses) of vertices
+##' @export 
 sib = function(graph, v, sort=1) {
   adj(graph, v, etype="bidirected", dir=0, inclusive=TRUE, sort=sort)
 }
 
-##' @describeIn pa find undirected neighbours of vertices
-##' @export nb
+##' @describeIn family find undirected neighbours of vertices
+##' @export 
 nb = function(graph, v, sort=1) {
   adj(graph, v, etype="undirected", dir=0, inclusive=TRUE, sort=sort)
 }
 
-##' @describeIn pa find ancestors of vertices
-##' @export anc
+##' @describeIn family find ancestors of vertices
+##' @export 
 anc = function(graph, v, sort=1) {
   grp(graph, v, etype="directed", dir=-1, sort=sort)
 }
 
-##' @describeIn pa find descendants of vertices
-##' @export dec
+##' @describeIn family find descendants of vertices
+##' @export 
 dec = function(graph, v, sort=1) {
   grp(graph, v, etype="directed", dir=1, sort=sort)
 }
 
-##' @describeIn pa find anterior vertices
-##' @export ant
+##' @describeIn family find anterior vertices
+##' @export 
 ant = function(graph, v, sort=1) {
   grp(graph, v, etype=c("directed", "undirected"), dir=c(-1,0), sort=sort)
 }
 
-##' @describeIn pa find district of vertices
+##' @describeIn family find neighbourhood of vertices
+##' @export 
+nhd = function(graph, v, sort=1) {
+  grp(graph, v, etype="undirected", dir=0, sort=sort)
+}
+
+##' @describeIn family find district of vertices
 ##' @param fast optionally opt for a faster metod with adjacency matrices or lists
-##' @export dis
+##' @export 
 dis = function(graph, v, sort=1, fast=FALSE) {
   if (!fast) return(grp(graph, v, etype="bidirected", dir=0, sort=sort))
   

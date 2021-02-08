@@ -7,7 +7,7 @@
 \usage{
 addEdges(graph, edges, ..., remDup = TRUE)
 
-removeEdges(graph, edges, ...)
+removeEdges(graph, edges, ..., force = FALSE)
 }
 \arguments{
 \item{graph}{a \code{mixedgraph} object}
@@ -17,15 +17,16 @@ removeEdges(graph, edges, ...)
 \item{...}{edges to be added with arguments matching names of edge types}
 
 \item{remDup}{logical: should we check for duplicate edges?}
+
+\item{force}{should we just ignore edges not actually present?}
 }
 \description{
 Add or remove edges
 }
 \details{
-At the moment no effort is made to 
-detect duplication in \code{addEdges()}.  To be added later.
-Currently \code{removeEdges()} forces all edges to be
-represented by adjacency matrices.
+The \code{remDup} argument is set by default to
+remove duplicate edges. Currently \code{removeEdges()} forces 
+all edges to be represented by adjacency matrices.
 }
 \section{Functions}{
 \itemize{
