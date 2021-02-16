@@ -18,6 +18,7 @@
 NULL
 
 ##' @describeIn family find parents of vertices
+##' @export
 pa = function(graph, v, sort=1) {
   adj(graph, v, etype="directed", dir=-1, inclusive=TRUE, sort=sort)
 }
