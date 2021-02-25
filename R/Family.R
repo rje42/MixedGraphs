@@ -507,7 +507,7 @@ barrenSets <- function(graph, topOrder, max_size, same_dist=FALSE,
   }
   
   # children <- lapply(graph$v, function(x) ch(graph, x))
-  parents <- withAdjList(graph, "directed")$edges$directed
+  parents <- withAdjList(graph, "directed", force=TRUE)$edges$directed
   # parents <- list()
   # parents[graph$v] <- lapply(graph$v, function(x) pa(graph, x))
   

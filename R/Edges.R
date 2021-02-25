@@ -433,11 +433,28 @@ is.adjList <- function(object, n, checknm = TRUE) {
 ##' @param graph an object of class \code{mixedgraph}
 ##' @param edges character vector of edge types to change, defaults to all
 ##' @param sparse logical: should sparse matrices be used?
+##' @param force logical: should edge sets be added when named?
 ##' 
 ##' @export withAdjMatrix
-withAdjMatrix <- function(graph, edges, sparse=FALSE) {
+withAdjMatrix <- function(graph, edges, sparse=FALSE, force=FALSE) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
+  
+  if (any(is.na(idx))) {
+    if (force) {
+      idx2 <- pmatch(edges, edgeTypes()[,1])
+      if (any(is.na(idx2))) stop("Some edge types not valid")
+      nms <- names(graph$edges, edgeTypes()[idx2[is.na(idx)],1])
+      graph$edges <- c(graph$edges, rep(list(adjMatrix(n=length(graph$vnames)), sum(is.na(idx)))))
+      names(graph$edges) <- nms
+    }
+    else {
+      warning("Some edge types not matched")
+      edges <- edges[!is.na(idx)]
+      idx <- na.omit(idx)
+    }
+  }
+  
   if (length(idx) == 0) {
     class(graph$edges) <- "edgeList"
     return(graph)
@@ -455,9 +472,27 @@ withAdjMatrix <- function(graph, edges, sparse=FALSE) {
 
 ##' @describeIn withAdjMatrix Change to \code{adjList} format
 ##' @export withAdjList
-withAdjList <- function(graph, edges) {
+withAdjList <- function(graph, edges, force=FALSE) {
   if (missing(edges)) idx <- seq_along(graph$edges)
-  else idx <- pmatch(edges, names(graph$edges))
+  else {
+    idx <- pmatch(edges, names(graph$edges))
+  }
+  
+  if (any(is.na(idx))) {
+    if (force) {
+      idx2 <- pmatch(edges, edgeTypes()[,1])
+      if (any(is.na(idx2))) stop("Some edge types not valid")
+      nms <- names(graph$edges, edgeTypes()[idx2[is.na(idx)],1])
+      graph$edges <- c(graph$edges, rep(list(adjList(n=length(graph$vnames)), sum(is.na(idx)))))
+      names(graph$edges) <- nms
+    }
+    else {
+      warning("Some edge types not matched")
+      edges <- edges[!is.na(idx)]
+      idx <- na.omit(idx)
+    }
+  }
+  
   if (length(idx) == 0) {
     class(graph$edges) <- "edgeList"
     return(graph)
@@ -475,9 +510,25 @@ withAdjList <- function(graph, edges) {
 
 ##' @describeIn withAdjMatrix Change to \code{edgeMatrix} format
 ##' @export withEdgeMatrix
-withEdgeMatrix <- function(graph, edges) {
+withEdgeMatrix <- function(graph, edges, force=FALSE) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
+  
+  if (any(is.na(idx))) {
+    if (force) {
+      idx2 <- pmatch(edges, edgeTypes()[,1])
+      if (any(is.na(idx2))) stop("Some edge types not valid")
+      nms <- names(graph$edges, edgeTypes()[idx2[is.na(idx)],1])
+      graph$edges <- c(graph$edges, rep(list(edgeMatrix(), sum(is.na(idx)))))
+      names(graph$edges) <- nms
+    }
+    else {
+      warning("Some edge types not matched")
+      edges <- edges[!is.na(idx)]
+      idx <- na.omit(idx)
+    }
+  }
+  
   if (length(idx) == 0) {
     class(graph$edges) <- "edgeList"
     return(graph)
@@ -495,9 +546,25 @@ withEdgeMatrix <- function(graph, edges) {
 
 ##' @describeIn withAdjMatrix Change to \code{eList} format
 ##' @export withEdgeList
-withEdgeList <- function(graph, edges) {
+withEdgeList <- function(graph, edges, force=FALSE) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
+  
+  if (any(is.na(idx))) {
+    if (force) {
+      idx2 <- pmatch(edges, edgeTypes()[,1])
+      if (any(is.na(idx2))) stop("Some edge types not valid")
+      nms <- names(graph$edges, edgeTypes()[idx2[is.na(idx)],1])
+      graph$edges <- c(graph$edges, rep(list(eList(), sum(is.na(idx)))))
+      names(graph$edges) <- nms
+    }
+    else {
+      warning("Some edge types not matched")
+      edges <- edges[!is.na(idx)]
+      idx <- na.omit(idx)
+    }
+  }
+  
   if (length(idx) == 0) {
     class(graph$edges) <- "edgeList"
     return(graph)
