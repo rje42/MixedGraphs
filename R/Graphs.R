@@ -439,6 +439,13 @@ standardizeVertices <- function(graph) {
 ##' 
 ##' @export
 standardizeEdges <- function(graph) {
+
+  kp <- rep(TRUE, length(graph$edges))
+  for (i in seq_along(graph$edges)) {
+    if (nedge(graph, names(graph$edges)[i]) == 0) kp[i] = FALSE
+  }
+  graph$edges <- graph$edges[kp]
+  
   ## standard order for edges
   #stop("FUNCTION NOT FINISHED")
   et <- na.omit(match(edgeTypes()[,1], names(graph$edges)))
@@ -449,12 +456,14 @@ standardizeEdges <- function(graph) {
 
   nms <- names(graph$edges)
   et <- sort(et)
-  
+
+  et2 <- match(names(graph$edges), edgeTypes()[,1])
+    
   ## order edges numerically
   for (i in seq_along(graph$edges)) {
     
     ## order edges by first vertex
-    if (edgeTypes()$directed[et[i]]) {
+    if (edgeTypes()$directed[et2[i]]) {
       ord = order(sapply(graph$edges[[i]], function(x) k*x[1]+x[2]))
     }
     else{
