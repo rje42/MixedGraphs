@@ -9,7 +9,7 @@
 ##' topological.  If the graph is cyclic, it returns \code{NA}, with or 
 ##' without a warning depending on the value of \code{warn}.
 ##' 
-##' @export topologicalOrder
+##' @export 
 topologicalOrder = function(graph, warn=TRUE) {
   n <- length(graph$v)
   if (n <= 1 || length(graph$edges$directed) == 0) return(graph$v)
@@ -61,7 +61,7 @@ isTopological = function(graph, v) {
 ##' 
 ##' @param graph \code{mixedgraph} object
 ##' 
-##' @export is.cyclic
+##' @export 
 is.cyclic = function(graph) {
   if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
   ord <- topologicalOrder(graph, warn=FALSE)
@@ -76,7 +76,7 @@ is.cyclic = function(graph) {
 }
 
 ##' @describeIn is.DAG test if an ADMG
-##' @export is.ADMG
+##' @export 
 is.ADMG = function(graph) {
   if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
   ## should only contain directed and bidirected edges
@@ -86,7 +86,7 @@ is.ADMG = function(graph) {
 }
 
 ##' @describeIn is.DAG test if a summary graph
-##' @export is.SG
+##' @export 
 is.SG = function(graph) {
   if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
   ## should only contain undirected, directed and bidirected edges
@@ -109,7 +109,7 @@ is.SG = function(graph) {
 ##' summary graph or acyclic directed mixed graph 
 ##' respectively.
 ##' 
-##' @export is.DAG
+##' @export 
 is.DAG = function(graph) {
   if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
   ## should only contain directed edges
@@ -119,7 +119,7 @@ is.DAG = function(graph) {
 }
 
 ##' @describeIn is.DAG test if an undirected graph
-##' @export is.UG
+##' @export 
 is.UG = function(graph) {
   if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
   ## should only contain undirected edges
