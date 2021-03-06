@@ -1,15 +1,16 @@
 ##' Find topological ordering of vertices
 ##' 
 ##' Looks for topological ordering of vertices with respect to directed edges.
-##' Not tested
 ##' 
 ##' @param graph a \code{mixedgraph} object
+##' @param warn logical: should a cyclic graph return a warning?
 ##' 
 ##' @details \code{isTopological} tests for an ordering being 
-##' topological.
+##' topological.  If the graph is cyclic, it returns \code{NA}, with or 
+##' without a warning depending on the value of \code{warn}.
 ##' 
 ##' @export topologicalOrder
-topologicalOrder = function(graph) {
+topologicalOrder = function(graph, warn=TRUE) {
   n <- length(graph$v)
   if (n <= 1 || length(graph$edges$directed) == 0) return(graph$v)
   
@@ -21,7 +22,7 @@ topologicalOrder = function(graph) {
   while (length(out) < n) {
     rm <- orphaned(graph, left)
     if (length(rm) == 0) {
-      warning("No topological order found: graph is cyclic")
+      if (warn) warning("No topological order found: graph is cyclic")
       return(NA)
     }
     out <- c(out, rm)
@@ -63,7 +64,7 @@ isTopological = function(graph, v) {
 ##' @export is.cyclic
 is.cyclic = function(graph) {
   if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
-  ord <- suppressWarnings(topologicalOrder(graph))
+  ord <- topologicalOrder(graph, warn=FALSE)
   if (any(is.na(ord))) return(TRUE)
   
   # out = tryCatch(topologicalOrder(graph), warning = function(e) {

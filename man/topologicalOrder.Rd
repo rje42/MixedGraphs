@@ -5,22 +5,24 @@
 \alias{isTopological}
 \title{Find topological ordering of vertices}
 \usage{
-topologicalOrder(graph)
+topologicalOrder(graph, warn = TRUE)
 
 isTopological(graph, v)
 }
 \arguments{
 \item{graph}{a \code{mixedgraph} object}
 
+\item{warn}{logical: should a cyclic graph return a warning?}
+
 \item{v}{an ordering of the vertices}
 }
 \description{
 Looks for topological ordering of vertices with respect to directed edges.
-Not tested
 }
 \details{
 \code{isTopological} tests for an ordering being 
-topological.
+topological.  If the graph is cyclic, it returns \code{NA}, with or 
+without a warning depending on the value of \code{warn}.
 }
 \section{Functions}{
 \itemize{

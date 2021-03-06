@@ -7,13 +7,13 @@
 \alias{withEdgeList}
 \title{Change representation of edges}
 \usage{
-withAdjMatrix(graph, edges, sparse = FALSE)
+withAdjMatrix(graph, edges, sparse = FALSE, force = FALSE)
 
-withAdjList(graph, edges)
+withAdjList(graph, edges, force = FALSE)
 
-withEdgeMatrix(graph, edges)
+withEdgeMatrix(graph, edges, force = FALSE)
 
-withEdgeList(graph, edges)
+withEdgeList(graph, edges, force = FALSE)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}
@@ -21,6 +21,8 @@ withEdgeList(graph, edges)
 \item{edges}{character vector of edge types to change, defaults to all}
 
 \item{sparse}{logical: should sparse matrices be used?}
+
+\item{force}{logical: should edge sets be added when named?}
 }
 \description{
 Change edge representation of (part of) graph to use \code{adjMatrix},
