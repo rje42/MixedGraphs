@@ -18,7 +18,8 @@ grv_a0 <- withAdjList(grv_a)
 grv_b0 <- withAdjList(grv_b, "bidirected")
 grv_c0 <- withAdjList(grv_c)
 
-g0u <- suppressWarnings(withAdjList(g0, "undirected"))
+g0u <- withAdjList(g0, "undirected", force=TRUE)
+g0u2 <- withEdgeList(g0, "undirected", force=TRUE)
 
 testthat::test_that("withAdjList works sensibly", {
   expect_equal(standardizeEdges(grv), standardizeEdges(grv_a0))
@@ -34,5 +35,5 @@ testthat::test_that("graphCr works sensibly", {
 
 
 testthat::test_that("withAdjList works sensibly when no edges present", {
-  expect_equal(g0, g0u)
+  expect_equal(standardizeEdges(g0u), standardizeEdges(g0u2))
 })

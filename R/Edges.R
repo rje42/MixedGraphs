@@ -444,8 +444,8 @@ withAdjMatrix <- function(graph, edges, sparse=FALSE, force=FALSE) {
     if (force) {
       idx2 <- pmatch(edges, edgeTypes()[,1])
       if (any(is.na(idx2))) stop("Some edge types not valid")
-      nms <- names(graph$edges, edgeTypes()[idx2[is.na(idx)],1])
-      graph$edges <- c(graph$edges, rep(list(adjMatrix(n=length(graph$vnames)), sum(is.na(idx)))))
+      nms <- c(names(graph$edges), edgeTypes()[idx2[is.na(idx)],1])
+      graph$edges <- c(graph$edges, rep(list(adjMatrix(n=length(graph$vnames))), sum(is.na(idx))))
       names(graph$edges) <- nms
     }
     else {
@@ -482,8 +482,8 @@ withAdjList <- function(graph, edges, force=FALSE) {
     if (force) {
       idx2 <- pmatch(edges, edgeTypes()[,1])
       if (any(is.na(idx2))) stop("Some edge types not valid")
-      nms <- names(graph$edges, edgeTypes()[idx2[is.na(idx)],1])
-      graph$edges <- c(graph$edges, rep(list(adjList(n=length(graph$vnames)), sum(is.na(idx)))))
+      nms <- c(names(graph$edges), edgeTypes()[idx2[is.na(idx)],1])
+      graph$edges <- c(graph$edges, rep(list(adjList(n=length(graph$vnames))), sum(is.na(idx))))
       names(graph$edges) <- nms
     }
     else {
@@ -518,8 +518,8 @@ withEdgeMatrix <- function(graph, edges, force=FALSE) {
     if (force) {
       idx2 <- pmatch(edges, edgeTypes()[,1])
       if (any(is.na(idx2))) stop("Some edge types not valid")
-      nms <- names(graph$edges, edgeTypes()[idx2[is.na(idx)],1])
-      graph$edges <- c(graph$edges, rep(list(edgeMatrix(), sum(is.na(idx)))))
+      nms <- c(names(graph$edges), edgeTypes()[idx2[is.na(idx)],1])
+      graph$edges <- c(graph$edges, rep(list(edgeMatrix()), sum(is.na(idx))))
       names(graph$edges) <- nms
     }
     else {
@@ -554,8 +554,8 @@ withEdgeList <- function(graph, edges, force=FALSE) {
     if (force) {
       idx2 <- pmatch(edges, edgeTypes()[,1])
       if (any(is.na(idx2))) stop("Some edge types not valid")
-      nms <- names(graph$edges, edgeTypes()[idx2[is.na(idx)],1])
-      graph$edges <- c(graph$edges, rep(list(eList(), sum(is.na(idx)))))
+      nms <- c(names(graph$edges), edgeTypes()[idx2[is.na(idx)],1])
+      graph$edges <- c(graph$edges, rep(list(eList()), sum(is.na(idx))))
       names(graph$edges) <- nms
     }
     else {
