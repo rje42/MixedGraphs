@@ -222,7 +222,9 @@ edgeMatrix <- function(edges, directed=FALSE, double=FALSE) {
     out <- matrix(c(rs,cs), nrow=2, byrow=TRUE)
   }
   else if (is.adjList(edges, checknm=TRUE)) {
-    out <- matrix(NA, 2, sum(lengths(edges)))
+    
+    if (directed) out <- matrix(NA, 2, sum(lengths(edges)))
+    else out <- matrix(NA, 2, sum(lengths(edges))/2)
     pos <- 0
     for (i in seq_along(edges)) {
       if (directed) {

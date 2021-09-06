@@ -317,7 +317,9 @@ subGraph = function (graph, v, drop=FALSE, etype) {
   v = unique.default(v)
   if (drop) v <- sort.int(v)
   if (!all(v %in% graph$v)) stop("Can only keep vertices which are present")
-  if (length(v) == length(graph$v)) return(graph)
+  if (!drop && length(v) == length(graph$v)) {
+    return(graph)
+  }
 
   edges = lapply(graph$edges, function(x) {
     if (is.adjMatrix(x, checknm=TRUE)) {
