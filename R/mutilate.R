@@ -173,9 +173,15 @@ addEdges <- function(graph, edges, ..., remDup = TRUE
 ## NEED TO SORT OUT ALL ARGUMENT
 ##' @describeIn addEdges remove edges
 ##' @param force should we just ignore edges not actually present?
+##' @param fast fast version for when graph already uses adjacency matrices
 ##' @export
-removeEdges <- function(graph, edges, ..., force=FALSE) {
-  out <- withAdjMatrix(graph)
+removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
+  if (!fast) out <- withAdjMatrix(graph)
+  else {
+    i <- edges[1]; j <- edges[2]
+    graph$edges <- lapply(graph$edges, function(x) x[i,j] <- x[j,i] <- 0)
+    return(graph)
+  }
   v <- graph$v
   
   # if ("all" %in% names(args)) {
@@ -272,6 +278,7 @@ mutilate <- function(graph, A, etype, dir=0L) {
   if (missing(etype)) {
     whEdge <- seq_along(graph$edges)
     tmp <- pmatch(names(graph$edges), edgeTypes()$type)
+    dir <- rep_len(dir, length(tmp))
   }
   else {
     whEdge <- pmatch(etype, names(graph$edges))
