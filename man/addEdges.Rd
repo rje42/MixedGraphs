@@ -7,7 +7,7 @@
 \usage{
 addEdges(graph, edges, ..., remDup = TRUE)
 
-removeEdges(graph, edges, ..., force = FALSE)
+removeEdges(graph, edges, ..., force = FALSE, fast = FALSE)
 }
 \arguments{
 \item{graph}{a \code{mixedgraph} object}
@@ -19,6 +19,8 @@ removeEdges(graph, edges, ..., force = FALSE)
 \item{remDup}{logical: should we check for duplicate edges?}
 
 \item{force}{should we just ignore edges not actually present?}
+
+\item{fast}{fast version for when graph already uses adjacency matrices}
 }
 \description{
 Add or remove edges
