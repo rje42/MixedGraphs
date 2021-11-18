@@ -586,7 +586,13 @@ withEdgeList <- function(graph, edges, force=FALSE) {
 ##' @export nedge
 nedge <- function (graph, edges) {
   if (missing(edges)) idx <- seq_along(graph$edges)
-  else idx <- pmatch(edges, names(graph$edges))
+  else {
+    idx2 <- pmatch(edges, edgeTypes()$type)
+    if (any(is.na(idx2))) stop(paste0("edge type",ifelse(sum(is.na(idx2)>1), "s", 
+                                      "")," '", paste(edges[is.na(idx2)], 
+                                      collapse="', '"), "' not matched"))
+    idx <- na.omit(match(edgeTypes()$type[idx2], names(graph$edges)))
+  }
   if (length(idx) == 0) return(0L)
   
   dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]

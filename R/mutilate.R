@@ -390,3 +390,52 @@ addNodes <- function(graph, k, vnames) {
   ## now return the enlarged graph
   mixedgraph(v=c(graph$v, n+seq_len(k)), edges=edges, vnames=c(graph$vnames, vnames))
 }
+
+##' Transform edges to different type
+##' 
+##' @param graph \code{mixedgraph} object
+##' @param from character vector of edges to transform (default is all)
+##' @param to character string of new edge type
+##' 
+##' @details \code{to} must be a single entry
+##' 
+##' @export
+morphEdges <- function(graph, from, to) {
+  if (missing(from)) from = names(graph$edges)
+  if (missing(to)) to = "undirected"
+  
+  ## partial matching of edge types
+  wh_edge <- pmatch(to, edgeTypes()$type)
+  if (is.na(wh_edge)) {
+    wh_edge <- pmatch(to, edgeTypes()$abbrv)
+    if (is.na(wh_edge)) stop("'to' edge type not matched")
+  }
+  to <- edgeTypes()$type[wh_edge]
+
+  wh_edge <- pmatch(from, edgeTypes()$type)
+  if (any(is.na(wh_edge))) {
+    wh_edge[is.na(wh_edge)] <- pmatch(from[is.na(wh_edge)], edgeTypes()$abbrv)
+    if (is.na(wh_edge)) stop(paste0("'from' edge type ", from[is.na(wh_edge)]," not matched"))
+  }
+  from <- edgeTypes()$type[wh_edge]
+  
+  ## add in target edge type if missing
+  if (is.null(graph$edges[[to]])) {
+    graph$edges[[to]] <- adjMatrix(n=length(graph$vnames))
+  }
+  else {
+    graph$edges[[to]] <- adjMatrix(graph$edges[[to]], n=length(graph$vnames), directed=)
+  }
+  
+  ## convert any edge lists and matrices:
+  to_add <- collapse(graph$edge[from], dir=edgeTypes()[wh_edge,"directed"])
+  new_edges <- list(to_add)
+  class(new_edges) <- "edgeList"
+  names(new_edges) = to
+
+  ## edit the graph  
+  graph <- graph[etype=setdiff(names(graph$edges), from)]
+  graph <- addEdges(graph, edges = new_edges)
+  
+  graph
+}
