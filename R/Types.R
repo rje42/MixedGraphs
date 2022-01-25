@@ -63,7 +63,7 @@ isTopological = function(graph, v) {
 ##' 
 ##' @export 
 is.cyclic = function(graph) {
-  if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
+  if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
   ord <- topologicalOrder(graph, warn=FALSE)
   if (any(is.na(ord))) return(TRUE)
   
@@ -78,7 +78,7 @@ is.cyclic = function(graph) {
 ##' @describeIn is.DAG test if an ADMG
 ##' @export 
 is.ADMG = function(graph) {
-  if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
+  if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
   ## should only contain directed and bidirected edges
   if(nedge(graph, setdiff(names(graph$edges), c("directed", "bidirected"))) > 0) return(FALSE)
   
@@ -88,7 +88,7 @@ is.ADMG = function(graph) {
 ##' @describeIn is.DAG test if a summary graph
 ##' @export 
 is.SG = function(graph) {
-  if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
+  if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
   ## should only contain undirected, directed and bidirected edges
   if(nedge(graph, setdiff(names(graph$edges), c("undirected", "directed", "bidirected"))) > 0) return(FALSE)
   
@@ -111,7 +111,7 @@ is.SG = function(graph) {
 ##' 
 ##' @export 
 is.DAG = function(graph) {
-  if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
+  if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
   ## should only contain directed edges
   if(any(lengths(graph$edges[!names(graph$edges)=="directed"]) > 0)) return(FALSE)
   
@@ -121,7 +121,7 @@ is.DAG = function(graph) {
 ##' @describeIn is.DAG test if an undirected graph
 ##' @export 
 is.UG = function(graph) {
-  if (!("mixedgraph" %in% class(graph))) stop("Must be an object of class 'mixedgraph'")
+  if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
   ## should only contain undirected edges
   if(any(lengths(graph$edges[!names(graph$edges)=="undirected"]) > 0)) return(FALSE)
   

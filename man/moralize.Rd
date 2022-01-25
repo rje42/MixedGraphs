@@ -4,7 +4,7 @@
 \alias{moralize}
 \title{Moralize}
 \usage{
-moralize(graph)
+moralize(graph, check = TRUE)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}

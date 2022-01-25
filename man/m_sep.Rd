@@ -12,5 +12,5 @@ m_sep(graph, A, B, C)
 \item{A, B, C}{sets of vertices in \code{graph}}
 }
 \description{
-Test m-separation
+Check if A is m-separated from B by C in a summary graph \code{graph}.
 }
