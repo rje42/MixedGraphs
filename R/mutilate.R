@@ -295,11 +295,11 @@ mutilate <- function(graph, A, etype, dir=0L) {
   for (i in seq_along(edges)) {
     if (is.adjList(edges[[i]], checknm=TRUE)) {
       ## adjList format
-      if (dir <= 0) {
+      if (dir[i] <= 0) {
         fill <- vector(mode="list", length = length(A))
         edges[[i]][A] <- fill
       }
-      if (dir >= 0) {
+      if (dir[i] >= 0) {
         edges[[i]] <- lapply(edges[[i]], function(x) setdiff(x, A))
       }
       class(edges[[i]]) <- "adjList"
@@ -307,10 +307,10 @@ mutilate <- function(graph, A, etype, dir=0L) {
     else if (is.eList(edges[[i]])) {
       ## edge list format
       rm = rep(FALSE, length(edges[[i]]))
-      if (dir >= 0) {  # remove outgoing edges
+      if (dir[i] >= 0) {  # remove outgoing edges
         rm = rm | sapply(edges[[i]], function(x) x[1]) %in% A
       }
-      if (dir <= 0) {  # remove incoming edges
+      if (dir[i] <= 0) {  # remove incoming edges
         rm = rm | sapply(edges[[i]], function(x) x[2]) %in% A
       }
       edges[[i]] = edges[[i]][!rm]
@@ -318,12 +318,12 @@ mutilate <- function(graph, A, etype, dir=0L) {
     }
     else if (is.adjMatrix(edges[[i]])) {
       ## matrix format
-      if (dir >= 0) edges[[i]][A,] = 0
-      if (dir <= 0) edges[[i]][,A] = 0
+      if (dir[i] >= 0) edges[[i]][A,] = 0
+      if (dir[i] <= 0) edges[[i]][,A] = 0
     }
     else if (is.edgeMatrix(edges[[i]])) {
-      if (dir >= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][1,] %in% A), drop=FALSE]
-      if (dir <= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][2,] %in% A), drop=FALSE]
+      if (dir[i] >= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][1,] %in% A), drop=FALSE]
+      if (dir[i] <= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][2,] %in% A), drop=FALSE]
       class(edges[[i]]) <- "edgeMatrix"
     }
     else stop("Edge type not recognised")
@@ -403,6 +403,8 @@ addNodes <- function(graph, k, vnames) {
 morphEdges <- function(graph, from, to) {
   if (missing(from)) from = names(graph$edges)
   if (missing(to)) to = "undirected"
+  
+  graph <- withEdgeMatrix(graph)
   
   ## partial matching of edge types
   wh_edge <- pmatch(to, edgeTypes()$type)
