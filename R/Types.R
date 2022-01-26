@@ -138,7 +138,7 @@ is_SG = function(graph) {
   if (length(intersect(ch(graph, v), nbs)) ||
         length(intersect(sp(graph, v), nbs))) return(FALSE)
   
-  return(!is.cyclic(graph))
+  return(!is_cyclic(graph))
 }
 
 
