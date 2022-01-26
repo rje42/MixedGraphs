@@ -6,10 +6,6 @@
 \alias{is_DAG}
 \alias{is_ADMG}
 \alias{is_SG}
-\alias{is.UG}
-\alias{is.DAG}
-\alias{is.ADMG}
-\alias{is.SG}
 \title{Test type of graph}
 \usage{
 is_UG(graph)
@@ -19,14 +15,6 @@ is_DAG(graph)
 is_ADMG(graph)
 
 is_SG(graph)
-
-is.UG(graph)
-
-is.DAG(graph)
-
-is.ADMG(graph)
-
-is.SG(graph)
 }
 \arguments{
 \item{graph}{\code{mixedgraph} object
@@ -47,13 +35,5 @@ Test type of graph
 \item \code{is_ADMG}: test if an acyclic directed mixed graph (ADMG)
 
 \item \code{is_SG}: test if a summary graph
-
-\item \code{is.UG}: deprecated version of \code{is_UG}
-
-\item \code{is.DAG}: deprecated version of \code{is_DAG}
-
-\item \code{is.ADMG}: deprecated version of \code{is_ADMG}
-
-\item \code{is.SG}: deprecated version of \code{is_SG}
 }}
 
