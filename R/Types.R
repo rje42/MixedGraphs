@@ -62,7 +62,7 @@ isTopological = function(graph, v) {
 ##' @param graph \code{mixedgraph} object
 ##' 
 ##' @export 
-is.cyclic = function(graph) {
+is_cyclic = function(graph) {
   if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
   ord <- topologicalOrder(graph, warn=FALSE)
   if (any(is.na(ord))) return(TRUE)
@@ -75,19 +75,60 @@ is.cyclic = function(graph) {
   return(FALSE)
 }
 
-##' @describeIn is.DAG test if an ADMG
+##' @describeIn is_cyclic deprecated version of \code{is_cyclic}
+##' @export
+is.cyclic <- function(A, B, C=integer(0), n=max(c(A,B,C))) {
+  .Deprecated("is_cyclic", msg="Function deprecated, use is_cyclic instead")
+  cl <- match.call()
+  args <- as.list(cl[-1])
+  args <- lapply(args, eval)
+  do.call(is_cyclic, args)
+}
+
+##' Test type of graph
+##' 
+##' @param graph \code{mixedgraph} object
+##' 
+##' \code{is_UG}, \code{is_DAG}, \code{is_ADMG}, \code{is_SG} respectively
+##' test whether a graph is an undirected graph, directed acyclic graph (DAG), 
+##' acyclic directed mixed graph (ADMG) or summary graph.
+##' 
+##' @name test_graph
+NULL
+
+##' @describeIn test_graph test if an undirected graph
 ##' @export 
-is.ADMG = function(graph) {
+is_UG = function(graph) {
+  if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
+  ## should only contain undirected edges
+  if(any(lengths(graph$edges[!names(graph$edges)=="undirected"]) > 0)) return(FALSE)
+  
+  return(TRUE)
+}
+
+##' @describeIn test_graph test if a directed acyclic graph (DAG)
+##' @export 
+is_DAG = function(graph) {
+  if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
+  ## should only contain directed edges
+  if(any(lengths(graph$edges[!names(graph$edges)=="directed"]) > 0)) return(FALSE)
+  
+  return(!is_cyclic(graph))
+}
+
+##' @describeIn test_graph test if an acyclic directed mixed graph (ADMG)
+##' @export 
+is_ADMG = function(graph) {
   if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
   ## should only contain directed and bidirected edges
   if(nedge(graph, setdiff(names(graph$edges), c("directed", "bidirected"))) > 0) return(FALSE)
   
-  return(!is.cyclic(graph))
+  return(!is_cyclic(graph))
 }
 
-##' @describeIn is.DAG test if a summary graph
+##' @describeIn test_graph test if a summary graph
 ##' @export 
-is.SG = function(graph) {
+is_SG = function(graph) {
   if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
   ## should only contain undirected, directed and bidirected edges
   if(nedge(graph, setdiff(names(graph$edges), c("undirected", "directed", "bidirected"))) > 0) return(FALSE)
@@ -100,30 +141,43 @@ is.SG = function(graph) {
   return(!is.cyclic(graph))
 }
 
-##' Test type of graph
-##' 
-##' @param graph \code{mixedgraph} object
-##' 
-##' \code{is.UG}, \code{is.DAG}, \code{is.SG}, \code{is.ADMG}
-##' test whether a graph is a directed acyclic graph, 
-##' summary graph or acyclic directed mixed graph 
-##' respectively.
-##' 
-##' @export 
-is.DAG = function(graph) {
-  if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
-  ## should only contain directed edges
-  if(any(lengths(graph$edges[!names(graph$edges)=="directed"]) > 0)) return(FALSE)
-  
-  return(!is.cyclic(graph))
-}
 
-##' @describeIn is.DAG test if an undirected graph
+##' @describeIn test_graph deprecated version of \code{is_UG}
 ##' @export 
 is.UG = function(graph) {
-  if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
-  ## should only contain undirected edges
-  if(any(lengths(graph$edges[!names(graph$edges)=="undirected"]) > 0)) return(FALSE)
-  
-  return(TRUE)
+  .Deprecated("is_UG", msg="Function deprecated, use is_UG instead")
+  cl <- match.call()
+  args <- as.list(cl[-1])
+  args <- lapply(args, eval)
+  do.call(is_UG, args)
+}
+
+##' @describeIn test_graph deprecated version of \code{is_DAG}
+##' @export
+is.DAG = function(graph) {
+  .Deprecated("is_DAG", msg="Function deprecated, use is_DAG instead")
+  cl <- match.call()
+  args <- as.list(cl[-1])
+  args <- lapply(args, eval)
+  do.call(is_DAG, args)
+}
+
+##' @describeIn test_graph deprecated version of \code{is_ADMG}
+##' @export
+is.ADMG = function(graph) {
+  .Deprecated("is_ADMG", msg="Function deprecated, use is_ADMG instead")
+  cl <- match.call()
+  args <- as.list(cl[-1])
+  args <- lapply(args, eval)
+  do.call(is_ADMG, args)
+}
+
+##' @describeIn test_graph deprecated version of \code{is_SG}
+##' @export
+is.SG = function(graph) {
+  .Deprecated("is_SG", msg="Function deprecated, use is_SG instead")
+  cl <- match.call()
+  args <- as.list(cl[-1])
+  args <- lapply(args, eval)
+  do.call(is_SG, args)
 }
