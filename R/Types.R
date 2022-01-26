@@ -75,7 +75,7 @@ is_cyclic = function(graph) {
   return(FALSE)
 }
 
-##' Test cyclicity of graph
+##' Deprecated function to test cyclicity of graph
 ##' 
 ##' Looks for cycles among edges of type 'directed'.  Not tested.
 ##' Maybe should add option to not test among all directed edges types.
@@ -84,7 +84,7 @@ is_cyclic = function(graph) {
 ##' 
 ##' @name is.cyclic-deprecated
 ##' @export
-is.cyclic <- function(A, B, C=integer(0), n=max(c(A,B,C))) {
+is.cyclic <- function(graph) {
   .Deprecated("is_cyclic")
 
   if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
