@@ -159,7 +159,7 @@ cliques = function(graph, sort=1, max_len) {
   if (missing(max_len)) max_len <- length(graph$v)
 
   ## restrict to undirected part of the graph
-  if (is.UG(graph)) gr_u <- graph
+  if (is_UG(graph)) gr_u <- graph
   else gr_u <- graph[un(graph)]
 
   ## get list of neighbours  
