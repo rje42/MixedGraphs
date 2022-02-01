@@ -513,6 +513,9 @@ graph_equal <- function(g1, g2) {
 ##' an edge with an \code{o} on the end (e.g. \code{o->}) then we must 
 ##' leave a space between the \code{o} and the variable name.
 ##' 
+##' The \code{edgeCr()} creates just an \code{edgeList} object, and is helpful
+##' for adding edges to existing graphs.
+##' 
 ##' @examples
 ##' graphCr("1--->2<-->3<-4","2<->4,4->5")
 ##' graphCr("1-2-3-4-1", representation="graphNEL")  # requires package 'graph'
@@ -668,7 +671,12 @@ graphCr <- function(char, ..., mode="adjList", useMatrices=FALSE, format="mixedg
   out
 }
 
-
+##' @describeIn graphCr Create edge list by hand
+##' @export
+edgeCr <- function(char, mode="eList") {
+  gr <- graphCr(char, mode=mode)
+  return(gr$edges)
+}
 
 # distail(gr, 3)
 # anc(gr, 3)
