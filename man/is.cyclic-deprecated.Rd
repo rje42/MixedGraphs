@@ -3,9 +3,9 @@
 \name{is.cyclic-deprecated}
 \alias{is.cyclic-deprecated}
 \alias{is.cyclic}
-\title{Test cyclicity of graph}
+\title{Deprecated function to test cyclicity of graph}
 \usage{
-is.cyclic(A, B, C = integer(0), n = max(c(A, B, C)))
+is.cyclic(graph)
 }
 \arguments{
 \item{graph}{\code{mixedgraph} object}
