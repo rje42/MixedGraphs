@@ -173,6 +173,7 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
 revAdjList <- function(object) {
   n <- length(object)
   out <- vector(mode="list", length=n)
+  out[] <- list(integer(0))
   for (i in seq_len(n)) {
     out[object[[i]]] <- lapply(out[object[[i]]], function(x) c(x,i))
   }

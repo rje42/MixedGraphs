@@ -19,62 +19,62 @@ NULL
 
 ##' @describeIn family find parents of vertices
 ##' @export
-pa = function(graph, v, sort=1) {
+pa <- function(graph, v, sort=1) {
   adj(graph, v, etype="directed", dir=-1, inclusive=TRUE, sort=sort)
 }
 
 ##' @describeIn family find children of vertices
 ##' @export 
-ch = function(graph, v, sort=1) {
+ch <- function(graph, v, sort=1) {
   adj(graph, v, etype="directed", dir=1, inclusive=TRUE, sort=sort)
 }
 
 ##' @describeIn family find spouses (siblings) of vertices
 ##' @export 
-sp = function(graph, v, sort=1) {
+sp <- function(graph, v, sort=1) {
   adj(graph, v, etype="bidirected", dir=0, inclusive=TRUE, sort=sort)
 }
 
 ##' @describeIn family find siblings (spouses) of vertices
 ##' @export 
-sib = function(graph, v, sort=1) {
+sib <- function(graph, v, sort=1) {
   adj(graph, v, etype="bidirected", dir=0, inclusive=TRUE, sort=sort)
 }
 
 ##' @describeIn family find undirected neighbours of vertices
 ##' @export 
-nb = function(graph, v, sort=1) {
+nb <- function(graph, v, sort=1) {
   adj(graph, v, etype="undirected", dir=0, inclusive=TRUE, sort=sort)
 }
 
 ##' @describeIn family find ancestors of vertices
 ##' @export 
-anc = function(graph, v, sort=1) {
+anc <- function(graph, v, sort=1) {
   grp(graph, v, etype="directed", dir=-1, sort=sort)
 }
 
 ##' @describeIn family find descendants of vertices
 ##' @export 
-dec = function(graph, v, sort=1) {
+dec <- function(graph, v, sort=1) {
   grp(graph, v, etype="directed", dir=1, sort=sort)
 }
 
 ##' @describeIn family find anterior vertices
 ##' @export 
-ant = function(graph, v, sort=1) {
+ant <- function(graph, v, sort=1) {
   grp(graph, v, etype=c("directed", "undirected"), dir=c(-1,0), sort=sort)
 }
 
 ##' @describeIn family find neighbourhood of vertices
 ##' @export 
-nhd = function(graph, v, sort=1) {
+nhd <- function(graph, v, sort=1) {
   grp(graph, v, etype="undirected", dir=0, sort=sort)
 }
 
 ##' @describeIn family find district of vertices
 ##' @param fast optionally opt for a faster metod with adjacency matrices or lists
 ##' @export 
-dis = function(graph, v, sort=1, fast=FALSE) {
+dis <- function(graph, v, sort=1, fast=FALSE) {
   if (!fast) return(grp(graph, v, etype="bidirected", dir=0, sort=sort))
   
   whEdge <- match("bidirected",names(graph$edges))
@@ -141,7 +141,7 @@ un <- function(graph, sort=1) {
 ##' @param undirected_only logical: should vertices not adjacent to an 
 ##' undirected edge be ignored?
 ##' @export neighbourhoods
-neighbourhoods = function(graph, undirected_only=TRUE) {
+neighbourhoods <- function(graph, undirected_only=TRUE) {
   if (undirected_only) groups(graph[un(graph)], etype="undirected")
   else groups(graph, etype="undirected")
 }
@@ -151,7 +151,7 @@ neighbourhoods = function(graph, undirected_only=TRUE) {
 ##' @param max_len maximum size of clique to consider
 ##' @describeIn districts Obtain maximal complete undirected subsets
 ##' @export cliques
-cliques = function(graph, sort=1, max_len) {
+cliques <- function(graph, sort=1, max_len) {
 
   # ## could do this by neighbourhood
   # neigh <- neighbourhoods(graph[un(graph)])
@@ -225,7 +225,7 @@ BK <- function(R, P, X, nbs, max_len) {
 ##' @details Finds the Markov blanket of \code{v} in \code{A}.
 ##' 
 ##' @export mb
-mb = function(graph, v, A, check=TRUE, sort=1) {
+mb <- function(graph, v, A, check=TRUE, sort=1) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (missing(A)) A <- graph$v
   
@@ -268,7 +268,7 @@ mb = function(graph, v, A, check=TRUE, sort=1) {
 ##' 
 ##' 
 ##' @export barren
-barren = function (graph, v = graph$v) {
+barren <- function (graph, v = graph$v) {
   if (length(v) == 0) return(integer(0))
   if (setequal(v, graph$v)) {
     ans = adj(graph, v, etype="directed", dir=-1)
@@ -289,7 +289,7 @@ barren = function (graph, v = graph$v) {
 
 ##' @describeIn barren find vertices with no parents
 ##' @export orphaned
-orphaned = function (graph, v = graph$v) {
+orphaned <- function (graph, v = graph$v) {
   if (length(v) == 0) return(integer(0))
   ans = adj(graph, v, etype="directed", dir=1)
   
@@ -300,7 +300,7 @@ orphaned = function (graph, v = graph$v) {
 
 ##' @export sterile
 ##' @describeIn barren find vertices with no children in the same set
-sterile = function(graph, v=graph$v){
+sterile <- function(graph, v=graph$v){
   if (length(v) == 0) return(integer(0))
   pas = adj(graph, v, etype="directed", dir=-1)
   
@@ -338,7 +338,7 @@ claudius <- function(graph, v) {
 ##' @param graph a \code{mixedgraph} object
 ##' 
 ##' @export skeleton
-skeleton = function(graph) {
+skeleton <- function(graph) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   # e = lapply(unlist(graph$edges, recursive=FALSE), sort.int)
   # e = unique(e)
@@ -367,7 +367,7 @@ skeleton = function(graph) {
 ##' @author Ilya Shpitser
 ##' 
 ##' @export anSets
-anSets = function(graph, topOrder, sort=1) {
+anSets <- function(graph, topOrder, sort=1) {
   if (length(graph$v) <= 1) return(list(graph$v))
   out = list(integer(0))
   if (missing(topOrder)) topOrder <- topologicalOrder(graph)
@@ -397,7 +397,7 @@ anSets = function(graph, topOrder, sort=1) {
 ##' @param same_dist logical, should barren vertices be in the same district?
 ##' @describeIn anSets Uses different algorithm 
 ##' @export anSets2
-anSets2 = function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
+anSets2 <- function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
   
   if (missing(maxbarren) || maxbarren > nv(graph)) maxbarren <- nv(graph)
   if (maxbarren < 1) return(list())

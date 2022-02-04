@@ -90,7 +90,7 @@ nv <- function(graph) {
 ##' @seealso \code{\link{graphCr}}.
 ##' 
 ##' @export
-mixedgraph = function(n, v=seq_len(n), edges = list(), vnames, vtype) {
+mixedgraph <- function(n, v=seq_len(n), edges = list(), vnames, vtype) {
   
   ## Check vertices are positive integers
   if (missing(n)) {
@@ -196,7 +196,7 @@ is.mixedgraph <- function(object) {
 ##' @param ... other arguments to \code{print}
 ##' 
 ##' @export 
-print.mixedgraph = function(x, ...) {
+print.mixedgraph <- function(x, ...) {
   n = length(x$v)
   cat("Graph with ", n, ifelse(n == 1, " vertex", " vertices"),
       ifelse(n == 0,"",":  "), sep="")
@@ -277,7 +277,7 @@ print.edgeList <- function(x, vnames, ...) {
 ##' @describeIn subGraph bracket notation for subgraphs
 ##' @param ... other arguments
 ##' @export
-`[.mixedgraph` = function(graph, v, ..., drop=FALSE, etype) {
+`[.mixedgraph` <- function(graph, v, ..., drop=FALSE, etype) {
   if (missing(v)) v <- graph$v
   else if (is.logical(v)) v <- which(v)
   v = v[v != 0]  # remove 0s
@@ -293,7 +293,7 @@ print.edgeList <- function(x, vnames, ...) {
 ##' @param etype edge types to keep (defaults to all)
 ##' 
 ##' @export subGraph
-subGraph = function (graph, v, drop=FALSE, etype) {
+subGraph <- function (graph, v, drop=FALSE, etype) {
   
   v <- sort.int(v)
   
