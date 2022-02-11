@@ -215,7 +215,7 @@ removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
   if (any(is.na(match(unlist(edges[adL]), v)))) stop("Edges must be between vertices in the graph")
 
   ## Check all edges given as lists to be added are valid and of length 2
-  edL <- sapply(edges, function(x) is.list(x) && !is.adjList(x))
+  edL <- sapply(edges, function(x) is.eList(x))
   if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
   if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
   
@@ -232,12 +232,12 @@ removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
   }
   
   ## Now convert to adjacency matrix anyway
-  edges <- mapply(adjMatrix, edges, directed=edgeTypes()$directed[et], n=nv(graph), SIMPLIFY = FALSE)
+  edges <- mapply(adjMatrix, edges, directed=edgeTypes()$directed[et], n=length(graph$vnames), SIMPLIFY = FALSE)
   
   for (i in seq_along(et)) {
     if (etys[et[i]] %in% names(out$edges)) {
       ## if these edges are present remove them
-      out$edges[[etys[et[i]]]][graph$v, graph$v] = out$edges[[etys[et[i]]]][graph$v, graph$v] - edges[[i]]
+      out$edges[[etys[et[i]]]][graph$v, graph$v] = out$edges[[etys[et[i]]]][graph$v, graph$v] - edges[[i]][graph$v, graph$v]
       if (any(out$edges[[etys[et[i]]]] < 0)) stop("Tried to remove edge not present")
     }
     ## else just ignore 

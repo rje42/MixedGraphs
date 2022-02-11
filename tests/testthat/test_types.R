@@ -14,15 +14,15 @@ gr3 <- makeGraphCycle(5, "directed")
 # gr3c <- graphCr("1 <--> 2 -> 3 <-> 4 <-- 2, 1 --> 4 --> 6, 2 <-> 5", mode="edgeMatrix")
 
 
-test_that("is.SG and is.ADMG work", {
-  expect_true(is.SG(gr1))
-  expect_true(is.SG(gr1a))
-  expect_true(is.SG(gr1b))
-  expect_true(is.SG(gr1c))
-  expect_false(is.ADMG(gr1))
-  expect_false(is.ADMG(gr1a))
-  expect_false(is.ADMG(gr1b))
-  expect_false(is.ADMG(gr1c))
+test_that("is_SG and is_ADMG work", {
+  expect_true(is_SG(gr1))
+  expect_true(is_SG(gr1a))
+  expect_true(is_SG(gr1b))
+  expect_true(is_SG(gr1c))
+  expect_false(is_ADMG(gr1))
+  expect_false(is_ADMG(gr1a))
+  expect_false(is_ADMG(gr1b))
+  expect_false(is_ADMG(gr1c))
 })
 
 test_that("pa, ch, sib, dis, anc, dec, consistent", {
@@ -51,8 +51,8 @@ test_that("pa, ch, sib, dis, anc, dec, consistent", {
   expect_equal(dec(gr2, 2, sort=2), dec(gr2c, 2, sort=2))
 })
 
-test_that("test is.cyclic()", {
-  expect_true(is.cyclic(gr3))
-  expect_false(is.cyclic(gr1))
-  expect_false(is.cyclic(gr2))
+test_that("test is_cyclic()", {
+  expect_true(is_cyclic(gr3))
+  expect_false(is_cyclic(gr1))
+  expect_false(is_cyclic(gr2))
 })

@@ -21,12 +21,6 @@ test_that("removeEdges works", {
   expect_equal(mg3, withAdjMatrix(mg1))
 })
 
-test_that("m-separation test works", {
-  expect_equal(m_sep(mg1a, 1, 2), FALSE)
-  expect_equal(m_sep(mg1a, 1, 2, 3), TRUE)
-  expect_equal(m_sep(mg1a, 1, integer(0)), TRUE)
-})
-
 mg1 <- graphCr("1 -> 4 <- 2 -> 3 -> 5 <- 4 -- 1 -- 3", mode = "eList")
 mg1a <- graphCr("2 -> 3 -> 5 <- 4 -- 1 -- 3", mode = "eList")
 mg2 <- graphCr("1 -> 4 <- 2 -> 3 -> 5 <- 4 -- 1 -- 3 -- 5", mode = "eList")
@@ -45,9 +39,3 @@ test_that("removeEdges works", {
   expect_equal(mg3, withAdjMatrix(mg1))
 })
 
-test_that("m-separation test works", {
-  expect_equal(m_sep(mg1a, 1, 2), FALSE)
-  expect_equal(m_sep(mg1a, 1, 2, 3), TRUE)
-  expect_equal(m_sep(mg1a, 1, integer(0)), TRUE)
-  expect_false(m_sep(gr3,1,3,4))
-})
