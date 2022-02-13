@@ -277,25 +277,26 @@ print.edgeList <- function(x, vnames, ...) {
 ##' @describeIn subGraph bracket notation for subgraphs
 ##' @param ... other arguments
 ##' @export
-`[.mixedgraph` <- function(graph, v, ..., drop=FALSE, etype) {
+`[.mixedgraph` <- function(graph, v, ..., drop=FALSE, etype, order=FALSE) {
   if (missing(v)) v <- graph$v
   else if (is.logical(v)) v <- which(v)
   v = v[v != 0]  # remove 0s
   if (length(v) > 0 && all(v < 0)) v = setdiff(graph$v, -v)
-  subGraph(graph, v, drop=drop, etype=etype)
+  subGraph(graph, v, drop=drop, etype=etype, order=order)
 }
 
 ##' Take induced vertex subgraph of mixedgraph
 ##' 
 ##' @param graph a \code{mixedgraph} object
 ##' @param v vertices to keep
-##' @param drop force removed vertices to be dropped from representation in adjacency matrices?
+##' @param drop force removed vertices to be dropped from representation in adjacency matrices and lists?
 ##' @param etype edge types to keep (defaults to all)
+##' @param order logical: force graph to follow new order implied by \code{v}?
 ##' 
 ##' @export subGraph
-subGraph <- function (graph, v, drop=FALSE, etype) {
+subGraph <- function (graph, v, drop=FALSE, etype, order=FALSE) {
   
-  v <- sort.int(v)
+  if (!order) v <- sort.int(v)
   
   if (missing(v)) {
     if (missing(etype)) return(graph)
@@ -318,8 +319,15 @@ subGraph <- function (graph, v, drop=FALSE, etype) {
   if (drop) v <- sort.int(v)
   if (!all(v %in% graph$v)) stop("Can only keep vertices which are present")
   if (!drop && length(v) == length(graph$v)) {
+    if (order) {
+      graph <- withAdjMatrix(graph)
+      graph$edges[] <- lapply(graph$edges, function(x) `[`(x,v,v,drop=FALSE))
+      graph$edges[] <- lapply(graph$edges, function(x) `class<-`(x,"adjMatrix"))
+      graph$vnames[] <- graph$vnames[v]
+    }
     return(graph)
   }
+  
 
   edges = lapply(graph$edges, function(x) {
     if (is.adjMatrix(x, checknm=TRUE)) {
