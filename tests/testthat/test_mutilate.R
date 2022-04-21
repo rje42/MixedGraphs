@@ -16,6 +16,17 @@ test_that("addEdges works", {
                     standardizeEdges(mg3))
 })
 
+test_that("addEdges works with edgeCr()", {
+  expect_equivalent(standardizeEdges(addEdges(mg1, edgeCr("3 -- 4", mode="eList"))), 
+                    standardizeEdges(mg3))
+  expect_equivalent(standardizeEdges(addEdges(mg1, edgeCr("3 -- 4", mode="edgeMatrix"))), 
+                    standardizeEdges(mg3))
+  expect_equivalent(standardizeEdges(addEdges(mg1, edgeCr("3 -- 4", mode="adjMatrix"))), 
+                    standardizeEdges(mg3))
+  expect_equivalent(standardizeEdges(addEdges(mg1, edgeCr("3 -- 4", mode="adjList"))), 
+                    standardizeEdges(mg3))
+})
+
 test_that("removeEdges works", {
   mg3 <- removeEdges(mg2, un=eList(c(5,3)))
   expect_equal(mg3, withAdjMatrix(mg1))

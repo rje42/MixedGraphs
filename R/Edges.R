@@ -129,7 +129,7 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
     
     # tmp <- edges
     if(missing(n)) n <- max(edges)
-    out <- vector(mode="list", length=n)
+    out <- rep(list(integer(0)), n) #vector(mode="list", length=n)
 
     for (i in seq_len(n)) {
       if (directed) {
@@ -138,9 +138,8 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
       }
       else {
         wh_i <- which(apply(edges, MARGIN=2, FUN=function(x) any(x==i)))
-        mod2 <- wh_i %% 2
-        wh_i2 <- wh_i + 2*mod2 - 1
-        out[[i]] <- edges[wh_i2]
+        wh_j <- apply(edges[,wh_i,drop=FALSE], 2, FUN=function(x) which(x==i))
+        out[[i]] <- edges[cbind(3-wh_j,wh_i)]
       }
     }
   }

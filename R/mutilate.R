@@ -64,6 +64,53 @@ remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
   else stop("Not sure how to handle this, should be list or matrix")
 }
 
+##' Function to match variables using their names
+##' 
+##' @param graph an object of class \code{mixedgraph}
+##' @param edges an \code{edgeList} object created by \code{edgeCr}
+##' 
+##' @description 
+match_vnames <- function (graph, edges) {
+  ## check for variable names equivalence
+  mtch <- match(attr(edges, "vnames"), graph$vnames)
+  if (any(is.na(mtch))) stop("Some variable names do not match")
+  
+  if (isTRUE(all.equal(mtch, seq_along(graph$vnames))) || length(edges) == 0) {
+    attr(edges, "vnames") <- NULL
+    return(edges)
+  }
+  
+  ## could speed this up by only checking for length of added vertices for 
+  ## eList and edgeMatrix objects
+  if (is.eList(edges[[1]])) {
+    edges <- rapply(edges, function(x) mtch[x], how = "replace")
+    edges <- lapply(edges, function(x) `class<-`(x, "eList"))
+  }
+  else if (is.adjMatrix(edges[[1]])) {
+    edges2 <- rep(list(adjMatrix(n=length(vnames(graph)))), length(edges))
+    for (i in seq_along(edges)) edges2[[i]][mtch, mtch] <- edges[[i]]
+    
+    names(edges2) <- names(edges)
+    edges <- edges2
+  }
+  else if (is.adjList(edges[[1]])) {
+    edges2 <- rep(list(adjList(n=length(vnames(graph)))), length(edges))
+    for (i in seq_along(edges)) for (j in seq_along(mtch)) if (!is.null(edges[[i]][[j]])) edges2[[i]][[mtch[j]]] <- mtch[[edges[[i]][[j]]]]
+    
+    names(edges2) <- names(edges)
+    edges <- edges2
+  } 
+  else if (is.edgeMatrix(edges[[1]])) {
+    edges <- lapply(edges, function(x) matrix(mtch[x], nrow=2))
+    edges <- lapply(edges, function(x) `class<-`(x, "edgeMatrix"))
+  }
+  else stop("'edges' should be a valid edge list object")
+  
+  class(edges) <- "edgeList"
+  
+  return(edges)
+}
+
 ##' Add or remove edges
 ##' 
 ##' @param graph a \code{mixedgraph} object
@@ -81,6 +128,11 @@ addEdges <- function(graph, edges, ..., remDup = TRUE
                      ) {
   out <- graph
   v <- graph$v
+  
+  ## if edges provided, ensure that edgeCr has correct vertex numbers
+  if (!missing(edges)) if (!is.null(attr(edges, "vnames"))) {
+    edges <- match_vnames(graph, edges)
+  }
   
   args <- list(...)
   if (length(args) > 0) edges <- do.call(makeEdgeList, args)
@@ -109,8 +161,18 @@ addEdges <- function(graph, edges, ..., remDup = TRUE
   if (any(is.na(match(unlist(edges[edE]), v)))) stop("Edges must be between vertices in the graph")
   if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
 
+  ## Check all edges given as edge matrices to be added are valid and of length 2
+  edAL <- !edL & !edE & sapply(edges, is.adjList)
+  if (any(lengths(edges[edAL]) != length(graph$vnames))) stop("Must be entry in an adjList for each vertex")
+
+  ## Check all edges given as edge matrices to be added are valid and of length 2
+  edAM <- !edL & !edE & !edAL & sapply(edges, is.adjMatrix)
+  if (any(sapply(edges[edAM], nrow) != length(graph$vnames)) ||
+      any(sapply(edges[edAM], ncol) != length(graph$vnames))) stop("Adjacency matrix must have entries for all vertices")
+
   ## Check for other list objects
-  oth <- !edL & !edE & sapply(edges, is.list)
+  # oth <- !edL & !edE & sapply(edges, is.list)
+  oth <- !edL & !edE & !edAM & !edAL & sapply(edges, is.list)
   if (any(oth)) stop("Not a valid edgeList member object")
   
   for (i in seq_along(et)) {
@@ -188,6 +250,11 @@ removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
   #   all <- args$all
   #   args <- args[names(args != "all")]
   # }
+  
+  ## if edges provided, ensure that edgeCr has correct vertex numbers
+  if (!missing(edges)) if (!is.null(attr(edges, "vnames"))) {
+    edges <- match_vnames(graph, edges)
+  }
   
   args <- makeEdgeList(...)
   if (length(args) > 0) edges <- args

@@ -683,7 +683,9 @@ graphCr <- function(char, ..., mode="adjList", useMatrices=FALSE, format="mixedg
 ##' @export
 edgeCr <- function(char, mode="eList") {
   gr <- graphCr(char, mode=mode)
-  return(gr$edges)
+  out <- gr$edges
+  attr(out, "vnames") <- gr$vnames
+  return(out)
 }
 
 # distail(gr, 3)
