@@ -122,6 +122,9 @@ match_vnames <- function (graph, edges) {
 ##' remove duplicate edges. Currently \code{removeEdges()} forces 
 ##' all edges to be represented by adjacency matrices. 
 ##' 
+##' The \code{fast} argument for \code{removeEdges} requires that 
+##' the edge to be removed is given as a single vector of length 2.
+##' 
 ##' @export
 addEdges <- function(graph, edges, ..., remDup = TRUE
                      ## add in code to put edges in more directly
@@ -236,6 +239,7 @@ addEdges <- function(graph, edges, ..., remDup = TRUE
 ##' @describeIn addEdges remove edges
 ##' @param force should we just ignore edges not actually present?
 ##' @param fast fast version for when graph already uses adjacency matrices
+##' 
 ##' @export
 removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
   if (!fast) out <- withAdjMatrix(graph)
@@ -250,17 +254,17 @@ removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
   #   all <- args$all
   #   args <- args[names(args != "all")]
   # }
-  
+
   ## if edges provided, ensure that edgeCr has correct vertex numbers
   if (!missing(edges)) if (!is.null(attr(edges, "vnames"))) {
     edges <- match_vnames(graph, edges)
   }
-  
+
   args <- makeEdgeList(...)
   if (length(args) > 0) edges <- args
-  
+
   if (!("edgeList" %in% class(edges))) class(edges) <- "edgeList"
-  
+
   ## now have an edgeList
   etys <- edgeTypes()$type
   if (is.null(names(edges))) et = seq_along(edges)
@@ -272,7 +276,7 @@ removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
   else if (any(is.na(et))) stop("Edge types not matched")
   else if (any(duplicated(et))) stop("Repeated edge types matched")
 
-  ## Check all edges given as adjacency lists to be added are valid
+  ## Check all edges given as adjacency lists to be removed are valid
   adL <- sapply(edges, function(x) is.adjList(x))
   if (nv(graph) < length(graph$vnames)) for (i in seq_along(edges)[adL]) {
     nv_orig <- length(graph$vnames)
@@ -281,23 +285,23 @@ removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
   }
   if (any(is.na(match(unlist(edges[adL]), v)))) stop("Edges must be between vertices in the graph")
 
-  ## Check all edges given as lists to be added are valid and of length 2
+  ## Check all edges given as lists to be removed are valid and of length 2
   edL <- sapply(edges, function(x) is.eList(x))
   if (any(is.na(match(unlist(edges[edL]), v)))) stop("Edges must be between vertices in the graph")
   if (any(sapply(unlist(edges[edL], recursive=FALSE), length) != 2)) stop("Hyper-edges not yet supported")
-  
-  ## Check all edges given as edge matrices to be added are valid and of length 2
+
+  ## Check all edges given as edge matrices to be removed are valid and of length 2
   edE <- sapply(edges, is.edgeMatrix)
   if (any(is.na(match(unlist(edges[edE]), v)))) stop("Edges must be between vertices in the graph")
   if (any(sapply(edges[edE], nrow) != 2)) stop("Hyper-edges not yet supported")
-  
+
   adM <- sapply(edges, is.adjMatrix)
   chk <- rowSums(cbind(adM, adL, edL, edE)) == 1
   if (!all(chk)) {
     wh <- names(edges)[chk != 1]
     stop(paste("Edge formats for ", paste(wh, collapse=", "), " are not valid", collapse=""))
   }
-  
+
   ## Now convert to adjacency matrix anyway
   edges <- mapply(adjMatrix, edges, directed=edgeTypes()$directed[et], n=length(graph$vnames), SIMPLIFY = FALSE)
   

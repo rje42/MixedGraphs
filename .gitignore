@@ -1,3 +1,4 @@
+.Rbuildignore
 ..Rcheck
 .Rproj.user
 .Rhistory

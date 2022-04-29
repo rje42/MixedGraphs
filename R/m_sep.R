@@ -45,7 +45,7 @@ m_sep <- function(graph, A, B, C) {
   
   ## moralize, remove edges from C
   mg <- moralize(graph2, check=FALSE)
-  mg <- mutilate(mg, C, "undirected")
+  mg <- mutilate(mg, C)
   gr <- grp(mg, v=A)
 
   if (any(B %in% gr)) return(FALSE)
