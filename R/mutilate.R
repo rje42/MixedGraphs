@@ -95,7 +95,7 @@ match_vnames <- function (graph, edges) {
   }
   else if (is.adjList(edges[[1]])) {
     edges2 <- rep(list(adjList(n=length(vnames(graph)))), length(edges))
-    for (i in seq_along(edges)) for (j in seq_along(mtch)) if (!is.null(edges[[i]][[j]])) edges2[[i]][[mtch[j]]] <- mtch[[edges[[i]][[j]]]]
+    for (i in seq_along(edges)) for (j in seq_along(mtch)) if (!is.null(edges[[i]][[j]])) edges2[[i]][[mtch[j]]] <- mtch[edges[[i]][[j]]]
     
     names(edges2) <- names(edges)
     edges <- edges2
@@ -322,7 +322,7 @@ removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
 ##' Remove edges adjacent to set of vertices
 ##' 
 ##' @param graph a \code{mixedgraph} object
-##' @param A a set of vertices in \code{graph}
+##' @param A,B sets of vertices in \code{graph}
 ##' @param etype which edges to remove
 ##' @param dir indicates whether only edges of certain orientation are removed
 ##' 
@@ -330,12 +330,15 @@ removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
 ##' If \code{dir=1}, then directed edges out of \code{A} are removed, 
 ##' but ones into \code{A} are preserved; for \code{dir=-1} the reverse,
 ##' and for \code{dir=0} (the default), direction is irrelevant.
+##' If a second set \code{B} is specified, then all edges between \code{A}
+##' and \code{B} are removed.
 ##' 
 ##' @export 
-mutilate <- function(graph, A, etype, dir=0L) {
+mutilate <- function(graph, A, B, etype, dir=0L) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (length(A) == 0) return(graph)
-  if (all(graph$v %in% A) && missing(etype)) {
+  if (!missing(B) && length(B) == 0) return(graph)
+  if (missing(B) && all(graph$v %in% A) && missing(etype)) {
     edg <- graph$edges
     for (i in seq_along(edg)) {
       edg[[i]] <- list()
@@ -366,35 +369,69 @@ mutilate <- function(graph, A, etype, dir=0L) {
   for (i in seq_along(edges)) {
     if (is.adjList(edges[[i]], checknm=TRUE)) {
       ## adjList format
-      if (dir[i] <= 0) {
-        fill <- vector(mode="list", length = length(A))
-        edges[[i]][A] <- fill
+      if (missing(B)) {
+        if (dir[i] <= 0) {
+          fill <- vector(mode="list", length = length(A))
+          edges[[i]][A] <- fill
+        }
+        if (dir[i] >= 0) {
+          edges[[i]] <- lapply(edges[[i]], function(x) setdiff(x, A))
+        }
       }
-      if (dir[i] >= 0) {
-        edges[[i]] <- lapply(edges[[i]], function(x) setdiff(x, A))
+      else {
+        if (dir[i] <= 0) {
+          edges[[i]][B] <- lapply(edges[[i]][B], function(x) setdiff(x, A))
+        }
+        if (dir[i] >= 0) {
+          edges[[i]][A] <- lapply(edges[[i]][A], function(x) setdiff(x, B))
+        }
       }
       class(edges[[i]]) <- "adjList"
     }
     else if (is.eList(edges[[i]])) {
       ## edge list format
       rm = rep(FALSE, length(edges[[i]]))
-      if (dir[i] >= 0) {  # remove outgoing edges
-        rm = rm | sapply(edges[[i]], function(x) x[1]) %in% A
+      if (missing(B)) {
+        if (dir[i] >= 0) {  # remove outgoing edges
+          rm = rm | (sapply(edges[[i]], function(x) x[1]) %in% A)
+        }
+        if (dir[i] <= 0) {  # remove incoming edges
+          rm = rm | (sapply(edges[[i]], function(x) x[2]) %in% A)
+        }
       }
-      if (dir[i] <= 0) {  # remove incoming edges
-        rm = rm | sapply(edges[[i]], function(x) x[2]) %in% A
+      else {
+        if (dir[i] >= 0) {  # remove outgoing edges
+          rm = rm | ((sapply(edges[[i]], function(x) x[1]) %in% A) & 
+                       (sapply(edges[[i]], function(x) x[2]) %in% B))
+        }
+        if (dir[i] <= 0) {  # remove incoming edges
+          rm = rm | ((sapply(edges[[i]], function(x) x[2]) %in% A) & 
+                       (sapply(edges[[i]], function(x) x[1]) %in% B))
+        }
       }
       edges[[i]] = edges[[i]][!rm]
       class(edges[[i]]) <- "eList"
     }
     else if (is.adjMatrix(edges[[i]])) {
       ## matrix format
-      if (dir[i] >= 0) edges[[i]][A,] = 0
-      if (dir[i] <= 0) edges[[i]][,A] = 0
+      if (missing(B)) {
+        if (dir[i] >= 0) edges[[i]][A,] = 0
+        if (dir[i] <= 0) edges[[i]][,A] = 0
+      }
+      else {
+        if (dir[i] >= 0) edges[[i]][A,B] = 0
+        if (dir[i] <= 0) edges[[i]][B,A] = 0
+      }
     }
     else if (is.edgeMatrix(edges[[i]])) {
-      if (dir[i] >= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][1,] %in% A), drop=FALSE]
-      if (dir[i] <= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][2,] %in% A), drop=FALSE]
+      if (missing(B)) {
+        if (dir[i] >= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][1,] %in% A), drop=FALSE]
+        if (dir[i] <= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][2,] %in% A), drop=FALSE]
+      }
+      else {
+        if (dir[i] >= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][1,] %in% A & edges[[i]][2,] %in% B), drop=FALSE]
+        if (dir[i] <= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][2,] %in% A & edges[[i]][1,] %in% B), drop=FALSE]
+      }
       class(edges[[i]]) <- "edgeMatrix"
     }
     else stop("Edge type not recognised")
@@ -402,6 +439,8 @@ mutilate <- function(graph, A, etype, dir=0L) {
   graph$edges[whEdge] <- edges
   graph
 }
+
+
 
 ##' Add additional nodes to a graph
 ##' 

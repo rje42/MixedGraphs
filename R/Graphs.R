@@ -604,7 +604,7 @@ graphCr <- function(char, ..., mode="adjList", useMatrices=FALSE, format="mixedg
   ## determine output based on value of 'mode'
   if (mode == "adjList") {
     len <- length(unique(etys[etype]))
-    edges <- lapply(seq_len(len), function(x) vector(mode="list", length=n))
+    edges <- lapply(seq_len(len), function(x) adjList(n=n))
     names(edges) <- unique(etys[etype])
     
     for (i in seq_along(v1)) {

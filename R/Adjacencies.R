@@ -470,7 +470,7 @@ grp2 <- function(v, edges, dir, inclusive, sort=1) {
 }
 
 ##' @export groups
-##' @describeIn grp find equivalence classes
+##' @describeIn grp find connected components
 groups = function(graph, etype, sort=1) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (missing(etype)) etype <- edgeTypes()$type
@@ -527,4 +527,86 @@ groups = function(graph, etype, sort=1) {
   out
 }
 
+##' Find vertices in subset connected to vertex
+##' 
+##' Function for finding nodes in a set connected to a vertex via paths in the 
+##' original graph
+##' 
+##' @param graph an object of class \code{mixedgraph}
+##' @param v vertex to check
+##' @param D set to look for paths to
+##' @param etype edge types to use
+##' @param dir integer vector of directions
+##' @param verbose logical: should additional information be provided?
+##' 
+##' @details This function will look for paths in \code{graph} from \code{v} 
+##' that only use the edge types in \code{etype} and the directions specified,
+##' and stop whenever a path hits something in \code{D}.  It then outputs the 
+##' subset of elements of \code{D} that it hits.
+##' 
+##' @export
+pathConnected <- function(graph, v, D, etype, dir, verbose=FALSE) {
+
+  if (length(D) == 0) return(integer(0))
+    
+  ## check inputs
+  if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
+  if (missing(etype)) etype <- names(graph$edges)
+  else {
+    ## match names and get correct descriptions
+    chk <- pmatch(etype, edgeTypes()$type)
+    chk_a <- pmatch(etype, edgeTypes()$abbrv)
+    if (any(is.na(chk) & is.na(chk_a))) stop("some edgeTypes not matched")
+    if (any(na.omit(chk != chk_a))) stop("conflicting values for edgeTypes")
+    chk[is.na(chk)] <- chk_a[is.na(chk)]
+    etype <- edgeTypes()$type[chk]
+  }
+  if (missing(dir)) dir <- 1*edgeTypes()$directed[edgeTypes()$type==etype]
+  else {
+    if (length(dir) > length(etype)) stop("Must be fewer directions than edge types")
+    dir <- dir*rep.int(1L, length(etype))
+  }
+  
+  graph <- withAdjList(graph[etype=etype])
+  edges <- graph$edges
+  if (length(edges) == 0) return(integer(0))
+
+  ## get adjLists into correct orientation
+  if (any(dir != 1*edgeTypes()$directed[edgeTypes()$type==etype])) {
+    for (i in seq_along(etype)) {
+      if (!edgeTypes()$directed[edgeTypes()$type==etype]) next
+      if (dir[i] == 0) {
+        edges[[i]] <- symAdjList(edges[[i]])
+      }
+      else if (dir[i]) {
+        edges[[i]] <- revAdjList(edges[[i]])
+      }
+    }
+  }
+  
+  ## combine adjLists
+  if (length(edges) > 1) {
+    edges <- lapply(purrr::transpose(edges), union)
+  }
+  else edges <- edges[[1]]
+  
+  ## now start search
+  new <- TRUE
+  active <- v
+  seen <- integer(0)
+  while (new) {
+    new_vs <- setdiff(unlist(edges[active]), seen)
+
+    seen <- c(seen, new_vs)
+    active <- setdiff(new_vs, D)
+    new <- length(active) > 0
+    
+    if (verbose && new) {
+      cat("new vertices: ", paste(new_vs, collapse=", "), "\n", sep="")
+      cat("  to check: ", paste(active, collapse=", "), "\n", sep="")
+    }
+  }
+  
+  return(intersect(seen, D))
+}
 
