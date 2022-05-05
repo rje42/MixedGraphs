@@ -58,7 +58,7 @@ or \code{adjList}.
 \itemize{
 \item \code{grp2}: Faster routine for single \code{adjMatrix} or \code{adjList}
 
-\item \code{groups}: find equivalence classes
+\item \code{groups}: find connected components
 repeat dir() vector with warning if necessary
 }}
 

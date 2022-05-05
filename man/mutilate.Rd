@@ -4,12 +4,12 @@
 \alias{mutilate}
 \title{Delete edges}
 \usage{
-mutilate(graph, A, etype, dir = 0L)
+mutilate(graph, A, B, etype, dir = 0L)
 }
 \arguments{
 \item{graph}{a \code{mixedgraph} object}
 
-\item{A}{a set of vertices in \code{graph}}
+\item{A, B}{sets of vertices in \code{graph}}
 
 \item{etype}{which edges to remove}
 
@@ -23,4 +23,6 @@ If no edge type is specified, then all edges are removed.
 If \code{dir=1}, then directed edges out of \code{A} are removed, 
 but ones into \code{A} are preserved; for \code{dir=-1} the reverse,
 and for \code{dir=0} (the default), direction is irrelevant.
+If a second set \code{B} is specified, then all edges between \code{A}
+and \code{B} are removed.
 }
