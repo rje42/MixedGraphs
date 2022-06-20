@@ -69,7 +69,6 @@ remove_duplicate_edges <- function(edges, directed=TRUE, sort=FALSE) {
 ##' @param graph an object of class \code{mixedgraph}
 ##' @param edges an \code{edgeList} object created by \code{edgeCr}
 ##' 
-##' @description 
 match_vnames <- function (graph, edges) {
   ## check for variable names equivalence
   mtch <- match(attr(edges, "vnames"), graph$vnames)
@@ -488,7 +487,7 @@ addNodes <- function(graph, k, vnames) {
   }
   
   if (length(adjM) > 0) {
-    edges[adjM] <- matrix(0, n+k, n+k)
+    edges[adjM] <- list(matrix(0, n+k, n+k))
     
     edges[adjM] <- mapply(function(x,y) {
       x[seq_len(nrow(y)), seq_len(ncol(y))] <- y
