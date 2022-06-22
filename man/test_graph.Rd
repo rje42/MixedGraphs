@@ -3,12 +3,15 @@
 \name{test_graph}
 \alias{test_graph}
 \alias{is_UG}
+\alias{is_BG}
 \alias{is_DAG}
 \alias{is_ADMG}
 \alias{is_SG}
 \title{Test type of graph}
 \usage{
 is_UG(graph)
+
+is_BG(graph)
 
 is_DAG(graph)
 
@@ -29,6 +32,8 @@ Test type of graph
 \section{Functions}{
 \itemize{
 \item \code{is_UG}: test if an undirected graph
+
+\item \code{is_BG}: test if a bidirected graph
 
 \item \code{is_DAG}: test if a directed acyclic graph (DAG)
 

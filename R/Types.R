@@ -110,7 +110,17 @@ NULL
 is_UG = function(graph) {
   if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
   ## should only contain undirected edges
-  if(any(lengths(graph$edges[!names(graph$edges)=="undirected"]) > 0)) return(FALSE)
+  if(nedge(graph, setdiff(names(graph$edges), "undirected")) > 0) return(FALSE)
+  
+  return(TRUE)
+}
+
+##' @describeIn test_graph test if a bidirected graph
+##' @export 
+is_BG = function(graph) {
+  if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
+  ## should only contain undirected edges
+  if(nedge(graph, setdiff(names(graph$edges), "bidirected")) > 0) return(FALSE)
   
   return(TRUE)
 }
@@ -120,7 +130,7 @@ is_UG = function(graph) {
 is_DAG = function(graph) {
   if (!is.mixedgraph(graph)) stop("Must be an object of class 'mixedgraph'")
   ## should only contain directed edges
-  if(any(lengths(graph$edges[!names(graph$edges)=="directed"]) > 0)) return(FALSE)
+  if(nedge(graph, setdiff(names(graph$edges), "directed")) > 0) return(FALSE)
   
   return(!is_cyclic(graph))
 }
