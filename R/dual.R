@@ -8,9 +8,9 @@
 ##' 
 ##' @export
 dual <- function(graph) {
-  n <- length(graph$vnames)
-  out <- withAdjMatrix(skeleton(graph))
-  out$edges$undirected[] <- (1 - diag(n)) - out$edges$undirected
+  n <- nv(graph)
+  out <- withAdjMatrix(skeleton(graph), force=TRUE)
+  out$edges$undirected[graph$v, graph$v] <- (1 - diag(n)) - out$edges$undirected[graph$v, graph$v]
   
   out
 }

@@ -343,7 +343,7 @@ skeleton <- function(graph) {
   # e = lapply(unlist(graph$edges, recursive=FALSE), sort.int)
   # e = unique(e)
   e = collapse(graph$edges, dir=0)
-  out = mixedgraph(v=graph$v, edges=list(undirected=e), vnames=graph$vnames)
+  out = mixedgraph(v=graph$v, edges=makeEdgeList(undirected=e), vnames=graph$vnames)
   return(out)
 }
 
