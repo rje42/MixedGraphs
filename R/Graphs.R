@@ -296,39 +296,45 @@ print.edgeList <- function(x, vnames, ...) {
 ##' @export subGraph
 subGraph <- function (graph, v, drop=FALSE, etype, order=FALSE) {
   
-  if (!order) v <- sort.int(v)
-  
   if (missing(v)) {
     if (missing(etype)) return(graph)
     v <- graph$v
   }
   else if (is.logical(v)) v <- which(v)
-  #  v = v[v <= graph$n]
+  else v <- unique.default(v)
   
+  if (length(v) == nv(graph) && drop) drop <- FALSE
+  else if (drop && order)  stop("Cannot both drop vertices and reorder the remainder, use two separate calls")
+  if (!order) v <- sort.int(v)
+
+  #  v = v[v <= graph$n]
+
+  ## ensure unwanted edge types are dropped  
   if (!missing(etype)) {
     etype <- intersect(etype, names(graph$edges))
     graph$edges <- graph$edges[etype]
   }
   
+  ## deal with case of no vertices
   if (length(v) == 0) {
     if (drop) out = mixedgraph(n=0)
     else out = mixedgraph(n=0, vnames=graph$vnames)
     return(out)
   }
-  v = unique.default(v)
-  if (drop) v <- sort.int(v)
-  if (!all(v %in% graph$v)) stop("Can only keep vertices which are present")
-  if (!drop && length(v) == length(graph$v)) {
-    if (order) {
-      graph <- withAdjMatrix(graph)
-      graph$edges[] <- lapply(graph$edges, function(x) `[`(x,v,v,drop=FALSE))
-      graph$edges[] <- lapply(graph$edges, function(x) `class<-`(x,"adjMatrix"))
-      graph$vnames[] <- graph$vnames[v]
-    }
+  # v = unique.default(v)
+  # if (drop) v <- sort.int(v)
+  if (!all(v %in% graph$v)) stop("Can only keep vertices that are present")
+  if (order) {
+    graph <- withAdjMatrix(graph)
+    graph$edges[] <- lapply(graph$edges, function(x) `[`(x,v,v,drop=FALSE))
+    graph$edges[] <- lapply(graph$edges, function(x) `class<-`(x,"adjMatrix"))
+    if (length(v) < length(graph$vnames)) graph$vnames[] <- c(graph$vnames[v], graph$vnames[-v])
+    else graph$vnames <- graph$vnames[v]
+    
     return(graph)
   }
   
-
+  ## now 
   edges = lapply(graph$edges, function(x) {
     if (is.adjMatrix(x, checknm=TRUE)) {
       if (drop) {
