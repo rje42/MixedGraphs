@@ -20,6 +20,8 @@ Current features:
 * Built in edge-types include undirected, directed, bidirected and partially 
   directed.
   
+* Custom edges can easily be added.
+  
 To install the package, run the commands
 ```
 install.packages("devtools")
