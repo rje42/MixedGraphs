@@ -467,8 +467,11 @@ addNodes <- function(graph, k, vnames) {
 
   ## add empty edges if necessary
   edges <- graph$edges
-  adjM <- which(sapply(edges, is.adjMatrix))
-  adjL <- which(sapply(edges, is.adjList))
+  if (length(edges) > 0) {
+    adjM <- which(sapply(edges, is.adjMatrix))
+    adjL <- which(sapply(edges, is.adjList))
+  }
+  else adjM <- adjL <- integer(0)
   # for (i in adjM) {
   #   edges[[i]] <- matrix(0, n+k, n+k)
   # }
