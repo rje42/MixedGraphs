@@ -10,11 +10,11 @@
 ##' without a warning depending on the value of \code{warn}.
 ##' 
 ##' @export 
-topologicalOrder = function(graph, warn=TRUE) {
+topologicalOrder <- function(graph, warn=TRUE) {
   n <- length(graph$v)
   if (n <= 1 || length(graph$edges$directed) == 0) return(graph$v)
   
-  graph_d <- withAdjMatrix(graph, "directed")
+  # graph_d <- withAdjMatrix(graph, "directed")
   
   out <- orphaned(graph)
   left <- setdiff(graph$v, out)

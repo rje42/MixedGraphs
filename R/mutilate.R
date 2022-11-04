@@ -110,6 +110,7 @@ match_vnames <- function (graph, edges) {
   return(edges)
 }
 
+
 ##' Add or remove edges
 ##' 
 ##' @param graph a \code{mixedgraph} object
@@ -316,6 +317,7 @@ removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
   out 
 }
 
+
 ##' Delete edges
 ##' 
 ##' Remove edges adjacent to set of vertices
@@ -438,7 +440,6 @@ mutilate <- function(graph, A, B, etype, dir=0L) {
   graph$edges[whEdge] <- edges
   graph
 }
-
 
 
 ##' Add additional nodes to a graph

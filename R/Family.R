@@ -226,7 +226,7 @@ BK <- function(R, P, X, nbs, max_len) {
 ##' 
 ##' @export mb
 mb <- function(graph, v, A, check=TRUE, sort=1) {
-  if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
+  if (check && !is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (missing(A)) A <- graph$v
   
   if (!(v %in% A)) stop("v must be a member of A")
