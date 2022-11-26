@@ -293,6 +293,10 @@ print.edgeList <- function(x, vnames, ...) {
 ##' @param etype edge types to keep (defaults to all)
 ##' @param order logical: force graph to follow new order implied by \code{v}?
 ##' 
+##' @details If \code{order} is \code{TRUE}, then \code{edgeMatrix} and \code{eList} 
+##' formats are converted to \code{edgeList}s (\code{adjMatrix} format is preserved).
+##' 
+##' 
 ##' @export subGraph
 subGraph <- function (graph, v, drop=FALSE, etype, order=FALSE) {
   
@@ -325,9 +329,25 @@ subGraph <- function (graph, v, drop=FALSE, etype, order=FALSE) {
   # if (drop) v <- sort.int(v)
   if (!all(v %in% graph$v)) stop("Can only keep vertices that are present")
   if (order) {
-    graph <- withAdjMatrix(graph)
-    graph$edges[] <- lapply(graph$edges, function(x) `[`(x,v,v,drop=FALSE))
-    graph$edges[] <- lapply(graph$edges, function(x) `class<-`(x,"adjMatrix"))
+    waM <- sapply(graph$edges, is.adjMatrix, checknm=TRUE)
+    waL <- sapply(graph$edges, is.adjList, checknm=TRUE)
+    not_aLaM <- names(graph$edges)[!(waL | waM)]
+    for (i in seq_along(not_aLaM)) {
+      graph$edges[[not_aLaM[i]]] <- adjList(graph$edges[[not_aLaM[i]]],
+                                            n=length(vnames(graph)), 
+                                            dir=edgeTypes()$directed[edgeTypes()$type==not_aLaM[i]])
+    }
+    waL <- sapply(graph$edges, is.adjList, checknm=TRUE)
+    # graph <- withAdjMatrix(graph)
+    
+    graph$edges[waM] <- lapply(graph$edges[waM], function(x) `[`(x,v,v,drop=FALSE))
+    graph$edges[waM] <- lapply(graph$edges[waM], function(x) `class<-`(x,"adjMatrix"))
+    
+    graph$edges[waL] <- lapply(graph$edges[waL], function(x) `[`(x,v))
+    graph$edges[waL] <- lapply(graph$edges[waL], function(x) lapply(x, intersect, y=v))
+    graph$edges[waL] <- lapply(graph$edges[waL], function(x) lapply(x, match, v))
+    graph$edges[waL] <- lapply(graph$edges[waL], function(x) `class<-`(x,"adjList"))
+    
     if (length(v) < length(graph$vnames)) graph$vnames[] <- c(graph$vnames[v], graph$vnames[-v])
     else graph$vnames <- graph$vnames[v]
     
