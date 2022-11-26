@@ -25,8 +25,12 @@ subGraph(graph, v, drop = FALSE, etype, order = FALSE)
 \description{
 Take induced vertex subgraph of mixedgraph
 }
-\section{Methods (by generic)}{
+\details{
+If \code{order} is \code{TRUE}, then \code{edgeMatrix} and \code{eList} 
+formats are converted to \code{edgeList}s (\code{adjMatrix} format is preserved).
+}
+\section{Functions}{
 \itemize{
 \item \code{[}: bracket notation for subgraphs
-}}
 
+}}

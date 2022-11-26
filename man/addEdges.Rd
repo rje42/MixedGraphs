@@ -35,6 +35,6 @@ the edge to be removed is given as a single vector of length 2.
 }
 \section{Functions}{
 \itemize{
-\item \code{removeEdges}: remove edges
-}}
+\item \code{removeEdges()}: remove edges
 
+}}

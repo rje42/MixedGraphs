@@ -28,10 +28,10 @@ or both?
 }
 \section{Functions}{
 \itemize{
-\item \code{nedge}: number of edges
+\item \code{nedge()}: number of edges
 
-\item \code{vnames}: names of vertices for \code{mixedgraph} object
+\item \code{vnames()}: names of vertices for \code{mixedgraph} object
 
-\item \code{nv}: number of vertices for \code{mixedgraph} object
+\item \code{nv()}: number of vertices for \code{mixedgraph} object
+
 }}
-

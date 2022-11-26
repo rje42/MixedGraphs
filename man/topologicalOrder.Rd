@@ -26,6 +26,6 @@ without a warning depending on the value of \code{warn}.
 }
 \section{Functions}{
 \itemize{
-\item \code{isTopological}: Check if ordering is topological
-}}
+\item \code{isTopological()}: Check if ordering is topological
 
+}}

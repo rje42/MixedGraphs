@@ -31,14 +31,14 @@ Test type of graph
 }
 \section{Functions}{
 \itemize{
-\item \code{is_UG}: test if an undirected graph
+\item \code{is_UG()}: test if an undirected graph
 
-\item \code{is_BG}: test if a bidirected graph
+\item \code{is_BG()}: test if a bidirected graph
 
-\item \code{is_DAG}: test if a directed acyclic graph (DAG)
+\item \code{is_DAG()}: test if a directed acyclic graph (DAG)
 
-\item \code{is_ADMG}: test if an acyclic directed mixed graph (ADMG)
+\item \code{is_ADMG()}: test if an acyclic directed mixed graph (ADMG)
 
-\item \code{is_SG}: test if a summary graph
+\item \code{is_SG()}: test if a summary graph
+
 }}
-

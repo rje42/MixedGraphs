@@ -1,19 +1,21 @@
 Package: MixedGraphs
 Title: Mixed Graphs and Graphical Models
-Version: 0.6.6
+Version: 1.0.0.9000
 Authors@R: person("Robin", "Evans", , "evans@stats.ox.ac.uk", role = c("aut", "cre"))
 Description: Functions for creating and manipulating graphs with arbitrary
     edge types.
 Depends:
     R (>= 3.1),
     rje,
-Imports: methods, 
-         graphics, 
-         grid,
-         stats, 
-         utils,
-         Matrix,
-         purrr
+Imports: 
+    methods,
+    graphics,
+    grid,
+    stats,
+    utils,
+    Matrix,
+    purrr,
+    Rcpp
 License: GPL-2
 LazyData: true
 Suggests:
@@ -28,5 +30,8 @@ Suggests:
     igraph,
     bnlearn,
 VignetteBuilder: knitr
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.2
 Encoding: UTF-8
+LinkingTo: 
+    Rcpp,
+    RcppArmadillo

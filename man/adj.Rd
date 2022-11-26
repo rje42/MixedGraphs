@@ -43,9 +43,9 @@ two vertices.
 }
 \section{Functions}{
 \itemize{
-\item \code{adjacent}: Test for adjacency
-}}
+\item \code{adjacent()}: Test for adjacency
 
+}}
 \examples{
 adj(gr1, v=1, etype="directed")
 adj(gr1, v=1, etype="directed", dir=-1)

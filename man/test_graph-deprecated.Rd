@@ -29,12 +29,12 @@ Deprecated functions to test type of graph
 }
 \section{Functions}{
 \itemize{
-\item \code{is.UG}: version of \code{is_UG}
+\item \code{is.UG()}: version of \code{is_UG}
 
-\item \code{is.DAG}: version of \code{is_DAG}
+\item \code{is.DAG()}: version of \code{is_DAG}
 
-\item \code{is.ADMG}: version of \code{is_ADMG}
+\item \code{is.ADMG()}: version of \code{is_ADMG}
 
-\item \code{is.SG}: version of \code{is_SG}
+\item \code{is.SG()}: version of \code{is_SG}
+
 }}
-

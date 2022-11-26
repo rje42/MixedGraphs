@@ -40,14 +40,14 @@ chains, cycles and stars.
 }
 \section{Functions}{
 \itemize{
-\item \code{makeGraphEmpty}: graph with no edges
+\item \code{makeGraphEmpty()}: graph with no edges
 
-\item \code{makeGraphChain}: graph with chain of edges
+\item \code{makeGraphChain()}: graph with chain of edges
 
-\item \code{makeGraphCycle}: graph with cycle of edges
+\item \code{makeGraphCycle()}: graph with cycle of edges
 
-\item \code{makeGraphStar}: star shaped graph
+\item \code{makeGraphStar()}: star shaped graph
 
-\item \code{makeGraphGrid}: grid of vertices
+\item \code{makeGraphGrid()}: grid of vertices
+
 }}
-
