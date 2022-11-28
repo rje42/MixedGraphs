@@ -25,3 +25,11 @@ add_edges_aL <- function(aL, e1, e2, dir) {
     .Call('_MixedGraphs_add_edges_aL', PACKAGE = 'MixedGraphs', aL, e1, e2, dir)
 }
 
+rmv_edges_aL <- function(aL, e1, e2, dir) {
+    .Call('_MixedGraphs_rmv_edges_aL', PACKAGE = 'MixedGraphs', aL, e1, e2, dir)
+}
+
+rmv_edges_aM <- function(aM, e1, e2, dir) {
+    .Call('_MixedGraphs_rmv_edges_aM', PACKAGE = 'MixedGraphs', aM, e1, e2, dir)
+}
+

@@ -85,6 +85,34 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rmv_edges_aL
+List rmv_edges_aL(List aL, IntegerVector e1, IntegerVector e2, int dir);
+RcppExport SEXP _MixedGraphs_rmv_edges_aL(SEXP aLSEXP, SEXP e1SEXP, SEXP e2SEXP, SEXP dirSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type aL(aLSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type e1(e1SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type e2(e2SEXP);
+    Rcpp::traits::input_parameter< int >::type dir(dirSEXP);
+    rcpp_result_gen = Rcpp::wrap(rmv_edges_aL(aL, e1, e2, dir));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rmv_edges_aM
+NumericMatrix rmv_edges_aM(NumericMatrix aM, IntegerVector e1, IntegerVector e2, int dir);
+RcppExport SEXP _MixedGraphs_rmv_edges_aM(SEXP aMSEXP, SEXP e1SEXP, SEXP e2SEXP, SEXP dirSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type aM(aMSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type e1(e1SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type e2(e2SEXP);
+    Rcpp::traits::input_parameter< int >::type dir(dirSEXP);
+    rcpp_result_gen = Rcpp::wrap(rmv_edges_aM(aM, e1, e2, dir));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_MixedGraphs_grp_cpp", (DL_FUNC) &_MixedGraphs_grp_cpp, 3},
@@ -93,6 +121,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MixedGraphs_sym_adjList_cpp", (DL_FUNC) &_MixedGraphs_sym_adjList_cpp, 1},
     {"_MixedGraphs_add_edges_aM", (DL_FUNC) &_MixedGraphs_add_edges_aM, 4},
     {"_MixedGraphs_add_edges_aL", (DL_FUNC) &_MixedGraphs_add_edges_aL, 4},
+    {"_MixedGraphs_rmv_edges_aL", (DL_FUNC) &_MixedGraphs_rmv_edges_aL, 4},
+    {"_MixedGraphs_rmv_edges_aM", (DL_FUNC) &_MixedGraphs_rmv_edges_aM, 4},
     {NULL, NULL, 0}
 };
 
