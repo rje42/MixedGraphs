@@ -308,8 +308,15 @@ removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
   for (i in seq_along(et)) {
     if (etys[et[i]] %in% names(out$edges)) {
       ## if these edges are present remove them
-      out$edges[[etys[et[i]]]][graph$v, graph$v] = out$edges[[etys[et[i]]]][graph$v, graph$v] - edges[[i]][graph$v, graph$v]
-      if (any(out$edges[[etys[et[i]]]] < 0)) stop("Tried to remove edge not present")
+      if (force) {
+        out$edges[[etys[et[i]]]][graph$v, graph$v] = 
+          pmax(out$edges[[etys[et[i]]]][graph$v, graph$v] - edges[[i]][graph$v, graph$v], 0)
+      }
+      else {
+        out$edges[[etys[et[i]]]][graph$v, graph$v] = 
+          out$edges[[etys[et[i]]]][graph$v, graph$v] - edges[[i]][graph$v, graph$v]
+      }
+      if (!force && any(out$edges[[etys[et[i]]]] < 0)) stop("Tried to remove edge not present")
     }
     ## else just ignore 
   }
