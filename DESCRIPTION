@@ -1,6 +1,10 @@
 Package: MixedGraphs
 Title: Mixed Graphs and Graphical Models
+<<<<<<< HEAD
 Version: 1.0.0.9002
+=======
+Version: 0.6.8
+>>>>>>> 7648c0d... Fixed bug in removeEdges()
 Authors@R: person("Robin", "Evans", , "evans@stats.ox.ac.uk", role = c("aut", "cre"))
 Description: Functions for creating and manipulating graphs with arbitrary
     edge types.
