@@ -101,3 +101,32 @@ NumericMatrix rmv_edges_aM (NumericMatrix aM, IntegerVector e1, IntegerVector e2
   return aM2;
 }
 
+
+// [[Rcpp::export]]
+List chg_ends_cpp (NumericMatrix m1, NumericMatrix m2, NumericVector v1, NumericVector v2, bool d2) {
+  std::vector<int> done;
+  // Rcout << v1.size() << ',' << v2.size() << '\n';
+  if (!Rf_isMatrix(m1) || !Rf_isMatrix(m2)) stop("'m1' and 'm2' must be matrices");
+  else if (m1.ncol() != m1.nrow()) stop("'m1' not an adjacency matrix");
+  else if (m2.ncol() != m2.nrow()) stop("'m2' not an adjacency matrix");
+  else if (m1.ncol() != m2.nrow()) stop("'m1' and 'm2' have different dimensions");
+  else if (v1.size() != v2.size()) stop("'v1' and 'v2' have different lengths");
+  
+  for (int i : seq_along(v1)) {
+    int v = v1[i-1]-1; int w = v2[i-1]-1;
+    // Rcout << i << ' ' << v << ' ' << w << '\n';
+    
+    if (m1(v,w) > 0) {
+      m1(v,w) = m1(w,v) = 0;
+      m2(v,w) = 1;
+      if (!d2) m2(w,v) = 1;
+      done.push_back(i);
+    }
+  }
+  
+  List out = List::create(Named("m1") = m1, 
+                          _["m2"] = m2, 
+                          _["done"] = done);
+  
+  return out;
+}

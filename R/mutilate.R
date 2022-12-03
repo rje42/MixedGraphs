@@ -561,3 +561,335 @@ morphEdges <- function(graph, from, to) {
   
   graph
 }
+
+##' Modify edge marks
+##' 
+##' @param graph simple graph of class \code{mixedgraph}
+##' @param v1,v2 end points to respectively preserve and change
+##' @param to one of 'arrow', 'tail', 'circle'
+##' 
+##' @export 
+chgEnds <- function (graph, v1, v2, to="arrow") {
+  ## validate inputs  
+  if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph")
+  if (length(v1) != length(v2)) stop("endpoint vectors must be of the same length")
+  if (length(v1) == 0) return(graph)
+  nv <- length(graph$vnames)
+  
+  done <- rep(FALSE, length(v1))
+  
+  if (to == "arrow") {
+    ##########################################
+    ## deal with transitions to an arrow head
+    if (!is.null(graph$edges$undirected)) {
+      ## get adjMatrix objects
+      adU <- adjMatrix(graph$edges$undirected, n=nv, directed=FALSE)
+      if (!is.null(graph$edges$directed)) adD <- adjMatrix(graph$edges$directed, n=nv, directed=TRUE)
+      else adD <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adU, m2=adD, v1=v1[!done], v2=v2[!done], d2=TRUE)
+      adU <- adjMatrix(out$m1, n=nv)
+      adD <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$undirected <- adU
+      graph$edges$directed <- adD
+      
+      if (all(done)) return(graph)
+    }
+    if (!is.null(graph$edges$directed)) {
+      ## get adjMatrix objects
+      adD <- adjMatrix(graph$edges$directed, n=nv, directed=TRUE)
+      if (!is.null(graph$edges$bidirected)) adB <- adjMatrix(graph$edges$bidirected, n=nv, directed=FALSE)
+      else adB <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adD, m2=adB, v1=v2[!done], v2=v1[!done], d2=FALSE)
+      adD <- adjMatrix(out$m1, n=nv)
+      adB <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$bidirected <- adB
+      graph$edges$directed <- adD
+      
+      if (all(done)) return(graph)
+    }
+    if (!is.null(graph$edges$`partially directed`)) {
+      ## get adjMatrix objects
+      adPD <- adjMatrix(graph$edges$`partially directed`, n=nv, directed=TRUE)
+      if (!is.null(graph$edges$bidirected)) adB <- adjMatrix(graph$edges$bidirected, n=nv, directed=FALSE)
+      else adB <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adPD, m2=adB, v1=v2[!done], v2=v1[!done], d2=FALSE)
+      adPD <- adjMatrix(out$m1, n=nv)
+      adB <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$bidirected <- adB
+      graph$edges$`partially directed` <- adPD
+      
+      if (all(done)) return(graph)
+    }
+    if (!is.null(graph$edges$`partially undirected`)) {
+      ## get adjMatrix objects
+      adPU <- adjMatrix(graph$edges$`partially undirected`, n=nv, directed=TRUE)
+      if (!is.null(graph$edges$directed)) adD <- adjMatrix(graph$edges$directed, n=nv, directed=TRUE)
+      else adD <- adjMatrix(n=nv)
+      if (!is.null(graph$edges$`partially directed`)) adPD <- adjMatrix(graph$edges$`partially directed`, n=nv, directed=TRUE)
+      else adPD <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adPU, m2=t(adD), v1=v2[!done], v2=v1[!done], d2=TRUE)
+      adPU <- adjMatrix(out$m1, n=nv)
+      adD <- adjMatrix(t(out$m2), n=nv)
+      done[!done][out$done] <- TRUE
+      out <- chg_ends_cpp(m1=adPU, m2=adPD, v1=v1[!done], v2=v2[!done], d2=TRUE)
+      adPU <- adjMatrix(out$m1, n=nv)
+      adPD <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$directed <- adD
+      graph$edges$`partially undirected` <- adPU
+      graph$edges$`partially directed` <- adPD
+      
+      if (all(done)) return(graph)
+    }
+    if (!is.null(graph$edges$`not directed`)) {
+      ## get adjMatrix objects
+      adND <- adjMatrix(graph$edges$`not directed`, n=nv, directed=FALSE)
+      if (!is.null(graph$edges$directed)) adPD <- adjMatrix(graph$edges$`partially directed`, n=nv, directed=TRUE)
+      else adPD <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adND, m2=adPD, v1=v1[!done], v2=v2[!done], d2=TRUE)
+      adND <- adjMatrix(out$m1, n=nv)
+      adPD <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$`not directed` <- adND
+      graph$edges$`partially directed` <- adPD
+      
+      if (all(done)) return(graph)
+    }
+  }
+  else if (to == "tail") {
+    ##########################################
+    ## now deal with transitions to a tail
+    if (!is.null(graph$edges$directed)) {
+      ## get adjMatrix objects
+      adD <- adjMatrix(graph$edges$directed, n=nv, directed=TRUE)
+      if (!is.null(graph$edges$undirected)) adU <- adjMatrix(graph$edges$undirected, n=nv, directed=FALSE)
+      else adU <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adD, m2=adU, v1=v1[!done], v2=v2[!done], d2=FALSE)
+      adD <- adjMatrix(out$m1, n=nv)
+      adU <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$undirected <- adU
+      graph$edges$directed <- adD
+      
+      if (all(done)) return(graph)
+    }
+    if (!is.null(graph$edges$bidirected)) {
+      ## "tail"
+      ## get adjMatrix objects
+      adB <- adjMatrix(graph$edges$bidirected, n=nv, directed=FALSE)
+      if (!is.null(graph$edges$directed)) adD <- adjMatrix(graph$edges$directed, n=nv, directed=TRUE)
+      else adD <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adB, m2=adD, v1=v2[!done], v2=v1[!done], d2=TRUE)
+      adB <- adjMatrix(out$m1, n=nv)
+      adD <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$bidirected <- adB
+      graph$edges$directed <- adD
+      
+      if (all(done)) return(graph)
+    }
+    if (!is.null(graph$edges$`partially directed`)) {
+      ## "tail"
+      ## get adjMatrix objects
+      adPD <- adjMatrix(graph$edges$`partially directed`, n=nv, directed=TRUE)
+      if (!is.null(graph$edges$`partially undirected`)) adPU <- adjMatrix(graph$edges$`partially undirected`, n=nv, directed=TRUE)
+      else adPU <- adjMatrix(n=nv)
+      if (!is.null(graph$edges$directed)) adD <- adjMatrix(graph$edges$directed, n=nv, directed=TRUE)
+      else adD <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adPD, m2=adPU, v1=v1[!done], v2=v2[!done], d2=TRUE)
+      adPD <- adjMatrix(out$m1, n=nv)
+      adPU <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      out <- chg_ends_cpp(m1=adPD, m2=adD, v1=v2[!done], v2=v1[!done], d2=TRUE)
+      adPD <- adjMatrix(out$m1, n=nv)
+      adD <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$`partially undirected` <- adPU
+      graph$edges$`partially directed` <- adPD
+      graph$edges$directed <- adD
+      
+      if (all(done)) return(graph)
+    }
+    if (!is.null(graph$edges$`partially undirected`)) {
+      ## "tail"
+      ## get adjMatrix objects
+      adPU <- adjMatrix(graph$edges$`partially undirected`, n=nv, directed=TRUE)
+      if (!is.null(graph$edges$undirected)) adU <- adjMatrix(graph$edges$undirected, n=nv, directed=FALSE)
+      else adU <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adPU, m2=adU, v1=v2[!done], v2=v1[!done], d2=FALSE)
+      adPU <- adjMatrix(out$m1, n=nv)
+      adU <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$undirected <- adU
+      graph$edges$`partially undirected` <- adPU
+      
+      if (all(done)) return(graph)
+    }
+    if (!is.null(graph$edges$`not directed`)) {
+      ## "tail"
+      ## get adjMatrix objects
+      adND <- adjMatrix(graph$edges$`not directed`, n=nv, directed=FALSE)
+      if (!is.null(graph$edges$directed)) adPU <- adjMatrix(graph$edges$`partially undirected`, n=nv, directed=TRUE)
+      else adPU <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adND, m2=adPU, v1=v1[!done], v2=v2[!done], d2=TRUE)
+      adND <- adjMatrix(out$m1, n=nv)
+      adPU <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$`not directed` <- adND
+      graph$edges$`partially undirected` <- adPU
+      
+      if (all(done)) return(graph)
+    }
+  }
+  else if (to == "circle") {
+    ##########################################
+    ## now deal with transitions to a circle
+    if (!is.null(graph$edges$directed)) {
+      ## get adjMatrix objects
+      adD <- adjMatrix(graph$edges$directed, n=nv, directed=TRUE)
+      if (!is.null(graph$edges$`partially undirected`)) adPU <- adjMatrix(graph$edges$`partially undirected`, n=nv, directed=TRUE)
+      else adPU <- adjMatrix(n=nv)
+      if (!is.null(graph$edges$`partially directed`)) adPD <- adjMatrix(graph$edges$`partially directed`, n=nv, directed=TRUE)
+      else adPD <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adD, m2=t(adPU), v1=v1[!done], v2=v2[!done], d2=TRUE)
+      adD <- adjMatrix(out$m1, n=nv)
+      adPU <- adjMatrix(t(out$m2), n=nv)
+      done[!done][out$done] <- TRUE
+      out <- chg_ends_cpp(m1=adD, m2=adPD, v1=v2[!done], v2=v1[!done], d2=TRUE)
+      adD <- adjMatrix(out$m1, n=nv)
+      adPD <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$`partially undirected` <- adPU
+      graph$edges$`partially directed` <- adPD
+      graph$edges$directed <- adD
+      
+      if (all(done)) return(graph)
+    }
+    if (!is.null(graph$edges$bidirected)) {
+      ## "circle"
+      ## get adjMatrix objects
+      adB <- adjMatrix(graph$edges$bidirected, n=nv, directed=FALSE)
+      if (!is.null(graph$edges$`partially directed`)) adPD <- adjMatrix(graph$edges$`partially directed`, n=nv, directed=TRUE)
+      else adPD <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adB, m2=adPD, v1=v2[!done], v2=v1[!done], d2=TRUE)
+      adB <- adjMatrix(out$m1, n=nv)
+      adD <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$bidirected <- adB
+      graph$edges$`partially directed` <- adPD
+      
+      if (all(done)) return(graph)
+    }
+    if (!is.null(graph$edges$`partially directed`)) {
+      ## "circle"
+      ## get adjMatrix objects
+      adPD <- adjMatrix(graph$edges$`partially directed`, n=nv, directed=TRUE)
+      if (!is.null(graph$edges$`not directed`)) adND <- adjMatrix(graph$edges$`not directed`, n=nv, directed=FALSE)
+      else adN <- adjMatrix(n=nv)
+
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adPD, m2=adND, v1=v1[!done], v2=v2[!done], d2=FALSE)
+      adPD <- adjMatrix(out$m1, n=nv)
+      adND <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+
+      ## record back into graph
+      graph$edges$`not directed` <- adND
+      graph$edges$`partially directed` <- adPD
+      
+      if (all(done)) return(graph)
+    }
+    if (!is.null(graph$edges$`partially undirected`)) {
+      ## "circle"
+      ## get adjMatrix objects
+      adPU <- adjMatrix(graph$edges$`partially undirected`, n=nv, directed=TRUE)
+      if (!is.null(graph$edges$`not directed`)) adND <- adjMatrix(graph$edges$`not directed`, n=nv, directed=FALSE)
+      else adN <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adPU, m2=adND, v1=v1[!done], v2=v2[!done], d2=FALSE)
+      adPU <- adjMatrix(out$m1, n=nv)
+      adND <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$`not directed` <- adND
+      graph$edges$`partially undirected` <- adPU
+      
+      if (all(done)) return(graph)
+    }
+    if (!is.null(graph$edges$undirected)) {
+      ## "circle"
+      ## get adjMatrix objects
+      adU <- adjMatrix(graph$edges$undirected, n=nv, directed=FALSE)
+      if (!is.null(graph$edges$directed)) adPU <- adjMatrix(graph$edges$`partially undirected`, n=nv, directed=TRUE)
+      else adPU <- adjMatrix(n=nv)
+      
+      ## call C++ function
+      out <- chg_ends_cpp(m1=adU, m2=adPU, v1=v2[!done], v2=v1[!done], d2=TRUE)
+      adU <- adjMatrix(out$m1, n=nv)
+      adPU <- adjMatrix(out$m2, n=nv)
+      done[!done][out$done] <- TRUE
+      
+      ## record back into graph
+      graph$edges$undirected <- adU
+      graph$edges$`partially undirected` <- adPU
+      
+      if (all(done)) return(graph)
+    }
+  }
+  else stop("'to' should be 'arrow', 'tail' or 'circle'")
+  
+  return(graph)
+}

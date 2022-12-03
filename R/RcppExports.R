@@ -33,3 +33,7 @@ rmv_edges_aM <- function(aM, e1, e2, dir) {
     .Call('_MixedGraphs_rmv_edges_aM', PACKAGE = 'MixedGraphs', aM, e1, e2, dir)
 }
 
+chg_ends_cpp <- function(m1, m2, v1, v2, d2) {
+    .Call('_MixedGraphs_chg_ends_cpp', PACKAGE = 'MixedGraphs', m1, m2, v1, v2, d2)
+}
+
