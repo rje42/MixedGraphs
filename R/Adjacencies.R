@@ -17,7 +17,8 @@
 ##' second vertices must belong to these respective sets. 
 ##' 
 ##' @export collapse
-collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, rev=FALSE, double_up=FALSE) {
+collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, 
+                     rev=FALSE, double_up=FALSE) {
   ## repeat direction with warning if necessary
   if (length(edges) == 0 || length(unlist(edges))==0) return(edgeMatrix())
   dir <- dir*rep(1L, length(edges))

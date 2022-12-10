@@ -24,6 +24,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// adj_cpp
+IntegerVector adj_cpp(List graph, IntegerVector v, int dir);
+RcppExport SEXP _MixedGraphs_adj_cpp(SEXP graphSEXP, SEXP vSEXP, SEXP dirSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type graph(graphSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type v(vSEXP);
+    Rcpp::traits::input_parameter< int >::type dir(dirSEXP);
+    rcpp_result_gen = Rcpp::wrap(adj_cpp(graph, v, dir));
+    return rcpp_result_gen;
+END_RCPP
+}
 // adjMat_to_adjList
 List adjMat_to_adjList(NumericMatrix aM);
 RcppExport SEXP _MixedGraphs_adjMat_to_adjList(SEXP aMSEXP) {
@@ -131,6 +144,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_MixedGraphs_grp_cpp", (DL_FUNC) &_MixedGraphs_grp_cpp, 3},
+    {"_MixedGraphs_adj_cpp", (DL_FUNC) &_MixedGraphs_adj_cpp, 3},
     {"_MixedGraphs_adjMat_to_adjList", (DL_FUNC) &_MixedGraphs_adjMat_to_adjList, 1},
     {"_MixedGraphs_rev_adjList_cpp", (DL_FUNC) &_MixedGraphs_rev_adjList_cpp, 1},
     {"_MixedGraphs_sym_adjList_cpp", (DL_FUNC) &_MixedGraphs_sym_adjList_cpp, 1},

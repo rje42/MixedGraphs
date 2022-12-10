@@ -5,6 +5,10 @@ grp_cpp <- function(graph, v, dir) {
     .Call('_MixedGraphs_grp_cpp', PACKAGE = 'MixedGraphs', graph, v, dir)
 }
 
+adj_cpp <- function(graph, v, dir) {
+    .Call('_MixedGraphs_adj_cpp', PACKAGE = 'MixedGraphs', graph, v, dir)
+}
+
 adjMat_to_adjList <- function(aM) {
     .Call('_MixedGraphs_adjMat_to_adjList', PACKAGE = 'MixedGraphs', aM)
 }
