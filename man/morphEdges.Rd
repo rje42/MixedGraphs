@@ -4,7 +4,7 @@
 \alias{morphEdges}
 \title{Transform edges to different type}
 \usage{
-morphEdges(graph, from, to)
+morphEdges(graph, from, to, topOrd)
 }
 \arguments{
 \item{graph}{\code{mixedgraph} object}
@@ -12,6 +12,8 @@ morphEdges(graph, from, to)
 \item{from}{character vector of edges to transform (default is all)}
 
 \item{to}{character string of new edge type}
+
+\item{topOrd}{optional topological order for directing edges}
 }
 \description{
 Transform edges to different type
