@@ -1,10 +1,30 @@
 ##' Moralize
 ##' 
 ##' @param graph an object of class \code{mixedgraph}
+##' @param C optional set of vertices to condition upon
+##' @param check logical: should we check graph is a summary graph?
 ##' 
 ##' @export
-moralize <- function(graph, check=TRUE) {
-  if (check && !is.SG(graph)) stop("Object must be a summary graph of class 'mixedgraph'")
+moralize <- function(graph, C, check=TRUE) {
+  
+  if (check && !is_SG(graph)) stop("Object must be a summary graph of class 'mixedgraph'")
+  
+  if (!missing(C)) {
+    ## work in progress!
+    An <- anc(graph, C)
+    Sibs <- setdiff(sib(graph, An), An) ## edges An -> Sibs must become directed
+    part <- Recall(graph[c(An, Sibs)])
+    
+    mid <- morphEdges(part[An, Sibs], to="directed", topOrd = c(An,Sibs))
+    
+    out <- mutilate(graph, An, internal = TRUE)
+    out <- mutilate(out, An, Sibs)
+    out <- addEdges(out, edges=part[An]$edges)
+    out <- addEdges(out, edges=mid$edges)
+    
+    return(out)
+  }
+  
   if (nv(graph) <= 1) return(graph)
   out <- skeleton(graph)
   dists <- districts(graph)

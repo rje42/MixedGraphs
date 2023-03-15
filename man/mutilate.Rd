@@ -4,7 +4,7 @@
 \alias{mutilate}
 \title{Delete edges}
 \usage{
-mutilate(graph, A, B, etype, dir = 0L)
+mutilate(graph, A, B, etype, dir = 0L, internal = FALSE)
 }
 \arguments{
 \item{graph}{a \code{mixedgraph} object}
@@ -14,6 +14,8 @@ mutilate(graph, A, B, etype, dir = 0L)
 \item{etype}{which edges to remove}
 
 \item{dir}{indicates whether only edges of certain orientation are removed}
+
+\item{internal}{logical: should only edges within \code{A} be removed?}
 }
 \description{
 Remove edges adjacent to set of vertices
@@ -25,4 +27,7 @@ but ones into \code{A} are preserved; for \code{dir=-1} the reverse,
 and for \code{dir=0} (the default), direction is irrelevant.
 If a second set \code{B} is specified, then all edges between \code{A}
 and \code{B} are removed.
+
+Note that specifying \code{internal=TRUE} and providing a set \code{B} will 
+result in an error.
 }

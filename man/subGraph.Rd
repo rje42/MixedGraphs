@@ -5,14 +5,16 @@
 \alias{subGraph}
 \title{Take induced vertex subgraph of mixedgraph}
 \usage{
-\method{[}{mixedgraph}(graph, v, ..., drop = FALSE, etype, order = FALSE)
+\method{[}{mixedgraph}(graph, v, w, ..., drop = FALSE, etype, order = FALSE)
 
-subGraph(graph, v, drop = FALSE, etype, order = FALSE)
+subGraph(graph, v, w, drop = FALSE, etype, order = FALSE)
 }
 \arguments{
 \item{graph}{a \code{mixedgraph} object}
 
 \item{v}{vertices to keep}
+
+\item{w}{other set of vertices for bipartite subgraph}
 
 \item{...}{other arguments}
 
@@ -28,6 +30,8 @@ Take induced vertex subgraph of mixedgraph
 \details{
 If \code{order} is \code{TRUE}, then \code{edgeMatrix} and \code{eList} 
 formats are converted to \code{edgeList}s (\code{adjMatrix} format is preserved).
+
+Note that \code{order} will have no effect if \code{w} is specified.
 }
 \section{Functions}{
 \itemize{

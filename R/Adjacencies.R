@@ -6,7 +6,7 @@
 ##' @param matrix logical indicating whether to force the return of an adjacency matrix
 ##' @param sparse should we use sparse matrices if available?
 ##' @param sort 1=unique but not sorted, 2=unique and sorted, 0=neither
-##' @param rev logical: should directed \code{adjList}s have the direction inverted if \code{dir=1}?
+##' @param rev logical: should directed \code{adjList}s have the direction inverted if \code{dir=-1}?
 ##' @param double_up logical: should edges with \code{dir=0} be repeated in both directions for an edgeMatrix?
 ##' 
 ##' @details returns an edgeMatrix or adjacency matrix for possibly multiple edge types.
@@ -88,6 +88,15 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1,
   if (all(isAList)) {
     for (i in seq_along(edges)) {
       if (dir[i] == 1) {
+        edges[[i]][vr1] <- vector(mode="list", length=length(vr1))
+        edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,v2))
+      }
+      else if (dir[i] == 0) {
+        edges[[i]] <- symAdjList(edges[[i]])
+        edges[[i]][vr] <- vector(mode="list", length=length(vr))
+        edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,c(v1,v2)))
+      }
+      else if (dir[i] == -1) {
         if (rev) {
           edges[[i]] <- revAdjList(edges[[i]])
           tmp <- vr1
@@ -99,15 +108,6 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1,
         }
         edges[[i]][vr2] <- vector(mode="list", length=length(vr2))
         edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,v1))
-      }
-      else if (dir[i] == 0) {
-        edges[[i]] <- symAdjList(edges[[i]])
-        edges[[i]][vr] <- vector(mode="list", length=length(vr))
-        edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,c(v1,v2)))
-      }
-      else if (dir[i] == -1) {
-        edges[[i]][vr1] <- vector(mode="list", length=length(vr1))
-        edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,v2))
       }
     }
     names(edges) <- NULL
@@ -192,10 +192,9 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1,
 ##' adj(gr1, v=1, etype="directed", dir=-1)
 ##' adjacent(gr1, 1, 3, etype="directed", dir=1)
 ##' 
-##' @export adj
-##' 
 ##' @seealso \code{\link{grp}} for paths
 ##' 
+##' @export
 adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
   ## if no edge type specified, use all available types
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
@@ -346,7 +345,7 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   if (length(edges) == 1) {
     if (is.adjList(edges[[1]], checknm=TRUE)) {
       wh <- match(names(graph$edges)[whEdge], edgeTypes()$type)
-      if (dir == -1 && edgeTypes()$directed[wh]) {
+      if (dir == 1 && edgeTypes()$directed[wh]) {
         return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive, sort=sort))
       }
       else if (dir == 0 && !edgeTypes()$directed[wh]) {
