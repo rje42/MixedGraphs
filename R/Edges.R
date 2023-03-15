@@ -33,7 +33,7 @@ adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
     }
     
     for (i in seq_along(edges)) {
-      out[edges[[i]],i] <- 1
+      out[i,edges[[i]]] <- 1
     }
     if (!directed && !isSymmetric(out)) stop("Error in input")
     
@@ -118,8 +118,8 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
     
     for (i in seq_along(edges)) {
       ## go through each edge and record in appropriate position on list
-      out[[edges[[i]][2]]] <- c(out[[edges[[i]][2]]], edges[[i]][1])
-      if (!directed) out[[edges[[i]][1]]] <- c(out[[edges[[i]][1]]], edges[[i]][2])
+      out[[edges[[i]][1]]] <- c(out[[edges[[i]][1]]], edges[[i]][2])
+      if (!directed) out[[edges[[i]][2]]] <- c(out[[edges[[i]][2]]], edges[[i]][1])
     }
   }  
   else if (is.edgeMatrix(edges)) {
@@ -133,8 +133,8 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
 
     for (i in seq_len(n)) {
       if (directed) {
-        wh_i <- which(edges[2,] == i)
-        out[[i]] <- edges[1,wh_i]
+        wh_i <- which(edges[1,] == i)
+        out[[i]] <- edges[2,wh_i]
       }
       else {
         wh_i <- which(apply(edges, MARGIN=2, FUN=function(x) any(x==i)))
@@ -146,7 +146,7 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
   else if (is.adjMatrix(edges)) {
     ## seems to be an adjMatrix
     if (!directed) edges <- edges+t(edges)
-    out <- unlist(apply(edges, 2, function(x) list(which(x > 0))), recursive=FALSE)
+    out <- unlist(apply(edges, 1, function(x) list(which(x > 0))), recursive=FALSE)
     # if (is.numeric(out)) out <- unlist(lapply(out, list), recursive = FALSE)
   }
   else if (is.null(edges)) return(NULL)
@@ -228,13 +228,13 @@ edgeMatrix <- function(edges, directed=FALSE, double=FALSE) {
     pos <- 0
     for (i in seq_along(edges)) {
       if (directed) {
-        out[1,pos + seq_along(edges[[i]])] <- edges[[i]]
-        out[2,pos + seq_along(edges[[i]])] <- i
+        out[1,pos + seq_along(edges[[i]])] <- i
+        out[2,pos + seq_along(edges[[i]])] <- edges[[i]]
         pos <- pos + length(edges[[i]])
       }
       else {
-        out[1,pos + seq_len(sum(edges[[i]] < i))] <- edges[[i]][edges[[i]] < i]
-        out[2,pos + seq_len(sum(edges[[i]] < i))] <- i
+        out[1,pos + seq_len(sum(edges[[i]] < i))] <- i
+        out[2,pos + seq_len(sum(edges[[i]] < i))] <- edges[[i]][edges[[i]] < i]
         pos <- pos + length(edges[[i]][edges[[i]] < i])
       }
     }
@@ -291,7 +291,7 @@ eList <- function(edges, directed=FALSE) {
       tmp <- edges[[i]]
       if (!directed) tmp <- tmp[tmp < i]
       
-      if (length(tmp) > 0) out <- c(out, lapply(tmp, function(x) c(x,i)))
+      if (length(tmp) > 0) out <- c(out, lapply(tmp, function(x) c(i,x)))
       # if (directed) out <- c(out, lapply(tmp, function(x) c(x,i)))
       # else {
       #   out <- c(out, lapply(tmp, function(x) c(x[x < i],i)))

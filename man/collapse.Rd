@@ -29,7 +29,7 @@ collapse(
 
 \item{sort}{1=unique but not sorted, 2=unique and sorted, 0=neither}
 
-\item{rev}{logical: should directed \code{adjList}s have the direction inverted if \code{dir=1}?}
+\item{rev}{logical: should directed \code{adjList}s have the direction inverted if \code{dir=-1}?}
 
 \item{double_up}{logical: should edges with \code{dir=0} be repeated in both directions for an edgeMatrix?}
 }

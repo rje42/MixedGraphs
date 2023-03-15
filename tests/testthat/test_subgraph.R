@@ -34,3 +34,19 @@ testthat::test_that("dropping vertices works", {
 testthat::test_that("dropping and reordering fails", {
   expect_error(gr2[c(2,1), order=TRUE, drop=TRUE])
 })
+
+## Now test bipartite subgraphs
+gr1_b <- graphCr("2 <-> 3, 4")
+gr1_b <- gr1_b[-1]
+gr1al_b <- gr1al[2,4:3]
+gr1am_b <- gr1am[2,4:3]
+gr1el_b <- gr1el[2,4:3]
+gr1em_b <- gr1em[2,4:3]
+
+testthat::test_that("dropping vertices works", {
+  expect_equal(standardizeEdges(gr1al_b), standardizeEdges(gr1_b))
+  expect_equal(standardizeEdges(gr1am_b), standardizeEdges(gr1_b))
+  expect_equal(standardizeEdges(gr1el_b), standardizeEdges(gr1_b))
+  expect_equal(standardizeEdges(gr1em_b), standardizeEdges(gr1_b))
+})
+
