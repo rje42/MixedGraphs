@@ -4,10 +4,14 @@
 \alias{moralize}
 \title{Moralize}
 \usage{
-moralize(graph, check = TRUE)
+moralize(graph, C, check = TRUE)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}
+
+\item{C}{optional set of vertices to condition upon}
+
+\item{check}{logical: should we check graph is a summary graph?}
 }
 \description{
 Moralize

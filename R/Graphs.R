@@ -277,18 +277,21 @@ print.edgeList <- function(x, vnames, ...) {
 ##' @describeIn subGraph bracket notation for subgraphs
 ##' @param ... other arguments
 ##' @export
-`[.mixedgraph` <- function(graph, v, ..., drop=FALSE, etype, order=FALSE) {
-  if (missing(v)) v <- graph$v
+`[.mixedgraph` <- function(graph, v, w, ..., drop=FALSE, etype, order=FALSE) {
+  if (missing(v)) {
+    v <- graph$v
+  }
   else if (is.logical(v)) v <- which(v)
   v = v[v != 0]  # remove 0s
   if (length(v) > 0 && all(v < 0)) v = setdiff(graph$v, -v)
-  subGraph(graph, v, drop=drop, etype=etype, order=order)
+  subGraph(graph, v, w, drop=drop, etype=etype, order=order)
 }
 
 ##' Take induced vertex subgraph of mixedgraph
 ##' 
 ##' @param graph a \code{mixedgraph} object
 ##' @param v vertices to keep
+##' @param w other set of vertices for bipartite subgraph
 ##' @param drop force removed vertices to be dropped from representation in adjacency matrices and lists?
 ##' @param etype edge types to keep (defaults to all)
 ##' @param order logical: force graph to follow new order implied by \code{v}?
@@ -296,20 +299,35 @@ print.edgeList <- function(x, vnames, ...) {
 ##' @details If \code{order} is \code{TRUE}, then \code{edgeMatrix} and \code{eList} 
 ##' formats are converted to \code{edgeList}s (\code{adjMatrix} format is preserved).
 ##' 
+##' Note that \code{order} will have no effect if \code{w} is specified.
+##' 
 ##' 
 ##' @export subGraph
-subGraph <- function (graph, v, drop=FALSE, etype, order=FALSE) {
+subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
   
+  ## set up vertices to take subgraph over
   if (missing(v)) {
     if (missing(etype)) return(graph)
     v <- graph$v
   }
   else if (is.logical(v)) v <- which(v)
   else v <- unique.default(v)
+  ## and other set if supplied
+  if (!missing(w)) {
+    if (is.logical(w)) w <- which(w)
+    else w <- unique.default(w)
+  }
+  
   
   if (length(v) == nv(graph) && drop) drop <- FALSE
   else if (drop && order)  stop("Cannot both drop vertices and reorder the remainder, use two separate calls")
-  if (!order) v <- sort.int(v)
+  if (!order) {
+    v <- sort.int(v)
+    if (!missing(w)) {
+      w <- sort.int(w)
+      vw <- sort.int(union(v,w))
+    }
+  }
 
   #  v = v[v <= graph$n]
 
@@ -319,16 +337,20 @@ subGraph <- function (graph, v, drop=FALSE, etype, order=FALSE) {
     graph$edges <- graph$edges[etype]
   }
   
-  ## deal with case of no vertices
-  if (length(v) == 0) {
+  ## deal with cases of no vertices in either v or w
+  if (length(v) == 0 && missing(w)) {
     if (drop) out = mixedgraph(n=0)
     else out = mixedgraph(n=0, vnames=graph$vnames)
     return(out)
   }
+  else if (!missing(w)) {
+    if (length(v) == 0) graph[w, drop=drop, etype=character(0)]
+    else if (length(w) == 0) graph[v, drop=drop, etype=character(0)]
+  }
   # v = unique.default(v)
   # if (drop) v <- sort.int(v)
-  if (!all(v %in% graph$v)) stop("Can only keep vertices that are present")
-  if (order) {
+  if (!all(v %in% graph$v) || (!missing(w) && !all(w %in% graph$v))) stop("Can only keep vertices that are present")
+  if (order && missing(w)) {
     waM <- sapply(graph$edges, is.adjMatrix, checknm=TRUE)
     waL <- sapply(graph$edges, is.adjList, checknm=TRUE)
     not_aLaM <- names(graph$edges)[!(waL | waM)]
@@ -354,51 +376,105 @@ subGraph <- function (graph, v, drop=FALSE, etype, order=FALSE) {
     return(graph)
   }
   
+  noW <- missing(w)
+  
   ## now 
   edges = lapply(graph$edges, function(x) {
     if (is.adjMatrix(x, checknm=TRUE)) {
-      if (drop) {
-        out <- x[v,v,drop=FALSE]  # note a different 'drop' argument!
-        class(out) <- "adjMatrix"
-        return(out)
-      }
+      if (noW) {
+        if (drop) {
+          out <- x[v,v,drop=FALSE]  # note a different 'drop' argument!
+          class(out) <- "adjMatrix"
+          return(out)
+        }
+        else {
+          x[-v,] = x[,-v] = 0L
+          return(x)
+        }
+      } 
       else {
-        x[-v,] = x[,-v] = 0L
-        return(x)
+        if (drop) {
+          x[w,-v] = x[-v,w] = 0L
+          x[-w,v] = x[v,-w] = 0L
+          x <- x[vw,vw,drop=FALSE]  # note a different 'drop' argument!
+          # out <- x[c(v,w),c(v,w),drop=FALSE]  
+          class(x) <- "adjMatrix"
+          return(x)
+        }
+        else {
+          x[w,-v] = x[-v,w] = 0L
+          x[-w,v] = x[v,-w] = 0L
+          return(x)
+        }
       }
     } 
     else if (is.edgeMatrix(x)) {
-      tmp <- x[, (x[1,] %in% v) & (x[2,] %in% v), drop=FALSE]
-      if (drop) {
-        mask <- match(seq_len(max(v)), v)
-        tmp <- apply(tmp, 1:2, function(x) mask[x])
-        if (any(is.na(tmp))) stop("Something went wrong with the mask (edgeMatrix)")
+      if (noW) {
+        tmp <- x[, (x[1,] %in% v) & (x[2,] %in% v), drop=FALSE]
+        if (drop) {
+          mask <- match(seq_len(max(v)), v)
+          tmp <- apply(tmp, 1:2, function(x) mask[x])
+          if (any(is.na(tmp))) stop("Something went wrong with the mask (edgeMatrix)")
+        }
+      }
+      else {
+        tmp <- x[, ((x[1,] %in% v) & (x[2,] %in% w)) | 
+                   ((x[2,] %in% v) & (x[1,] %in% w)), drop=FALSE]
+        if (drop) {
+          mask <- match(seq_len(max(v)), vw)
+          tmp <- apply(tmp, 1:2, function(x) mask[x])
+          if (any(is.na(tmp))) stop("Something went wrong with the mask (edgeMatrix)")
+        }
       }
       class(tmp) <- "edgeMatrix"
       return(tmp)
     }
     else if (is.adjList(x, checknm=TRUE)) {
-      if (drop) {
-        x <- x[v]
-        mask <- match(graph$v, v)
-        x <- lapply(x, function(w) mask[intersect(w, v)])
-        if (any(is.na(unlist(x)))) stop("Something went wrong with the mask (adjList)")
-      }
+      if (noW) {
+        if (drop) {
+          x <- x[v]
+          mask <- match(graph$v, v)
+          x <- lapply(x, function(w) mask[intersect(w, v)])
+          if (any(is.na(unlist(x)))) stop("Something went wrong with the mask (adjList)")
+        }
+        else {
+          x[-v] <- vector(mode="list", length=length(x)-length(v))
+          x <- lapply(x, function(w) intersect(w, v))
+        }
+      } 
       else {
-        x[-v] <- vector(mode="list", length=length(x)-length(v))
-        x <- lapply(x, function(w) intersect(w, v))
+        vw <- intersect(v,w)
+        v_w <- setdiff(v, vw)
+        w_v <- setdiff(w, vw)
+        
+        x[vw] <- lapply(x[vw], intersect, y=c(v,w))
+        x[v_w] <- lapply(x[v_w], intersect, y=w)
+        x[w_v] <- lapply(x[w_v], intersect, y=v)
+        
+        if (drop) {
+          x <- x[vw]
+        }
+        else {
+          x[-vw] <- list(integer(0))
+        }
       }
       class(x) <- "adjList"
       return(x)
     }
     else if (is.eList(x)) {
       if (length(x) > 0) {
-        tmp <- x[sapply(x, function(y) all(y %in% v))]
-        
-        if (drop) {
-          mask <- match(seq_len(max(v)), v)
-          tmp <- lapply(tmp, function(x) mask[x])
-          if (any(sapply(tmp, function(x) any(is.na(x))))) stop("Something went wrong with the mask")
+        if (noW) {
+          tmp <- x[sapply(x, function(y) all(y %in% v))]
+          
+          if (drop) {
+            mask <- match(seq_len(max(v)), v)
+            tmp <- lapply(tmp, function(x) mask[x])
+            if (any(sapply(tmp, function(x) any(is.na(x))))) stop("Something went wrong with the mask")
+          }
+        }
+        else {
+          tmp <- x[sapply(x, function(y) (y[1] %in% v && y[2] %in% w) ||
+                            (y[2] %in% v && y[1] %in% w))]
         }
         class(tmp) <- "eList"
         return(tmp)
@@ -414,8 +490,14 @@ subGraph <- function (graph, v, drop=FALSE, etype, order=FALSE) {
 
   class(edges) <- "edgeList"
   
-  if (drop) out = list(v=seq_along(v), edges=edges, vnames=graph$vnames[v])
-  else out = list(v=v, edges=edges, vnames=graph$vnames)
+  if (noW) {
+    if (drop) out = list(v=seq_along(v), edges=edges, vnames=graph$vnames[v])
+    else out = list(v=v, edges=edges, vnames=graph$vnames)
+  }
+  else {
+    if (drop) out = list(v=seq_along(vw), edges=edges, vnames=graph$vnames[vw])
+    else out = list(v=vw, edges=edges, vnames=graph$vnames)
+  }
   class(out) = "mixedgraph"
   out
 }

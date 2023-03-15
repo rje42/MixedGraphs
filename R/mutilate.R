@@ -333,6 +333,7 @@ removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
 ##' @param A,B sets of vertices in \code{graph}
 ##' @param etype which edges to remove
 ##' @param dir indicates whether only edges of certain orientation are removed
+##' @param internal logical: should only edges within \code{A} be removed?
 ##' 
 ##' @details  If no edge type is specified, then all edges are removed.
 ##' If \code{dir=1}, then directed edges out of \code{A} are removed, 
@@ -341,16 +342,37 @@ removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
 ##' If a second set \code{B} is specified, then all edges between \code{A}
 ##' and \code{B} are removed.
 ##' 
+##' Note that specifying \code{internal=TRUE} and providing a set \code{B} will 
+##' result in an error.
+##' 
 ##' @export 
-mutilate <- function(graph, A, B, etype, dir=0L) {
+mutilate <- function(graph, A, B, etype, dir=0L, internal=FALSE) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (length(A) == 0) return(graph)
-  if (!missing(B) && length(B) == 0) return(graph)
-  if (missing(B) && all(graph$v %in% A) && missing(etype)) {
+  if (!missing(B)) {
+    if (internal) stop("'internal' must be false if B is supplied")
+    if (length(B) == 0) return(graph)
+  }
+  else if (all(graph$v %in% A) && missing(etype)) {
     edg <- graph$edges
     for (i in seq_along(edg)) {
-      edg[[i]] <- list()
-      class(edg[[i]]) <- "eList"
+      if (class(edg[[i]]) == "adjList") {
+        edg[[i]] <- adjList(n=length(graph$vnames))
+        # class(edg[[i]]) <- "adjMatrix"
+      }
+      else if (class(edg[[i]]) == "adjMatrix") {
+        edg[[i]] <- adjMatrix(n=length(graph$vnames))
+        # class(edg[[i]]) <- "adjMatrix"
+      }
+      else if (class(edg[[i]]) == "edgeMatrix") {
+        edg[[i]] <- edg[[i]][,integer(0),drop=FALSE]
+        class(edg[[i]]) <- "edgeMatrix"
+      }
+      else if (class(edg[[i]]) == "eList") {
+        edg[[i]] <- list()
+        class(edg[[i]]) <- "eList"
+      }
+      else stop("Edge type not recognised")
     }
     out <- mixedgraph(v=graph$v, edges=edg, vnames=graph$vnames)
     return(out)
@@ -379,11 +401,15 @@ mutilate <- function(graph, A, B, etype, dir=0L) {
       ## adjList format
       if (missing(B)) {
         if (dir[i] <= 0) {
-          fill <- vector(mode="list", length = length(A))
+          if (internal) {
+            fill <- lapply(edges[[i]][A], setdiff, y=A)
+          }
+          else fill <- vector(mode="list", length = length(A))
           edges[[i]][A] <- fill
         }
         if (dir[i] >= 0) {
-          edges[[i]] <- lapply(edges[[i]], function(x) setdiff(x, A))
+          if (internal) edges[[i]][A] <- lapply(edges[[i]][A], function(x) setdiff(x, A))
+          else edges[[i]] <- lapply(edges[[i]], function(x) setdiff(x, A))
         }
       }
       else {
@@ -400,12 +426,13 @@ mutilate <- function(graph, A, B, etype, dir=0L) {
       ## edge list format
       rm = rep(FALSE, length(edges[[i]]))
       if (missing(B)) {
-        if (dir[i] >= 0) {  # remove outgoing edges
+        if (dir[i] >= 0 && !internal) {  # remove outgoing edges
           rm = rm | (sapply(edges[[i]], function(x) x[1]) %in% A)
         }
-        if (dir[i] <= 0) {  # remove incoming edges
+        if (dir[i] <= 0 && !internal) {  # remove incoming edges
           rm = rm | (sapply(edges[[i]], function(x) x[2]) %in% A)
         }
+        else if (internal) rm <-  sapply(edges[[i]], function(x) all(x %in% A))
       }
       else {
         if (dir[i] >= 0) {  # remove outgoing edges
@@ -423,8 +450,13 @@ mutilate <- function(graph, A, B, etype, dir=0L) {
     else if (is.adjMatrix(edges[[i]])) {
       ## matrix format
       if (missing(B)) {
-        if (dir[i] >= 0) edges[[i]][A,] = 0
-        if (dir[i] <= 0) edges[[i]][,A] = 0
+        if (internal) {
+          edges[[i]][A,A] = 0
+        }
+        else {
+          if (dir[i] >= 0) edges[[i]][A,] = 0
+          if (dir[i] <= 0) edges[[i]][,A] = 0
+        }
       }
       else {
         if (dir[i] >= 0) edges[[i]][A,B] = 0
@@ -433,8 +465,13 @@ mutilate <- function(graph, A, B, etype, dir=0L) {
     }
     else if (is.edgeMatrix(edges[[i]])) {
       if (missing(B)) {
-        if (dir[i] >= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][1,] %in% A), drop=FALSE]
-        if (dir[i] <= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][2,] %in% A), drop=FALSE]
+        if (internal) {
+          edges[[i]] <- edges[[i]][,!((edges[[i]][1,] %in% A) & (edges[[i]][2,] %in% A)), drop=FALSE]
+        }
+        else {
+          if (dir[i] >= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][1,] %in% A), drop=FALSE]
+          if (dir[i] <= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][2,] %in% A), drop=FALSE]
+        }
       }
       else {
         if (dir[i] >= 0) edges[[i]] <- edges[[i]][,!(edges[[i]][1,] %in% A & edges[[i]][2,] %in% B), drop=FALSE]
@@ -516,16 +553,17 @@ addNodes <- function(graph, k, vnames) {
 ##' @param graph \code{mixedgraph} object
 ##' @param from character vector of edges to transform (default is all)
 ##' @param to character string of new edge type
+##' @param topOrd optional topological order for directing edges
 ##' 
 ##' @details \code{to} must be a single entry
 ##' 
 ##' @export
-morphEdges <- function(graph, from, to) {
-  if (missing(from)) from = names(graph$edges)
-  if (missing(to)) to = "undirected"
+morphEdges <- function(graph, from, to, topOrd) {
+  if (missing(from)) from <- names(graph$edges)
+  if (missing(to)) to <- "undirected"
   
   graph <- withEdgeMatrix(graph)
-  
+
   ## partial matching of edge types
   wh_edge <- pmatch(to, edgeTypes()$type)
   if (is.na(wh_edge)) {
@@ -533,6 +571,7 @@ morphEdges <- function(graph, from, to) {
     if (is.na(wh_edge)) stop("'to' edge type not matched")
   }
   to <- edgeTypes()$type[wh_edge]
+  dir <- edgeTypes()$dir[wh_edge]
 
   wh_edge <- pmatch(from, edgeTypes()$type)
   if (any(is.na(wh_edge))) {
@@ -540,6 +579,7 @@ morphEdges <- function(graph, from, to) {
     if (is.na(wh_edge)) stop(paste0("'from' edge type ", from[is.na(wh_edge)]," not matched"))
   }
   from <- edgeTypes()$type[wh_edge]
+  if (nedge(graph[etype=from]) == 0) return(graph)
   
   ## add in target edge type if missing
   if (is.null(graph$edges[[to]])) {
@@ -550,11 +590,36 @@ morphEdges <- function(graph, from, to) {
   }
   
   ## convert any edge lists and matrices:
-  to_add <- collapse(graph$edge[from], dir=edgeTypes()[wh_edge,"directed"])
+  to_add <- collapse(graph$edge[from], dir=edgeTypes()[wh_edge,"directed"], matrix=TRUE)
+  
+  if (dir) {
+    if (missing(topOrd)) {
+      to_add[lower.tri(to_add, diag=TRUE)] <- 0
+    }
+    else {
+      fto <- seq_len(nrow(to_add))
+      fto[sort.int(topOrd)] <- topOrd
+      
+      # oth <- setdiff(graph$v, topOrd)
+      rev_ord <- order(fto)  ## should probably check the topOrd is valid
+      
+      M2 <- to_add[fto, fto, drop=FALSE]
+      M2 <- pmin(M2 + t(M2), 1)
+
+      ## since edges are directed, set 'wrong' direction to 0
+      M2[lower.tri(M2, diag=TRUE)] <- 0
+
+      ## record in matrix to be added in            
+      to_add[rev_ord, rev_ord] <- M2
+      
+      # class()
+    }
+    
+  }
   new_edges <- list(to_add)
   class(new_edges) <- "edgeList"
-  names(new_edges) = to
-
+  names(new_edges) <- to
+  
   ## edit the graph  
   graph <- graph[etype=setdiff(names(graph$edges), from)]
   graph <- addEdges(graph, edges = new_edges)

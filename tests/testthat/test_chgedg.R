@@ -37,3 +37,4 @@ testthat::test_that("graphCr works sensibly", {
 testthat::test_that("withAdjList works sensibly when no edges present", {
   expect_equal(standardizeEdges(g0u), standardizeEdges(g0u2))
 })
+

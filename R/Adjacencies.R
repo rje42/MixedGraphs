@@ -191,10 +191,9 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, r
 ##' adj(gr1, v=1, etype="directed", dir=-1)
 ##' adjacent(gr1, 1, 3, etype="directed", dir=1)
 ##' 
-##' @export adj
-##' 
 ##' @seealso \code{\link{grp}} for paths
 ##' 
+##' @export
 adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
   ## if no edge type specified, use all available types
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
