@@ -217,10 +217,10 @@ print.edgeList <- function(x, vnames, ...) {
   
   if (missing(vnames)) {
     adjM <- sapply(x, is.adjMatrix)
-    if (any(adjM)) n_v <- nrow(x[which(adjM)[1]])
+    if (any(adjM)) n_v <- nrow(x[[which(adjM)[1]]])
     else {
       adjL <- sapply(x, is.adjList)
-      if (any(adjL)) n_v <- length(x[which(adjL)[1]])
+      if (any(adjL)) n_v <- length(x[[which(adjL)[1]]])
       else {
         oth <- sapply(x, function(y) is.edgeMatrix(y) || is.eList(y))
         if (any(oth)) n_v <- max(unlist(x[oth]))

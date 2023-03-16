@@ -10,3 +10,5 @@ inst/doc
 .Rapp.history
 Rprof.out
 .DS_Store
+scratch
+.*

@@ -545,9 +545,8 @@ groups = function(graph, etype, sort=1) {
 ##' 
 ##' @export
 pathConnected <- function(graph, v, D, etype, dir, verbose=FALSE) {
-
   if (length(D) == 0) return(integer(0))
-    
+
   ## check inputs
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (missing(etype)) etype <- names(graph$edges)
@@ -560,7 +559,7 @@ pathConnected <- function(graph, v, D, etype, dir, verbose=FALSE) {
     chk[is.na(chk)] <- chk_a[is.na(chk)]
     etype <- edgeTypes()$type[chk]
   }
-  if (missing(dir)) dir <- 1*edgeTypes()$directed[edgeTypes()$type==etype]
+  if (missing(dir)) dir <- 1*edgeTypes()$directed[match(etype, edgeTypes()$type)]
   else {
     if (length(dir) > length(etype)) stop("Must be fewer directions than edge types")
     dir <- dir*rep.int(1L, length(etype))
@@ -571,9 +570,9 @@ pathConnected <- function(graph, v, D, etype, dir, verbose=FALSE) {
   if (length(edges) == 0) return(integer(0))
 
   ## get adjLists into correct orientation
-  if (any(dir != 1*edgeTypes()$directed[edgeTypes()$type==etype])) {
+  if (any(dir != 1*edgeTypes()$directed[match(etype, edgeTypes()$type)])) {
     for (i in seq_along(etype)) {
-      if (!edgeTypes()$directed[edgeTypes()$type==etype]) next
+      if (!edgeTypes()$directed[match(etype, edgeTypes()$type)][i]) next
       if (dir[i] == 0) {
         edges[[i]] <- symAdjList(edges[[i]])
       }
@@ -585,7 +584,7 @@ pathConnected <- function(graph, v, D, etype, dir, verbose=FALSE) {
   
   ## combine adjLists
   if (length(edges) > 1) {
-    edges <- lapply(purrr::transpose(edges), union)
+    edges <- lapply(purrr::transpose(edges), function(x) unique.default(unlist(x)))
   }
   else edges <- edges[[1]]
   
