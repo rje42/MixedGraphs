@@ -30,10 +30,10 @@ Change edge representation of (part of) graph to use \code{adjMatrix},
 }
 \section{Functions}{
 \itemize{
-\item \code{withAdjList}: Change to \code{adjList} format
+\item \code{withAdjList()}: Change to \code{adjList} format
 
-\item \code{withEdgeMatrix}: Change to \code{edgeMatrix} format
+\item \code{withEdgeMatrix()}: Change to \code{edgeMatrix} format
 
-\item \code{withEdgeList}: Change to \code{eList} format
+\item \code{withEdgeList()}: Change to \code{eList} format
+
 }}
-

@@ -28,8 +28,8 @@ children (parents) also within \code{v}.
 }
 \section{Functions}{
 \itemize{
-\item \code{orphaned}: find vertices with no parents
+\item \code{orphaned()}: find vertices with no parents
 
-\item \code{sterile}: find vertices with no children in the same set
+\item \code{sterile()}: find vertices with no children in the same set
+
 }}
-

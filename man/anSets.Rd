@@ -37,9 +37,9 @@ provides the option \code{maxbarren} to cap this at a fixed value.
 }
 \section{Functions}{
 \itemize{
-\item \code{anSets2}: Uses different algorithm
-}}
+\item \code{anSets2()}: Uses different algorithm
 
+}}
 \author{
 Ilya Shpitser
 }

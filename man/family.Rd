@@ -57,24 +57,24 @@ descendants, anterior, district and neighbourhood of \code{v} respectively.
 }
 \section{Functions}{
 \itemize{
-\item \code{pa}: find parents of vertices
+\item \code{pa()}: find parents of vertices
 
-\item \code{ch}: find children of vertices
+\item \code{ch()}: find children of vertices
 
-\item \code{sp}: find spouses (siblings) of vertices
+\item \code{sp()}: find spouses (siblings) of vertices
 
-\item \code{sib}: find siblings (spouses) of vertices
+\item \code{sib()}: find siblings (spouses) of vertices
 
-\item \code{nb}: find undirected neighbours of vertices
+\item \code{nb()}: find undirected neighbours of vertices
 
-\item \code{anc}: find ancestors of vertices
+\item \code{anc()}: find ancestors of vertices
 
-\item \code{dec}: find descendants of vertices
+\item \code{dec()}: find descendants of vertices
 
-\item \code{ant}: find anterior vertices
+\item \code{ant()}: find anterior vertices
 
-\item \code{nhd}: find neighbourhood of vertices
+\item \code{nhd()}: find neighbourhood of vertices
 
-\item \code{dis}: find district of vertices
+\item \code{dis()}: find district of vertices
+
 }}
-

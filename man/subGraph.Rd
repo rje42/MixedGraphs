@@ -36,5 +36,5 @@ Note that \code{order} will have no effect if \code{w} is specified.
 \section{Functions}{
 \itemize{
 \item \code{[}: bracket notation for subgraphs
-}}
 
+}}

@@ -14,6 +14,6 @@ Returns data frame of current edge types.
 }
 \section{Functions}{
 \itemize{
-\item \code{vertexTypes}: See vertex types
-}}
+\item \code{vertexTypes()}: See vertex types
 
+}}

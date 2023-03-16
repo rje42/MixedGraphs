@@ -56,12 +56,12 @@ or \code{adjList}.
 }
 \section{Functions}{
 \itemize{
-\item \code{grp2}: Faster routine for single \code{adjMatrix} or \code{adjList}
+\item \code{grp2()}: Faster routine for single \code{adjMatrix} or \code{adjList}
 
-\item \code{groups}: find connected components
+\item \code{groups()}: find connected components
 repeat dir() vector with warning if necessary
-}}
 
+}}
 \seealso{
 \code{\link{adj}} for single edge adjacencies.
 repeat dir() vector with warning if necessary

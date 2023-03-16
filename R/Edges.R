@@ -168,7 +168,8 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
   out
 }
 
-## Get reverse directions for edges
+##' @describeIn adjList Get reverse directions for edges
+##' @export
 revAdjList <- function(object) {
   n <- length(object)
   out <- vector(mode="list", length=n)
@@ -180,7 +181,9 @@ revAdjList <- function(object) {
   out
 }
 
-## Make adjList symmetric
+##' @describeIn adjList Make adjList symmetric
+##' @param unq logical: should values be made unique and sorted?
+##' @export
 symAdjList <- function(object, unq=TRUE) {
   object_r <- revAdjList(object)
   if (unq) out <- mapply(function(x,y) sort.int(unique.default(c(x,y))), object, object_r, SIMPLIFY = FALSE)

@@ -2,9 +2,15 @@
 % Please edit documentation in R/Edges.R
 \name{adjList}
 \alias{adjList}
+\alias{revAdjList}
+\alias{symAdjList}
 \title{Get adjacency list of edges}
 \usage{
 adjList(edges, n, directed = FALSE, transpose = FALSE)
+
+revAdjList(object)
+
+symAdjList(object, unq = TRUE)
 }
 \arguments{
 \item{edges}{list or matrix giving edges in the form of an 
@@ -15,6 +21,8 @@ adjList(edges, n, directed = FALSE, transpose = FALSE)
 \item{directed}{logical: if \code{TRUE} edges are assumed directed}
 
 \item{transpose}{logical: if \code{TRUE} we consider children instead of parents}
+
+\item{unq}{logical: should values be made unique and sorted?}
 }
 \description{
 Get adjacency list of edges
@@ -23,3 +31,10 @@ Get adjacency list of edges
 Stores adjancies by one of their vertices.  E.g. directed edges
 are stored indexed by the child vertex, undirected by both neighbours.
 }
+\section{Functions}{
+\itemize{
+\item \code{revAdjList()}: Get reverse directions for edges
+
+\item \code{symAdjList()}: Make adjList symmetric
+
+}}

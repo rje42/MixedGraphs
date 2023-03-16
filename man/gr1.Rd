@@ -42,6 +42,6 @@ Some example graphs for illustration.
 \item \code{grVerma}: The Verma graph
 
 \item \code{grJamie}: Jamie's 'double' Verma graph
-}}
 
+}}
 \keyword{datasets}

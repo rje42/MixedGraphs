@@ -42,10 +42,10 @@ maximal fully-connected subsets.
 }
 \section{Functions}{
 \itemize{
-\item \code{un}: Obtain undirected component
+\item \code{un()}: Obtain undirected component
 
-\item \code{neighbourhoods}: Obtain neighbourhoods
+\item \code{neighbourhoods()}: Obtain neighbourhoods
 
-\item \code{cliques}: Obtain maximal complete undirected subsets
+\item \code{cliques()}: Obtain maximal complete undirected subsets
+
 }}
-

@@ -27,10 +27,10 @@ Check if object could be an edgeMatrix
 }
 \section{Functions}{
 \itemize{
-\item \code{is.eList}: Check if object could be eList
+\item \code{is.eList()}: Check if object could be eList
 
-\item \code{is.adjMatrix}: Check if object could be adjMatrix
+\item \code{is.adjMatrix()}: Check if object could be adjMatrix
 
-\item \code{is.adjList}: Check if object could be adjList
+\item \code{is.adjList()}: Check if object could be adjList
+
 }}
-

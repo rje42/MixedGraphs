@@ -43,9 +43,9 @@ for adding edges to existing graphs.
 }
 \section{Functions}{
 \itemize{
-\item \code{edgeCr}: Create edge list by hand
-}}
+\item \code{edgeCr()}: Create edge list by hand
 
+}}
 \examples{
 graphCr("1--->2<-->3<-4","2<->4,4->5")
 graphCr("1-2-3-4-1", representation="graphNEL")  # requires package 'graph'
