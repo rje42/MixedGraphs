@@ -13,11 +13,12 @@ moralize <- function(graph, C, check=TRUE) {
     ## work in progress!
     An <- anc(graph, C)
     Sibs <- setdiff(sib(graph, An), An) ## edges An -> Sibs must become directed
-    part <- Recall(graph[c(An, Sibs)])
+    part <- Recall(graph[An])
+    # part <- addNodes(part, length(Sibs), vnames = graph$vnames[Sibs])
     
-    mid <- morphEdges(part[An, Sibs], to="directed", topOrd = c(An,Sibs))
+    out <- mutilate(graph, An, internal = TRUE)    
+    mid <- morphEdges(out[An, Sibs], to="directed", topOrd = c(An,Sibs))
     
-    out <- mutilate(graph, An, internal = TRUE)
     out <- mutilate(out, An, Sibs)
     out <- addEdges(out, edges=part[An]$edges)
     out <- addEdges(out, edges=mid$edges)

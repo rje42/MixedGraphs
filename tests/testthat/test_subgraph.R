@@ -43,10 +43,25 @@ gr1am_b <- gr1am[2,4:3]
 gr1el_b <- gr1el[2,4:3]
 gr1em_b <- gr1em[2,4:3]
 
-testthat::test_that("dropping vertices works", {
+testthat::test_that("bipartite subgraph works", {
   expect_equal(standardizeEdges(gr1al_b), standardizeEdges(gr1_b))
   expect_equal(standardizeEdges(gr1am_b), standardizeEdges(gr1_b))
   expect_equal(standardizeEdges(gr1el_b), standardizeEdges(gr1_b))
   expect_equal(standardizeEdges(gr1em_b), standardizeEdges(gr1_b))
+})
+
+gr1_c <- graphCr("4 <-> 3")
+gr1_c <- gr1_c[-c(1,2)]
+gr1al_c <- gr1al[4,3]
+gr1am_c <- gr1am[4,3]
+gr1el_c <- gr1el[4,3]
+gr1em_c <- gr1em[4,3]
+
+
+testthat::test_that("edges preserved correctly in bipartite mode", {
+  expect_equal(standardizeEdges(gr1al_c), standardizeEdges(gr1_c))
+  expect_equal(standardizeEdges(gr1am_c), standardizeEdges(gr1_c))
+  expect_equal(standardizeEdges(gr1el_c), standardizeEdges(gr1_c))
+  expect_equal(standardizeEdges(gr1em_c), standardizeEdges(gr1_c))
 })
 

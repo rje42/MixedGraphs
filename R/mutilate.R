@@ -208,13 +208,13 @@ addEdges <- function(graph, edges, ..., remDup = TRUE
       else if (is.adjList(A)) {
         nv_orig <- length(A)
         if (length(edges[[i]]) == nv(graph)) {
-          A[v] <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], n=nv_orig, directed=dir))[v]
+          A[v] <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], n=nv_orig, directed=dir), SIMPLIFY = FALSE)[v]
         }
         else {
-          A <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], n=nv_orig, directed=dir))
+          A <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], n=nv_orig, directed=dir), SIMPLIFY = FALSE)
         }
         
-        # A <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], directed=dir))
+        # A <- mapply(function(x,y) union(x,y), A, adjList(edges[[i]], directed=dir), SIMPLIFY = FALSE)
         class(A) <- "adjList"
       }
       else stop("mixedgraph supplied seems invalid")
