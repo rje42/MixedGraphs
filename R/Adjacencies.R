@@ -4,6 +4,7 @@
 ##' @param v1,v2 incoming and outgoing vertices, defaults to all.
 ##' @param dir direction
 ##' @param matrix logical indicating whether to force the return of an adjacency matrix
+##' @param nv number of vertices for \code{adjMatrix}
 ##' @param sparse should we use sparse matrices if available?
 ##' @param sort 1=unique but not sorted, 2=unique and sorted, 0=neither
 ##' @param rev logical: should directed \code{adjList}s have the direction inverted if \code{dir=1}?
@@ -13,11 +14,14 @@
 ##' If any of the edges are specified as an adjacency matrix, then the output will also
 ##' be an adjacency matrix, and similarly for an edgeMatrix. 
 ##' 
+##' If \code{nv} is not supplied, then it is inferred from the input.
+##' 
 ##' If \code{v1} or \code{v2} are specified then the first and 
 ##' second vertices must belong to these respective sets. 
 ##' 
 ##' @export collapse
-collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, rev=FALSE, double_up=FALSE) {
+collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, nv, sparse=FALSE, sort=1, 
+                     rev=FALSE, double_up=FALSE) {
   ## repeat direction with warning if necessary
   if (length(edges) == 0 || length(unlist(edges))==0) return(edgeMatrix())
   dir <- dir*rep(1L, length(edges))
@@ -31,22 +35,29 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, sparse=FALSE, sort=1, r
   ### first look for objects of class adjMatrix and adjList
   isAMat <- sapply(edges, is.adjMatrix)
   isAList <- sapply(edges, is.adjList)
-
+  
+  if (missing(nv)) {
+    nv <- 0
+    if (any(isAMat)) nv <- max(nv, sapply(edges[isAMat], dim))
+    if (any(isAList)) nv <- max(nv, lengths(edges[isAMat]))
+    if (any(!isAMat & !isAList)) nv <- max(nv, unlist(edges[!isAMat & !isAList]))
+  }
+  
   ## if vertices not specified, use all
   if (missing(v1) || missing(v2)) {
-    if (any(isAMat)) {
-      i <- which(isAMat)[1]
-      nv <- nrow(edges[[i]])
-    }
-    else if (any(isAList)) {
-      i <- which(isAList)[1]
-      nv <- length(edges[[i]])
-    }
-    else {
-      ## just look for biggest vertex
-      nv <- max(unlist(edges))
-#      if (is.infinite(nv)) return(matrix(NA, 2, 0))
-    }
+#     if (any(isAMat)) {
+#       i <- which(isAMat)[1]
+#       nv <- nrow(edges[[i]])
+#     }
+#     else if (any(isAList)) {
+#       i <- which(isAList)[1]
+#       nv <- length(edges[[i]])
+#     }
+#     else {
+#       ## just look for biggest vertex
+#       nv <- max(unlist(edges))
+# #      if (is.infinite(nv)) return(matrix(NA, 2, 0))
+#     }
     ## if vertices not specified, use all
     if(missing(v1)) {
       v1 <- seq_len(nv)

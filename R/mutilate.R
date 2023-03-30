@@ -590,7 +590,8 @@ morphEdges <- function(graph, from, to, topOrd) {
   }
   
   ## convert any edge lists and matrices:
-  to_add <- collapse(graph$edge[from], dir=edgeTypes()[wh_edge,"directed"], matrix=TRUE)
+  to_add <- collapse(graph$edge[from], dir=edgeTypes()[wh_edge,"directed"], 
+                     nv=length(graph$vnames), matrix=TRUE)
   
   if (dir) {
     if (missing(topOrd)) {
