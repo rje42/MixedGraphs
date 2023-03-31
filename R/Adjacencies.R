@@ -35,29 +35,22 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, nv, sparse=FALSE, sort=
   ### first look for objects of class adjMatrix and adjList
   isAMat <- sapply(edges, is.adjMatrix)
   isAList <- sapply(edges, is.adjList)
-  
-  if (missing(nv)) {
-    nv <- 0
-    if (any(isAMat)) nv <- max(nv, sapply(edges[isAMat], dim))
-    if (any(isAList)) nv <- max(nv, lengths(edges[isAMat]))
-    if (any(!isAMat & !isAList)) nv <- max(nv, unlist(edges[!isAMat & !isAList]))
-  }
-  
+
   ## if vertices not specified, use all
   if (missing(v1) || missing(v2)) {
-#     if (any(isAMat)) {
-#       i <- which(isAMat)[1]
-#       nv <- nrow(edges[[i]])
-#     }
-#     else if (any(isAList)) {
-#       i <- which(isAList)[1]
-#       nv <- length(edges[[i]])
-#     }
-#     else {
-#       ## just look for biggest vertex
-#       nv <- max(unlist(edges))
-# #      if (is.infinite(nv)) return(matrix(NA, 2, 0))
-#     }
+    if (any(isAMat)) {
+      i <- which(isAMat)[1]
+      nv <- nrow(edges[[i]])
+    }
+    else if (any(isAList)) {
+      i <- which(isAList)[1]
+      nv <- length(edges[[i]])
+    }
+    else {
+      ## just look for biggest vertex
+      nv <- max(unlist(edges))
+#      if (is.infinite(nv)) return(matrix(NA, 2, 0))
+    }
     ## if vertices not specified, use all
     if(missing(v1)) {
       v1 <- seq_len(nv)
@@ -556,8 +549,9 @@ groups = function(graph, etype, sort=1) {
 ##' 
 ##' @export
 pathConnected <- function(graph, v, D, etype, dir, verbose=FALSE) {
-  if (length(D) == 0) return(integer(0))
 
+  if (length(D) == 0) return(integer(0))
+    
   ## check inputs
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (missing(etype)) etype <- names(graph$edges)
@@ -570,7 +564,7 @@ pathConnected <- function(graph, v, D, etype, dir, verbose=FALSE) {
     chk[is.na(chk)] <- chk_a[is.na(chk)]
     etype <- edgeTypes()$type[chk]
   }
-  if (missing(dir)) dir <- 1*edgeTypes()$directed[match(etype, edgeTypes()$type)]
+  if (missing(dir)) dir <- 1*edgeTypes()$directed[edgeTypes()$type==etype]
   else {
     if (length(dir) > length(etype)) stop("Must be fewer directions than edge types")
     dir <- dir*rep.int(1L, length(etype))
@@ -581,9 +575,9 @@ pathConnected <- function(graph, v, D, etype, dir, verbose=FALSE) {
   if (length(edges) == 0) return(integer(0))
 
   ## get adjLists into correct orientation
-  if (any(dir != 1*edgeTypes()$directed[match(etype, edgeTypes()$type)])) {
+  if (any(dir != 1*edgeTypes()$directed[edgeTypes()$type==etype])) {
     for (i in seq_along(etype)) {
-      if (!edgeTypes()$directed[match(etype, edgeTypes()$type)][i]) next
+      if (!edgeTypes()$directed[edgeTypes()$type==etype]) next
       if (dir[i] == 0) {
         edges[[i]] <- symAdjList(edges[[i]])
       }
@@ -595,7 +589,7 @@ pathConnected <- function(graph, v, D, etype, dir, verbose=FALSE) {
   
   ## combine adjLists
   if (length(edges) > 1) {
-    edges <- lapply(purrr::transpose(edges), function(x) unique.default(unlist(x)))
+    edges <- lapply(purrr::transpose(edges), union)
   }
   else edges <- edges[[1]]
   
