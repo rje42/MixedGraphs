@@ -287,7 +287,9 @@ print.edgeList <- function(x, vnames, ...) {
   subGraph(graph, v, w, drop=drop, etype=etype, order=order)
 }
 
-##' Take induced vertex subgraph of mixedgraph
+##' Subgraphs for \code{mixedgraph} objects
+##' 
+##' Take induced vertex subgraph or bipartite subgraph of mixedgraph
 ##' 
 ##' @param graph a \code{mixedgraph} object
 ##' @param v vertices to keep
@@ -396,6 +398,7 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
         if (drop) {
           x[w,-v] = x[-v,w] = 0L
           x[-w,v] = x[v,-w] = 0L
+          x[-c(v,w),-c(v,w)] = 0L
           x <- x[vw,vw,drop=FALSE]  # note a different 'drop' argument!
           # out <- x[c(v,w),c(v,w),drop=FALSE]  
           class(x) <- "adjMatrix"
@@ -404,6 +407,7 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
         else {
           x[w,-v] = x[-v,w] = 0L
           x[-w,v] = x[v,-w] = 0L
+          x[-c(v,w),-c(v,w)] = 0L
           return(x)
         }
       }
@@ -450,6 +454,7 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
         x[vw] <- lapply(x[vw], intersect, y=c(v,w))
         x[v_w] <- lapply(x[v_w], intersect, y=w)
         x[w_v] <- lapply(x[w_v], intersect, y=v)
+        x[-c(v,w)] <- list(integer(0))
         
         if (drop) {
           x <- x[vw]

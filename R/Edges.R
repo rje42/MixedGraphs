@@ -486,9 +486,10 @@ withAdjList <- function(graph, edges, force=FALSE) {
   if (any(is.na(idx))) {
     if (force) {
       idx2 <- pmatch(edges, edgeTypes()[,1])
-      if (any(is.na(idx2))) stop("Some edge types not valid")
+      if (any(is.na(idx2))) stop("Some edge types not valid or specified ambiguously")
       nms <- c(names(graph$edges), edgeTypes()[idx2[is.na(idx)],1])
       graph$edges <- c(graph$edges, rep(list(adjList(n=length(graph$vnames))), sum(is.na(idx))))
+      idx[is.na(idx)] <- length(na.omit(idx)) + seq_len(sum(is.na(idx)))
       names(graph$edges) <- nms
     }
     else {
@@ -507,6 +508,8 @@ withAdjList <- function(graph, edges, force=FALSE) {
   dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
   n <- length(graph$vnames)
   graph$edges[idx] <- mapply(adjList, graph$edges[idx], directed=dir, n=n, SIMPLIFY=FALSE)
+  
+  for (i in idx) class(graph$edges[[i]]) <- "adjList"
   
   class(graph$edges) <- "edgeList"
   

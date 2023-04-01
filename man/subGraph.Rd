@@ -3,7 +3,7 @@
 \name{[.mixedgraph}
 \alias{[.mixedgraph}
 \alias{subGraph}
-\title{Take induced vertex subgraph of mixedgraph}
+\title{Subgraphs for \code{mixedgraph} objects}
 \usage{
 \method{[}{mixedgraph}(graph, v, w, ..., drop = FALSE, etype, order = FALSE)
 
@@ -25,7 +25,7 @@ subGraph(graph, v, w, drop = FALSE, etype, order = FALSE)
 \item{order}{logical: force graph to follow new order implied by \code{v}?}
 }
 \description{
-Take induced vertex subgraph of mixedgraph
+Take induced vertex subgraph or bipartite subgraph of mixedgraph
 }
 \details{
 If \code{order} is \code{TRUE}, then \code{edgeMatrix} and \code{eList} 
