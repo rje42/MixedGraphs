@@ -87,7 +87,7 @@ adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
 ##' @param directed logical: if \code{TRUE} edges are assumed directed
 ##' @param transpose logical: if \code{TRUE} we consider children instead of parents
 ##' 
-##' @details Stores adjancies by one of their vertices.  E.g. directed edges
+##' @details Stores adjacencies by one of their vertices.  E.g. directed edges
 ##' are stored indexed by the child vertex, undirected by both neighbours.
 ##' 
 ##' @export adjList
