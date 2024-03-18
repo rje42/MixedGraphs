@@ -20,16 +20,16 @@ pathConnected(graph, v, D, etype, dir, verbose = FALSE)
 \item{verbose}{logical: should additional information be provided?}
 }
 \description{
-Function for finding nodes in a set connected to a vertex via paths in the 
+Function for finding nodes in a set connected to a vertex via paths in the
 original graph
 }
 \details{
-This function will look for paths in \code{graph} from \code{v} 
+This function will look for paths in \code{graph} from \code{v}
 that only use the edge types in \code{etype} and the directions specified,
-and stop whenever a path hits something in \code{D}.  It then outputs the 
+and stop whenever a path hits something in \code{D}.  It then outputs the
 subset of elements of \code{D} that it hits.
 
-Note that for directed edges, \code{dir} defaults to 1, and so only 
+Note that for directed edges, \code{dir} defaults to 1, and so only
 follows the canonical direction of the edge.  Set to 0 if all directions are
 valid.
 }

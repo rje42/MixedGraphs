@@ -17,8 +17,8 @@ be sorted as a side-effect of the function? (list form
 only)
 
 Check for and remove duplicate edges in a list of
-edges or edgeMatrix.  Note that this will sort 
-elements in eList objects.}
+edges or \code{edgeMatrix}.  Note that this will sort
+elements in \code{eList} objects.}
 }
 \description{
 Remove duplicate edges

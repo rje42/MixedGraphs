@@ -39,7 +39,7 @@ dis(graph, v, sort = 1, fast = FALSE)
 
 \item{v}{collection of vertices}
 
-\item{sort}{integer:1 for unique but unsorted, 2 for 
+\item{sort}{integer:1 for unique but unsorted, 2 for
 sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 then output will always be unique and sorted.}
 
@@ -50,7 +50,7 @@ The usual familial relations between vertices in
 mixed graphs.
 }
 \details{
-\code{pa}, \code{ch}, \code{sp} and \code{nb} find the 
+\code{pa}, \code{ch}, \code{sp} and \code{nb} find the
 parents, children, spouses and neighbours of \code{v} respectively.
 \code{anc}, \code{dec}, \code{ant}, \code{dis}, \code{nhd} finds the ancestors
 descendants, anterior, district and neighbourhood of \code{v} respectively.

@@ -2,12 +2,12 @@
 ##' 
 ##' Looks for topological ordering of vertices with respect to directed edges.
 ##' 
-##' @param graph a \code{mixedgraph} object
+##' @param graph a `mixedgraph` object
 ##' @param warn logical: should a cyclic graph return a warning?
 ##' 
-##' @details \code{isTopological} tests for an ordering being 
-##' topological.  If the graph is cyclic, it returns \code{NA}, with or 
-##' without a warning depending on the value of \code{warn}.
+##' @details `isTopological` tests for an ordering being 
+##' topological.  If the graph is cyclic, it returns `NA`, with or 
+##' without a warning depending on the value of `warn`.
 ##' 
 ##' @export 
 topologicalOrder <- function(graph, warn=TRUE) {
@@ -59,7 +59,7 @@ isTopological = function(graph, v) {
 ##' Looks for cycles among edges of type 'directed'.  Not tested.
 ##' Maybe should add option to not test among all directed edges types.
 ##' 
-##' @param graph \code{mixedgraph} object
+##' @param graph `mixedgraph` object
 ##' 
 ##' @export 
 is_cyclic = function(graph) {
@@ -80,7 +80,7 @@ is_cyclic = function(graph) {
 ##' Looks for cycles among edges of type 'directed'.  Not tested.
 ##' Maybe should add option to not test among all directed edges types.
 ##' 
-##' @param graph \code{mixedgraph} object
+##' @param graph `mixedgraph` object
 ##' 
 ##' @name is.cyclic-deprecated
 ##' @export
@@ -96,9 +96,9 @@ is.cyclic <- function(graph) {
 
 ##' Test type of graph
 ##' 
-##' @param graph \code{mixedgraph} object
+##' @param graph `mixedgraph` object
 ##' 
-##' \code{is_UG}, \code{is_DAG}, \code{is_ADMG}, \code{is_SG} respectively
+##' `is_UG`, `is_DAG`, `is_ADMG`, `is_SG` respectively
 ##' test whether a graph is an undirected graph, directed acyclic graph (DAG), 
 ##' acyclic directed mixed graph (ADMG) or summary graph.
 ##' 
@@ -162,17 +162,17 @@ is_SG = function(graph) {
 
 ##' Deprecated functions to test type of graph
 ##' 
-##' @param graph \code{mixedgraph} object
+##' @param graph `mixedgraph` object
 ##' 
-##' \code{is.UG}, \code{is.DAG}, \code{is.ADMG}, \code{is.SG} respectively
+##' `is.UG`, `is.DAG`, `is.ADMG`, `is.SG` respectively
 ##' test whether a graph is an undirected graph, directed acyclic graph (DAG), 
 ##' acyclic directed mixed graph (ADMG) or summary graph.  These have since 
-##' been replaced by \code{is_UG} etc.
+##' been replaced by `is_UG` etc.
 ##' 
 ##' @name test_graph-deprecated
 NULL
 
-##' @describeIn test_graph-deprecated version of \code{is_UG}
+##' @describeIn test_graph-deprecated version of `is_UG`
 ##' @export 
 is.UG = function(graph) {
   .Deprecated("is_UG")
@@ -184,7 +184,7 @@ is.UG = function(graph) {
   return(TRUE)
 }
 
-##' @describeIn test_graph-deprecated version of \code{is_DAG}
+##' @describeIn test_graph-deprecated version of `is_DAG`
 ##' @export
 is.DAG = function(graph) {
   .Deprecated("is_DAG")
@@ -196,7 +196,7 @@ is.DAG = function(graph) {
   return(!is_cyclic(graph))
 }
 
-##' @describeIn test_graph-deprecated version of \code{is_ADMG}
+##' @describeIn test_graph-deprecated version of `is_ADMG`
 ##' @export
 is.ADMG = function(graph) {
   .Deprecated("is_ADMG")
@@ -208,7 +208,7 @@ is.ADMG = function(graph) {
   return(!is_cyclic(graph))
 }
 
-##' @describeIn test_graph-deprecated version of \code{is_SG}
+##' @describeIn test_graph-deprecated version of `is_SG`
 ##' @export
 is.SG = function(graph) {
   .Deprecated("is_SG")

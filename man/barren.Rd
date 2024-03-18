@@ -23,7 +23,7 @@ Find barren, sterile, orphaned vertices
 \details{
 Barren vertices (within \code{v}) are those
 that have no proper descendants also within \code{v}.
-Sterile (orphaned) vertices in \code{v} have no 
+Sterile (orphaned) vertices in \code{v} have no
 children (parents) also within \code{v}.
 }
 \section{Functions}{

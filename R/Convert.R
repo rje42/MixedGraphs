@@ -14,12 +14,12 @@
 ##' are 
 ##' \itemize{
 ##' \item \code{\link{mixedgraph}}
-##' \item \code{ggm}, an adjacency matrix as specified in the \code{ggm} package; 
-##' \item \code{graphNEL}, \code{graphAM}, \code{graphBAM} from the \code{graph} package;
-##' \item \code{igraph};
-##' \item \code{PAG}: that is, the output of \code{pc()} or \code{fci()} functions in the \code{pcalg} package;
-##' \item \code{bn} from the \code{bnlearn} package;
-##' \item \code{ADMG}, from the \code{ADMGs} package.
+##' \item `ggm`, an adjacency matrix as specified in the `ggm` package; 
+##' \item `graphNEL`, `graphAM`, `graphBAM` from the `graph` package;
+##' \item `igraph`;
+##' \item `PAG`: that is, the output of `pc()` or `fci()` functions in the `pcalg` package;
+##' \item `bn` from the `bnlearn` package;
+##' \item `ADMG`, from the `ADMGs` package.
 ##' }
 ##' The function can recognise the class of objects other than
 ##' "ggm", which is just an adjacency matrix.
@@ -34,12 +34,12 @@
 ##' \item mixedgraph <-> PAG
 ##' \item mixedgraph <-> bn
 ##' \item mixedgraph <-> igraph (goes mixedgraph -> graphNEL -> igraph)
-##' \item graphNEL <-> igraph (using functions in the \code{igraph} package)
-##' \item graphNEL, graphAM <-> bn (using functions in the \code{bnlearn} package)
+##' \item graphNEL <-> igraph (using functions in the `igraph` package)
+##' \item graphNEL, graphAM <-> bn (using functions in the `bnlearn` package)
 ##' }
 ##' 
-##' \code{ggm} entries must be specified by \code{cur_format = "ggm"}.  
-##' \code{PAG} objects are those whose class inherits from \code{gAlgo}, 
+##' `ggm` entries must be specified by \code{cur_format = "ggm"}.  
+##' `PAG` objects are those whose class inherits from `gAlgo`, 
 ##' or an adjacency matrix if \code{cur_format = "PAG"} is specified.
 ##' 
 ##' @export convert
@@ -210,10 +210,10 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
 ##' Experimental automatic conversion function
 ##' 
 ##' @param graph a graph object that can be handled
-##' by \code{MixedGraphs}
+##' by `MixedGraphs`
 ##' @param .f right-hand side of a pipe to be evaluated
 ##' 
-##' This is a version of the pipe `%>%` from \code{magrittr}
+##' This is a version of the pipe `%>%` from `magrittr`
 ##' that converts the left-hand side into a graph of suitable
 ##' format to be used by the right-hand side.
 ##' 

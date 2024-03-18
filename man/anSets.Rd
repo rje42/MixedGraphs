@@ -14,7 +14,7 @@ anSets2(graph, topOrder, maxbarren, same_dist = FALSE, sort = 1)
 
 \item{topOrder}{optional topological order of vertices}
 
-\item{sort}{integer:1 for unique but unsorted, 2 for 
+\item{sort}{integer:1 for unique but unsorted, 2 for
 sorted.}
 
 \item{maxbarren}{maximum size of barren subsets}
@@ -26,13 +26,15 @@ Find ancestral sets of a graph.
 }
 \details{
 Algorithm:
-1. Find a topological order of nodes.
-2. Base case: {} is ancestral
-3. Induction: (i) Assume we have a list L of all ancestral sets involving Xi-1 in the order.
+\enumerate{
+\item Find a topological order of nodes.
+\item Base case: {} is ancestral
+\item Induction: (i) Assume we have a list L of all ancestral sets involving Xi-1 in the order.
 (ii) If an ancestral set S in L contains all parents of Xi, Xi + S is also ancestral.
+}
 
-The function \code{anSets2} proceeds by adding a new barren vertex to the 
-set, which is not a descendant of any existing vertices.  It consequently 
+The function \code{anSets2} proceeds by adding a new barren vertex to the
+set, which is not a descendant of any existing vertices.  It consequently
 provides the option \code{maxbarren} to cap this at a fixed value.
 }
 \section{Functions}{

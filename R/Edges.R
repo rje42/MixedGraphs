@@ -2,11 +2,11 @@
 ##' 
 ##' @param edges list or matrix giving edges
 ##' @param n total number of vertices, defaults to maximal value
-##' @param directed logical: if TRUE edges are assumed directed
+##' @param directed logical: if `TRUE` edges are assumed directed
 ##' @param sparse logical: use a sparse matrix?
 ##' 
 ##' @export adjMatrix
-adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
+adjMatrix <- function(edges, n, directed=FALSE, sparse=FALSE) {
   if (missing(edges)) {
     if (sparse) {
       out <- Matrix(0L,n,n)
@@ -35,7 +35,7 @@ adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
     for (i in seq_along(edges)) {
       out[edges[[i]],i] <- 1
     }
-    if (!directed && !isSymmetric(out)) stop("Error in input")
+    # if (!directed && !isSymmetric(out)) stop("Error in input")
     
     return(out)
   }
@@ -43,7 +43,7 @@ adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
     if (length(edges) == 0) {
       if (missing(n)) {
         warning("number of vertices not supplied, assumed to be 0")
-        n = 0
+        n <- 0
       }
       ## return zero matrix
       if (sparse) {
@@ -63,14 +63,14 @@ adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
   else if (is.null(edges)) return(NULL)
   else stop("Failed to identify edge type")
   
-  if (missing(n)) n = max(tmp)
+  if (missing(n)) n <- max(tmp)
   
   idx <- c(1, n) %*% (tmp-1) + 1
   if (!directed) idx <- c(idx, c(n, 1) %*% (tmp-1) + 1)
   
   if (sparse) out <- Matrix(0, n, n, doDiag = FALSE)
   else out <- matrix(0, n, n)
-  out[c(idx)] = 1
+  out[c(idx)] <- 1
   
 #  dim(out) <- c(n,n)
   class(out) <- c("adjMatrix", class(out))
@@ -82,16 +82,16 @@ adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
 ##' Get adjacency list of edges
 ##' 
 ##' @param edges list or matrix giving edges in the form of an 
-##' \code{eList}, \code{adjMatrix} or \code{edgeMatrix}
+##' `eList`, `adjMatrix` or `edgeMatrix`
 ##' @param n total number of vertices (defaults to maximum value)
-##' @param directed logical: if \code{TRUE} edges are assumed directed
-##' @param transpose logical: if \code{TRUE} we consider children instead of parents
+##' @param directed logical: if `TRUE` edges are assumed directed
+##' @param transpose logical: if `TRUE` we consider children instead of parents
 ##' 
 ##' @details Stores adjacencies by one of their vertices.  E.g. directed edges
 ##' are stored indexed by the child vertex, undirected by both neighbours.
 ##' 
 ##' @export adjList
-adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
+adjList <- function(edges, n, directed=FALSE, transpose=FALSE) {
   if (missing(edges) || length(edges) == 0L) {
     out <- rep(list(integer(0)), n)
     class(out) <- "adjList"
@@ -107,7 +107,7 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
     if (length(edges) == 0) {
       if (missing(n)) {
         warning("number of vertices not supplied, assumed to be 0")
-        n = 0
+        n <- 0
       }
       class(edges) <- "adjList"
       return(edges)
@@ -152,13 +152,13 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
   else if (is.null(edges)) return(NULL)
   else stop("Don't know what kind of edge-set this is")
   
-  # if (missing(n)) n = max(tmp)
+  # if (missing(n)) n <- max(tmp)
   
   # idx <- c(1, n) %*% (tmp-1) + 1
   # if (!directed) idx <- c(idx, c(n, 1) %*% (tmp-1) + 1)
   # 
   # out <- rep(0, n*n)
-  # out[idx] = 1
+  # out[idx] <- 1
 
   out <- lapply(out, as.integer)
   
@@ -196,10 +196,10 @@ symAdjList <- function(object, unq=TRUE) {
 ##' Get edges from adjacency matrix or list
 ##' 
 ##' @param edges list or adjacency matrix of edges
-##' @param directed logical: if TRUE edges are assumed directed
-##' @param double logical: if TRUE, edges are written in both directions
+##' @param directed logical: if `TRUE` edges are assumed to be directed
+##' @param double logical: if `TRUE`, edges are written in both directions
 ##' 
-##' @export edgeMatrix
+##' @export 
 edgeMatrix <- function(edges, directed=FALSE, double=FALSE) {
   
   if (missing(edges) || length(edges) == 0) {
@@ -209,25 +209,28 @@ edgeMatrix <- function(edges, directed=FALSE, double=FALSE) {
   }
 
   if (is.edgeMatrix(edges)) {
-    if (double) {
-      edges <- cbind(edges, edges[2:1,])
-      edges <- unique.matrix(edges, MARGIN=2)
-    }
-    return(edges)
+    out <- edges
+    # if (double) {
+    #   edges <- cbind(edges, edges[2:1,])
+    #   edges <- unique.matrix(edges, MARGIN=2)
+    # }
+    # return(edges)
   }
   else if (is.adjMatrix(edges)) {
     rs <- row(edges)[edges > 0]
     cs <- col(edges)[edges > 0]
     if (!directed) {
-      wh = (rs < cs)
-      rs = rs[wh]; cs = cs[wh]
+      wh <- (rs < cs)
+      rs <- rs[wh]; cs <- cs[wh]
     }
     out <- matrix(c(rs,cs), nrow=2, byrow=TRUE)
   }
   else if (is.adjList(edges, checknm=TRUE)) {
-    
     if (directed) out <- matrix(NA, 2, sum(lengths(edges)))
-    else out <- matrix(NA, 2, sum(lengths(edges))/2)
+    else {
+      if (sum(lengths(edges)) %% 2 == 1) stop("Should not be an odd number of edge entries for non-directed edge-type")
+      out <- matrix(NA, 2, sum(lengths(edges))/2)
+    }
     pos <- 0
     for (i in seq_along(edges)) {
       if (directed) {
@@ -249,7 +252,7 @@ edgeMatrix <- function(edges, directed=FALSE, double=FALSE) {
   
   if (double) {
     ## requested to double edges, do this
-    out <- cbind(out, out[2:1,])
+    out <- cbind(out, out[2:1,,drop=FALSE])
     out <- unique.matrix(out, MARGIN=2)
   }
   
@@ -261,13 +264,13 @@ edgeMatrix <- function(edges, directed=FALSE, double=FALSE) {
 
 ##' Edge list
 ##' 
-##' Returns an \code{eList} object from an adjacency matrix
+##' Returns an `eList` object from an adjacency matrix
 ##' or edge matrix object.
 ##' 
-##' @param edges \code{adjList}, \code{edgeMatrix}, \code{adjMatrix}, or a \code{list} of pairs of edges
+##' @param edges `adjList`, `edgeMatrix`, `adjMatrix`, or a `list` of pairs of edges
 ##' @param directed logical: if TRUE edges are assumed directed
 ##' 
-##' @details The \code{directed} argument is important; if omitted, 
+##' @details The `directed` argument is important; if omitted, 
 ##' then some edges may be recorded only once, even though they are present 
 ##' in both directions.
 ##' 
@@ -283,8 +286,8 @@ eList <- function(edges, directed=FALSE) {
     rs <- row(edges)[edges > 0]
     cs <- col(edges)[edges > 0]
     if (!directed) {
-      wh = (rs < cs)
-      rs = rs[wh]; cs = cs[wh]
+      wh <- (rs < cs)
+      rs <- rs[wh]; cs <- cs[wh]
     }
     out <- mapply(c, rs, cs, SIMPLIFY=FALSE)
   }
@@ -342,7 +345,7 @@ makeEdgeList <- function(...) {
   }
   
   ## otherwise, compare to standard edge types
-  etys = edgeTypes()$type
+  etys <- edgeTypes()$type
   if (length(args) > 0) {
     wh <- pmatch(names(args), etys)
     names(args)[!is.na(wh)] <- etys[na.omit(wh)]
@@ -432,10 +435,10 @@ is.adjList <- function(object, n, checknm = TRUE) {
 
 ##' Change representation of edges
 ##' 
-##' Change edge representation of (part of) graph to use \code{adjMatrix},
-##' \code{adjList}, \code{eList} or \code{edgeMatrix} formats.
+##' Change edge representation of (part of) graph to use `adjMatrix`,
+##' `adjList`, `eList` or `edgeMatrix` formats.
 ##' 
-##' @param graph an object of class \code{mixedgraph}
+##' @param graph an object of class `mixedgraph`
 ##' @param edges character vector of edge types to change, defaults to all
 ##' @param sparse logical: should sparse matrices be used?
 ##' @param force logical: should edge sets be added when named?
@@ -475,7 +478,7 @@ withAdjMatrix <- function(graph, edges, sparse=FALSE, force=FALSE) {
   graph
 }
 
-##' @describeIn withAdjMatrix Change to \code{adjList} format
+##' @describeIn withAdjMatrix Change to `adjList` format
 ##' @export withAdjList
 withAdjList <- function(graph, edges, force=FALSE) {
   if (missing(edges)) idx <- seq_along(graph$edges)
@@ -516,7 +519,7 @@ withAdjList <- function(graph, edges, force=FALSE) {
   graph
 }
 
-##' @describeIn withAdjMatrix Change to \code{edgeMatrix} format
+##' @describeIn withAdjMatrix Change to `edgeMatrix` format
 ##' @export withEdgeMatrix
 withEdgeMatrix <- function(graph, edges, force=FALSE) {
   if (missing(edges)) idx <- seq_along(graph$edges)
@@ -552,7 +555,7 @@ withEdgeMatrix <- function(graph, edges, force=FALSE) {
   graph
 }
 
-##' @describeIn withAdjMatrix Change to \code{eList} format
+##' @describeIn withAdjMatrix Change to `eList` format
 ##' @export withEdgeList
 withEdgeList <- function(graph, edges, force=FALSE) {
   if (missing(edges)) idx <- seq_along(graph$edges)

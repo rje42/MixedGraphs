@@ -4,22 +4,22 @@
 ##' @param v1,v2 incoming and outgoing vertices, defaults to all.
 ##' @param dir direction
 ##' @param matrix logical indicating whether to force the return of an adjacency matrix
-##' @param nv number of vertices for \code{adjMatrix}
+##' @param nv number of vertices for `adjMatrix`
 ##' @param sparse should we use sparse matrices if available?
 ##' @param sort 1=unique but not sorted, 2=unique and sorted, 0=neither
-##' @param rev logical: should directed \code{adjList}s have the direction inverted if \code{dir=1}?
-##' @param double_up logical: should edges with \code{dir=0} be repeated in both directions for an edgeMatrix?
+##' @param rev logical: should directed `adjList`s have the direction inverted if `dir=1`?
+##' @param double_up logical: should edges with `dir=0` be repeated in both directions for an edgeMatrix?
 ##' 
-##' @details returns an edgeMatrix or adjacency matrix for possibly multiple edge types.
+##' @details returns an `edgeMatrix` or `adjMatrix` for possibly multiple edge types.
 ##' If any of the edges are specified as an adjacency matrix, then the output will also
-##' be an adjacency matrix, and similarly for an edgeMatrix. 
+##' be an adjacency matrix, and similarly for an `edgeMatrix`. 
 ##' 
-##' If \code{nv} is not supplied, then it is inferred from the input.
+##' If `nv` is not supplied, then it is inferred from the input.
 ##' 
-##' If \code{v1} or \code{v2} are specified then the first and 
+##' If `v1` or `v2` are specified then the first and 
 ##' second vertices must belong to these respective sets. 
 ##' 
-##' @export collapse
+##' @export 
 collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, nv, sparse=FALSE, sort=1, 
                      rev=FALSE, double_up=FALSE) {
   ## repeat direction with warning if necessary
@@ -133,9 +133,9 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, nv, sparse=FALSE, sort=
     return(out)
   }
   
-  ## otherwise use edgeMatrices
+  ## otherwise use edgeMatrix class
   if (double_up) {
-    edges <- mapply(edgeMatrix, edges, double=(dir==0), SIMPLIFY = FALSE)
+    edges <- mapply(edgeMatrix, edges, directed=TRUE, double=(dir==0), SIMPLIFY = FALSE)
   }
   else edges <- lapply(edges, edgeMatrix)
   ## reverse edges for direction =-1.
@@ -178,23 +178,23 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, nv, sparse=FALSE, sort=
 ##' 
 ##' Generic function for finding adjacent vertices based on any kind of edge.
 ##' 
-##' @param graph an object of class \code{mixedgraph}
+##' @param graph an object of class `mixedgraph`
 ##' @param v vertices to find adjacencies
 ##' @param etype edge types to consider; defaults to all
 ##' @param dir for directed edges, indicates which direction to search in:
 ##' 1: along direction, -1: against direction, 0: both directions.
-##' @param inclusive logical indicating whether elements of \code{v} can be 
+##' @param inclusive logical indicating whether elements of `v` can be 
 ##' included in output group.
-##' @param sort integer:1 for unique but unsorted, 2 for 
+##' @param sort integer: 1 for unique but unsorted, 2 for 
 ##' sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 ##' then output will always be unique and sorted.
-##' @param force logical - should invalid \code{v} be ignored?
+##' @param force logical - should invalid `v` be ignored?
 ##' 
-##' @details The argument \code{directed} is recycled for multiple edge types, but 
-##' has no effect for edges without a specified direction.  If any \code{v} is 
-##' not a vertex of \code{graph}, an error is returned, unless \code{force=TRUE}.
+##' @details The argument `directed` is recycled for multiple edge types, but 
+##' has no effect for edges without a specified direction.  If any `v` is 
+##' not a vertex of `graph`, an error is returned, unless `force=TRUE`.
 ##' 
-##' The function \code{adjacent} tests for a particular adjacency between
+##' The function `adjacent` tests for a particular adjacency between
 ##' two vertices.  
 ##' 
 ##' @examples
@@ -202,7 +202,8 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, nv, sparse=FALSE, sort=
 ##' adj(gr1, v=1, etype="directed", dir=-1)
 ##' adjacent(gr1, 1, 3, etype="directed", dir=1)
 ##' 
-##' @seealso \code{\link{grp}} for paths
+##' @seealso \code{\link{grp}} for vertices joined by paths, \code{\link{groups}} 
+##' for partitions of vertices by adjacency type.
 ##' 
 ##' @export
 adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
@@ -298,38 +299,39 @@ adjacent <- function(graph, v1, v2, etype, dir=0) {
 ##' Generic functions for finding groups based on edge adjacencies, 
 ##' e.g. neighbourhoods, districts or ancestral sets.
 ##' 
-##' @param graph an object of class \code{mixedgraph}
+##' @param graph an object of class `mixedgraph`
 ##' @param v vertices to group
 ##' @param etype edge types to group by (defaults to all)
-##' @param inclusive logical indicating whether \code{v} should be 
+##' @param inclusive logical indicating whether `v` should be 
 ##' included in output group.
 ##' @param dir integer(s) indicating if direction should be 
 ##' considered: 0 = undirected, 1 = from row to column; -1 = from column to row.
 ##' @param sort integer: 1 for unique but unsorted, 2 for 
 ##' sorted (0 for possibly repeated and unsorted).
-##' @param force logical - should invalid \code{v} be ignored?
+##' @param force logical - should invalid `v` be ignored?
 ## @param skipChecks guarantees that input is valid
-##' @param edges an \code{adjMatrix} or \code{adjList}
+##' @param edges an `adjMatrix` or `adjList`
 ##' 
-##' @details \code{grp()} finds all vertices that can be reached from
-##' vertices in \code{v} by edges of the specified type, and in the 
+##' @details `grp()` finds all vertices that can be reached from
+##' vertices in `v` by edges of the specified type, and in the 
 ##' specified direction.
-##' For example, we can find all the ancestors of \code{v} by using 
-##' \code{type="directed"} and \code{dir=-1} (i.e.\ go back up the edges).
+##' For example, we can find all the ancestors of `v` by using 
+##' `type="directed"` and `dir=-1` (i.e. go back up the edges).
 ##' 
-##' \code{groups()} finds equivalence classes in a graph based on being 
-##' connected by such a path (i.e.\ the connected components with respect 
+##' `groups()` finds equivalence classes in a graph based on being 
+##' connected by such a path (i.e. the connected components with respect 
 ##' to the specified edge types).
 ##' 
-##' If any \code{v} is 
-##' not a vertex of \code{graph}, an error is returned, unless 
-##' \code{force=TRUE}.
+##' If any `v` is 
+##' not a vertex of `graph`, an error is returned, unless 
+##' `force=TRUE`.
 ##' 
-##' \code{grp2} is a faster version of the function for a single \code{adjMatrix}
-##' or \code{adjList}.
+##' `grp2` is a faster version of the function for a single `adjMatrix`
+##' or `adjList`.
 ##' 
-##' @export grp
 ##' @seealso \code{\link{adj}} for single edge adjacencies.
+##' 
+##' @export
 grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
 
@@ -339,17 +341,16 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   else if (any(!(v %in% graph$v))) stop("Invalid values of v")
   if (length(v) == 0) return(integer(0))
   
-  
+  ## obtain edgeTypes if not supplied, and sort out directions
   if (missing(etype)) etype <- edgeTypes()$type
-  ##' repeat dir() vector with warning if necessary
+  ## repeat dir() vector with warning if necessary
   if (length(dir) > length(etype)) warning("More directions specified than edge types")
   dir = dir*rep.int(1L, length(etype))
   
+  ## get lists of relevant edges
   tmp <- pmatch(etype, edgeTypes()$type)
   dir[!edgeTypes()$directed[tmp]] <- 0L
-  
   whEdge <- pmatch(etype,names(graph$edges))
-  
   edges <- graph$edges[whEdge]
   
   if (length(edges) == 1) {
@@ -367,7 +368,8 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
       return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive, sort=sort))
     }
   }
-
+  
+  ## collapse edges into one representation
   es <- collapse(edges, dir=dir, rev=TRUE, double_up=TRUE)
 
   # }
@@ -439,7 +441,7 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   out
 }
 
-##' @describeIn grp Faster routine for single \code{adjMatrix} or \code{adjList}
+##' @describeIn grp Faster routine for single `adjMatrix` or `adjList`
 ##' @export
 grp2 <- function(v, edges, dir, inclusive, sort=1) {
   new <- v
@@ -479,15 +481,17 @@ grp2 <- function(v, edges, dir, inclusive, sort=1) {
   out
 }
 
-##' @export groups
 ##' @describeIn grp find connected components
+##' @export 
 groups = function(graph, etype, sort=1) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (missing(etype)) etype <- edgeTypes()$type
 
-  ##' repeat dir() vector with warning if necessary
+  ## repeat dir() vector with warning if necessary
   whEdge <- pmatch(etype,names(graph$edges))
   edges <- graph$edges[whEdge[!is.na(whEdge)]]
+  
+  ## collapse edges into one representation
   es <- collapse(edges, dir=0, double_up = TRUE)
   
   grp = rep(0, length(vnames(graph)))
@@ -542,19 +546,19 @@ groups = function(graph, etype, sort=1) {
 ##' Function for finding nodes in a set connected to a vertex via paths in the 
 ##' original graph
 ##' 
-##' @param graph an object of class \code{mixedgraph}
+##' @param graph an object of class `mixedgraph`
 ##' @param v vertex to check
 ##' @param D set to look for paths to
 ##' @param etype edge types to use
 ##' @param dir integer vector of directions
 ##' @param verbose logical: should additional information be provided?
 ##' 
-##' @details This function will look for paths in \code{graph} from \code{v} 
-##' that only use the edge types in \code{etype} and the directions specified,
-##' and stop whenever a path hits something in \code{D}.  It then outputs the 
-##' subset of elements of \code{D} that it hits.
+##' @details This function will look for paths in `graph` from `v` 
+##' that only use the edge types in `etype` and the directions specified,
+##' and stop whenever a path hits something in `D`.  It then outputs the 
+##' subset of elements of `D` that it hits.
 ##' 
-##' Note that for directed edges, \code{dir} defaults to 1, and so only 
+##' Note that for directed edges, `dir` defaults to 1, and so only 
 ##' follows the canonical direction of the edge.  Set to 0 if all directions are
 ##' valid.
 ##' 

@@ -13,7 +13,7 @@ revAdjList(object)
 symAdjList(object, unq = TRUE)
 }
 \arguments{
-\item{edges}{list or matrix giving edges in the form of an 
+\item{edges}{list or matrix giving edges in the form of an
 \code{eList}, \code{adjMatrix} or \code{edgeMatrix}}
 
 \item{n}{total number of vertices (defaults to maximum value)}
@@ -28,7 +28,7 @@ symAdjList(object, unq = TRUE)
 Get adjacency list of edges
 }
 \details{
-Stores adjancies by one of their vertices.  E.g. directed edges
+Stores adjacencies by one of their vertices.  E.g. directed edges
 are stored indexed by the child vertex, undirected by both neighbours.
 }
 \section{Functions}{

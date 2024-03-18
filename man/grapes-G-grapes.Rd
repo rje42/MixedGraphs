@@ -12,7 +12,7 @@ by \code{MixedGraphs}}
 
 \item{.f}{right-hand side of a pipe to be evaluated
 
-This is a version of the pipe `%>%` from \code{magrittr}
+This is a version of the pipe \verb{\%>\%} from \code{magrittr}
 that converts the left-hand side into a graph of suitable
 format to be used by the right-hand side.}
 }

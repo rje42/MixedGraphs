@@ -15,7 +15,7 @@ claudius(graph, v)
 Find the Claudius of a (presumably) bidirected-connected set.
 }
 \details{
-Drops strict spouses of \code{v} and any of their 
+Drops strict spouses of \code{v} and any of their
 descendants.
 }
 \examples{

@@ -19,10 +19,10 @@ adjacent(graph, v1, v2, etype, dir = 0)
 \item{dir}{for directed edges, indicates which direction to search in:
 1: along direction, -1: against direction, 0: both directions.}
 
-\item{inclusive}{logical indicating whether elements of \code{v} can be 
+\item{inclusive}{logical indicating whether elements of \code{v} can be
 included in output group.}
 
-\item{sort}{integer:1 for unique but unsorted, 2 for 
+\item{sort}{integer: 1 for unique but unsorted, 2 for
 sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 then output will always be unique and sorted.}
 
@@ -34,8 +34,8 @@ then output will always be unique and sorted.}
 Generic function for finding adjacent vertices based on any kind of edge.
 }
 \details{
-The argument \code{directed} is recycled for multiple edge types, but 
-has no effect for edges without a specified direction.  If any \code{v} is 
+The argument \code{directed} is recycled for multiple edge types, but
+has no effect for edges without a specified direction.  If any \code{v} is
 not a vertex of \code{graph}, an error is returned, unless \code{force=TRUE}.
 
 The function \code{adjacent} tests for a particular adjacency between
@@ -53,5 +53,6 @@ adjacent(gr1, 1, 3, etype="directed", dir=1)
 
 }
 \seealso{
-\code{\link{grp}} for paths
+\code{\link{grp}} for vertices joined by paths, \code{\link{groups}}
+for partitions of vertices by adjacency type.
 }
