@@ -11,3 +11,5 @@ inst/doc
 Rprof.out
 .DS_Store
 scratch
+.*
+src/*o

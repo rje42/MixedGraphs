@@ -53,23 +53,23 @@ vertexTypes <- function() {
 
 ##' Graph Operations
 ##' 
-##' @param graph an object of class \code{mixedgraph}
+##' @param graph an object of class `mixedgraph`
 ##' @param edges character vector of edge types to include, defaults to all
 ##' 
-##' @details \code{nedge} uses an internal function \code{nedge2} to count for
+##' @details `nedge` uses an internal function `nedge2` to count for
 ##' each type of edge separately. Do we want this to apply to graphs or edge lists
 ##' or both?
 ##' 
 ##' @name graphOps
 NULL
 
-##' @describeIn graphOps names of vertices for \code{mixedgraph} object
+##' @describeIn graphOps names of vertices for `mixedgraph` object
 ##' @export
 vnames <- function(graph) {
   graph$vnames
 }
 
-##' @describeIn graphOps number of vertices for \code{mixedgraph} object
+##' @describeIn graphOps number of vertices for `mixedgraph` object
 ##' @export
 nv <- function(graph) {
   length(graph$v)
@@ -78,9 +78,9 @@ nv <- function(graph) {
 ##' Construct a mixed graph
 ##' 
 ##' @param n integer number of vertices in graph
-##' @param v integer identifiers of vertices (length \code{n})
+##' @param v integer identifiers of vertices (length `n`)
 ##' @param edges named list of types of edge in graph
-##' @param vnames character vector of vertex names (defaults to \code{x1}, \code{x2}, ...)
+##' @param vnames character vector of vertex names (defaults to `x1`, `x2`, ...)
 ##' @param vtype optionally, a character vector of vertex types
 ##' 
 ##' @details Currently row/column names on adjacency matrices are 
@@ -94,7 +94,7 @@ mixedgraph <- function(n, v=seq_len(n), edges = list(), vnames, vtype) {
   
   ## Check vertices are positive integers
   if (missing(n)) {
-    n = length(v)
+    n <- length(v)
   }
   else if (length(v) != n) stop("Vertex list must have length 'n'")
   else if (any(v < 1)) stop("Vertices must be numbered as positive integers")
@@ -106,22 +106,26 @@ mixedgraph <- function(n, v=seq_len(n), edges = list(), vnames, vtype) {
   
   ## use x1, x2, as vertex names if not supplied
   if (missing(vnames) || is.null(vnames)) {
-    if (length(v) > 0) vnames = paste0("x", seq_len(max(v)))
-    else vnames = character(0)
+    if (length(v) > 0) vnames <- paste0("x", seq_len(max(v)))
+    else vnames <- character(0)
   }
   else if (length(v) > 0 && length(vnames) < max(v)) {
     stop("Variable names vector must have length at least max(v)")
   }
-  
+
+  ## remove edge types with no edges in
+  edges <- edges[lengths(edges) > 0]
+    
   ## now consider the edges
   if (length(edges) > 0) {
+
     ## Check that edge types are matched by global options
-    etys = edgeTypes()$type
-    if (is.null(names(edges))) et = seq_along(edges)
-    else et = pmatch(names(edges), etys)
+    etys <- edgeTypes()$type
+    if (is.null(names(edges))) et <- seq_along(edges)
+    else et <- pmatch(names(edges), etys)
     if (length(et) == 1 && is.na(et)) {
       warning("No edge type given, assuming undirected")
-      et = 1
+      et <- 1
     }
     else if (any(is.na(et))) stop("Edge types not matched")
     else if (any(duplicated(et))) stop("Repeated edge types matched")
@@ -155,32 +159,32 @@ mixedgraph <- function(n, v=seq_len(n), edges = list(), vnames, vtype) {
     if (!all(edAL | edL | edE | edA)) stop("Edge types not all given")
     
     ## Construct edge lists
-    edgeList = list()
+    edgeList <- list()
     for (i in seq_along(et)) {
       dimnames(edges[[i]]) <- NULL   # drop dimnames
-      edgeList[[etys[et[i]]]] = edges[[i]]
+      edgeList[[etys[et[i]]]] <- edges[[i]]
     }
-    class(edgeList) = "edgeList"
-    wh = which(names(edgeList) == "")
-    if (length(wh) > 0) names(edgeList)[wh] = paste("EdgeType", wh, sep="")
+    class(edgeList) <- "edgeList"
+    wh <- which(names(edgeList) == "")
+    if (length(wh) > 0) names(edgeList)[wh] <- paste("EdgeType", wh, sep="")
   }
   else {
-    edgeList = list()
+    edgeList <- list()
     class(edgeList) <- "edgeList"
   }
   
-  out = list(v=v, edges=edgeList, vnames=vnames)
-  class(out) = "mixedgraph"
+  out <- list(v=v, edges=edgeList, vnames=vnames)
+  class(out) <- "mixedgraph"
   return(out)
 }
 
-##' Test for \code{mixedgraph}
+##' Test for `mixedgraph`
 ##' 
-##' Is this object a \code{mixedgraph}?
+##' Is this object a `mixedgraph`?
 ##' 
 ##' @param object Object to be tested
 ##' 
-##' @details Returns \code{TRUE} or \code{FALSE}
+##' @details Returns `TRUE` or `FALSE`
 ##' 
 ##' @export
 is.mixedgraph <- function(object) {
@@ -190,14 +194,14 @@ is.mixedgraph <- function(object) {
 
 ##' Print a mixedgraph object
 ##' 
-##' Prints a \code{mixedgraph} object to the standard output.
+##' Prints a `mixedgraph` object to the standard output.
 ##' 
-##' @param x an object of class \code{mixedgraph}
-##' @param ... other arguments to \code{print}
+##' @param x an object of class `mixedgraph`
+##' @param ... other arguments to `print`
 ##' 
 ##' @export 
 print.mixedgraph <- function(x, ...) {
-  n = length(x$v)
+  n <- length(x$v)
   cat("Graph with ", n, ifelse(n == 1, " vertex", " vertices"),
       ifelse(n == 0,"",":  "), sep="")
   cat(x$vnames[x$v], "\n\n", sep="  ")
@@ -207,6 +211,7 @@ print.mixedgraph <- function(x, ...) {
   invisible(x)
 }
 
+##' @export
 print.edgeList <- function(x, vnames, ...) {
   
   if (length(x) == 0) return(invisible(x))
@@ -217,10 +222,10 @@ print.edgeList <- function(x, vnames, ...) {
   
   if (missing(vnames)) {
     adjM <- sapply(x, is.adjMatrix)
-    if (any(adjM)) n_v <- nrow(x[which(adjM)[1]])
+    if (any(adjM)) n_v <- nrow(x[[which(adjM)[1]]])
     else {
       adjL <- sapply(x, is.adjList)
-      if (any(adjL)) n_v <- length(x[which(adjL)[1]])
+      if (any(adjL)) n_v <- length(x[[which(adjL)[1]]])
       else {
         oth <- sapply(x, function(y) is.edgeMatrix(y) || is.eList(y))
         if (any(oth)) n_v <- max(unlist(x[oth]))
@@ -242,7 +247,7 @@ print.edgeList <- function(x, vnames, ...) {
     else if (is.adjMatrix(x[[i]])) {
       if (all(x[[i]]==0)) next
       tmp <- cbind(row(x[[i]])[x[[i]] > 0], col(x[[i]])[x[[i]] > 0])
-      if(!edgeTypes()$directed[whEdge[i]]) tmp = tmp[tmp[,1] < tmp[,2],,drop=FALSE]
+      if(!edgeTypes()$directed[whEdge[i]]) tmp <- tmp[tmp[,1] < tmp[,2],,drop=FALSE]
       
       for (j in seq_len(nrow(tmp))) {
         cat(vnames[tmp[j,1]], edgeSymb[whEdge[i]],
@@ -251,8 +256,8 @@ print.edgeList <- function(x, vnames, ...) {
     }
     else if (is.adjList(x[[i]], checknm=TRUE)) {
       tmp <- cbind(rep(seq_len(n_v), times=lengths(x[[i]][seq_len(n_v)])), unlist(x[[i]]))
-      if (!edgeTypes()$directed[whEdge[i]]) tmp = tmp[tmp[,1] < tmp[,2],,drop=FALSE]
-      
+      if (!edgeTypes()$directed[whEdge[i]]) tmp <- tmp[tmp[,1] < tmp[,2],,drop=FALSE]
+
       for (j in seq_len(nrow(tmp))) {
         cat(vnames[tmp[j,1]], edgeSymb[whEdge[i]],
             vnames[tmp[j,2]], "\n", sep=" ")
@@ -282,27 +287,30 @@ print.edgeList <- function(x, vnames, ...) {
     v <- graph$v
   }
   else if (is.logical(v)) v <- which(v)
-  v = v[v != 0]  # remove 0s
-  if (length(v) > 0 && all(v < 0)) v = setdiff(graph$v, -v)
+  
+  v <- v[v != 0]  # remove 0s
+  if (length(v) > 0 && all(v < 0)) v <- setdiff(graph$v, -v)
   subGraph(graph, v, w, drop=drop, etype=etype, order=order)
 }
 
-##' Take induced vertex subgraph of mixedgraph
+##' Subgraphs for `mixedgraph` objects
 ##' 
-##' @param graph a \code{mixedgraph} object
-##' @param v vertices to keep
+##' Take induced vertex subgraph or bipartite subgraph of mixedgraph
+##' 
+##' @param graph a `mixedgraph` object
+##' @param v vertices to keep (or restore)
 ##' @param w other set of vertices for bipartite subgraph
 ##' @param drop force removed vertices to be dropped from representation in adjacency matrices and lists?
 ##' @param etype edge types to keep (defaults to all)
-##' @param order logical: force graph to follow new order implied by \code{v}?
+##' @param order logical: force graph to follow new order implied by `v`?
 ##' 
-##' @details If \code{order} is \code{TRUE}, then \code{edgeMatrix} and \code{eList} 
-##' formats are converted to \code{edgeList}s (\code{adjMatrix} format is preserved).
+##' @details If `order` is `TRUE`, then `edgeMatrix` and `eList` 
+##' formats are converted to `edgeList`s (`adjMatrix` format is preserved).
 ##' 
-##' Note that \code{order} will have no effect if \code{w} is specified.
+##' Note that `order` will have no effect if `w` is specified.
 ##' 
 ##' 
-##' @export subGraph
+##' @export 
 subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
   
   ## set up vertices to take subgraph over
@@ -329,7 +337,7 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
     }
   }
 
-  #  v = v[v <= graph$n]
+  #  v <- v[v <= graph$n]
 
   ## ensure unwanted edge types are dropped  
   if (!missing(etype)) {
@@ -339,8 +347,8 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
   
   ## deal with cases of no vertices in either v or w
   if (length(v) == 0 && missing(w)) {
-    if (drop) out = mixedgraph(n=0)
-    else out = mixedgraph(n=0, vnames=graph$vnames)
+    if (drop) out <- mixedgraph(n=0)
+    else out <- mixedgraph(n=0, vnames=graph$vnames)
     return(out)
   }
   else if (!missing(w)) {
@@ -351,25 +359,27 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
   # if (drop) v <- sort.int(v)
   if (!all(v %in% graph$v) || (!missing(w) && !all(w %in% graph$v))) stop("Can only keep vertices that are present")
   if (order && missing(w)) {
-    waM <- sapply(graph$edges, is.adjMatrix, checknm=TRUE)
-    waL <- sapply(graph$edges, is.adjList, checknm=TRUE)
-    not_aLaM <- names(graph$edges)[!(waL | waM)]
-    for (i in seq_along(not_aLaM)) {
-      graph$edges[[not_aLaM[i]]] <- adjList(graph$edges[[not_aLaM[i]]],
-                                            n=length(vnames(graph)), 
-                                            dir=edgeTypes()$directed[edgeTypes()$type==not_aLaM[i]])
+    if (nedge(graph) > 0) {
+      waM <- sapply(graph$edges, is.adjMatrix, checknm=TRUE)
+      waL <- sapply(graph$edges, is.adjList, checknm=TRUE)
+      not_aLaM <- names(graph$edges)[!(waL | waM)]
+      for (i in seq_along(not_aLaM)) {
+        graph$edges[[not_aLaM[i]]] <- adjList(graph$edges[[not_aLaM[i]]],
+                                              n=length(vnames(graph)), 
+                                              dir=edgeTypes()$directed[edgeTypes()$type==not_aLaM[i]])
+      }
+      waL <- sapply(graph$edges, is.adjList, checknm=TRUE)
+      # graph <- withAdjMatrix(graph)
+      
+      graph$edges[waM] <- lapply(graph$edges[waM], function(x) `[`(x,v,v,drop=FALSE))
+      graph$edges[waM] <- lapply(graph$edges[waM], function(x) `class<-`(x,"adjMatrix"))
+      
+      graph$edges[waL] <- lapply(graph$edges[waL], function(x) `[`(x,v))
+      graph$edges[waL] <- lapply(graph$edges[waL], function(x) lapply(x, intersect, y=v))
+      graph$edges[waL] <- lapply(graph$edges[waL], function(x) lapply(x, match, v))
+      graph$edges[waL] <- lapply(graph$edges[waL], function(x) `class<-`(x,"adjList"))
     }
-    waL <- sapply(graph$edges, is.adjList, checknm=TRUE)
-    # graph <- withAdjMatrix(graph)
-    
-    graph$edges[waM] <- lapply(graph$edges[waM], function(x) `[`(x,v,v,drop=FALSE))
-    graph$edges[waM] <- lapply(graph$edges[waM], function(x) `class<-`(x,"adjMatrix"))
-    
-    graph$edges[waL] <- lapply(graph$edges[waL], function(x) `[`(x,v))
-    graph$edges[waL] <- lapply(graph$edges[waL], function(x) lapply(x, intersect, y=v))
-    graph$edges[waL] <- lapply(graph$edges[waL], function(x) lapply(x, match, v))
-    graph$edges[waL] <- lapply(graph$edges[waL], function(x) `class<-`(x,"adjList"))
-    
+
     if (length(v) < length(graph$vnames)) graph$vnames[] <- c(graph$vnames[v], graph$vnames[-v])
     else graph$vnames <- graph$vnames[v]
     
@@ -379,7 +389,7 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
   noW <- missing(w)
   
   ## now 
-  edges = lapply(graph$edges, function(x) {
+  edges <- lapply(graph$edges, function(x) {
     if (is.adjMatrix(x, checknm=TRUE)) {
       if (noW) {
         if (drop) {
@@ -388,22 +398,24 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
           return(out)
         }
         else {
-          x[-v,] = x[,-v] = 0L
+          x[-v,] <- x[,-v] <- 0L
           return(x)
         }
       } 
       else {
         if (drop) {
-          x[w,-v] = x[-v,w] = 0L
-          x[-w,v] = x[v,-w] = 0L
+          x[w,-v] <- x[-v,w] <- 0L
+          x[-w,v] <- x[v,-w] <- 0L
+          x[-c(v,w),-c(v,w)] <- 0L
           x <- x[vw,vw,drop=FALSE]  # note a different 'drop' argument!
           # out <- x[c(v,w),c(v,w),drop=FALSE]  
           class(x) <- "adjMatrix"
           return(x)
         }
         else {
-          x[w,-v] = x[-v,w] = 0L
-          x[-w,v] = x[v,-w] = 0L
+          x[w,-v] <- x[-v,w] <- 0L
+          x[-w,v] <- x[v,-w] <- 0L
+          x[-c(v,w),-c(v,w)] <- 0L
           return(x)
         }
       }
@@ -450,7 +462,8 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
         x[vw] <- lapply(x[vw], intersect, y=c(v,w))
         x[v_w] <- lapply(x[v_w], intersect, y=w)
         x[w_v] <- lapply(x[w_v], intersect, y=v)
-        
+        x[-c(v,w)] <- list(integer(0))
+
         if (drop) {
           x <- x[vw]
         }
@@ -491,20 +504,41 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
   class(edges) <- "edgeList"
   
   if (noW) {
-    if (drop) out = list(v=seq_along(v), edges=edges, vnames=graph$vnames[v])
-    else out = list(v=v, edges=edges, vnames=graph$vnames)
+    if (drop) out <- list(v=seq_along(v), edges=edges, vnames=graph$vnames[v])
+    else out <- list(v=v, edges=edges, vnames=graph$vnames)
   }
   else {
-    if (drop) out = list(v=seq_along(vw), edges=edges, vnames=graph$vnames[vw])
-    else out = list(v=vw, edges=edges, vnames=graph$vnames)
+    if (drop) out <- list(v=seq_along(vw), edges=edges, vnames=graph$vnames[vw])
+    else out <- list(v=vw, edges=edges, vnames=graph$vnames)
   }
-  class(out) = "mixedgraph"
+  class(out) <- "mixedgraph"
   out
+}
+
+##' @describeIn subGraph Add back in vertices removed by taking a subgraph
+##' @details
+##' `restore_nodes` will add back in nodes whose names are still present, but
+##' which were removed by a `subGraph` command.
+##' 
+##' @export
+restore_nodes <- function (graph, v) {
+  n <- length(graph$vnames)
+  
+  if (!missing(v)) {
+    if (any(v > n) || any(v < 1))  stop("Invalid vertex values given")
+    v <- sort.int(union(v, graph$v))
+  }
+  else v <- seq_len(n)
+  
+  ## insert vertices back in
+  graph$v <- v
+  
+  return(graph)
 }
 
 ##' Force graphs to have vertices 1,\dots,k
 ##'
-##' @param graph \code{mixedgraph} object
+##' @param graph `mixedgraph` object
 ##' 
 ##' Designed to make comparison of graphs easier
 ##' 
@@ -517,7 +551,7 @@ standardizeVertices <- function(graph) {
 
   if (isTRUE(all.equal(v, seq_len(k)))) return(graph)
   
-  edges = lapply(graph$edges, function(x) {
+  edges <- lapply(graph$edges, function(x) {
     if (is.adjMatrix(x)) {
       return(x[v,v,drop=FALSE])
     } 
@@ -551,7 +585,7 @@ standardizeVertices <- function(graph) {
 
 ##' Write graphs in standard format
 ##' 
-##' @param graph \code{mixedgraph} object
+##' @param graph `mixedgraph` object
 ##' 
 ##' Designed to make comparison of graphs easier
 ##' 
@@ -560,7 +594,7 @@ standardizeEdges <- function(graph) {
 
   kp <- rep(TRUE, length(graph$edges))
   for (i in seq_along(graph$edges)) {
-    if (nedge(graph, names(graph$edges)[i]) == 0) kp[i] = FALSE
+    if (nedge(graph, names(graph$edges)[i]) == 0) kp[i] <- FALSE
   }
   graph$edges <- graph$edges[kp]
   
@@ -582,16 +616,16 @@ standardizeEdges <- function(graph) {
     
     ## order edges by first vertex
     if (edgeTypes()$directed[et2[i]]) {
-      ord = order(sapply(graph$edges[[i]], function(x) k*x[1]+x[2]))
+      ord <- order(sapply(graph$edges[[i]], function(x) k*x[1]+x[2]))
     }
     else{
       ## make smallest vertex first for undirected edges
-      wh = sapply(graph$edges[[i]], function(x) x[1] > x[2])
-      graph$edges[[i]][wh] = lapply(graph$edges[[i]][wh], rev)
-      ord = order(sapply(graph$edges[[i]], function(x) k*x[1]+x[2]))
+      wh <- sapply(graph$edges[[i]], function(x) x[1] > x[2])
+      graph$edges[[i]][wh] <- lapply(graph$edges[[i]][wh], rev)
+      ord <- order(sapply(graph$edges[[i]], function(x) k*x[1]+x[2]))
     }
     
-    graph$edges[[i]] = graph$edges[[i]][ord]
+    graph$edges[[i]] <- graph$edges[[i]][ord]
     class(graph$edges[[i]]) <- "eList"
   }
   class(graph$edges) <- "edgeList"
@@ -601,7 +635,7 @@ standardizeEdges <- function(graph) {
 
 ##' Test graphs are equal
 ##' 
-##' @param g1,g2 two \code{mixedgraph} objects
+##' @param g1,g2 two `mixedgraph` objects
 ##' 
 ##' NOT TESTED
 ##' @export graph_equal
@@ -618,18 +652,18 @@ graph_equal <- function(g1, g2) {
 ##' @param char string of inputs given by vertex names separated by edges
 ##' @param ... other strings of further edges
 ##' @param mode format for edges in graph
-##' @param useMatrices deprecated argument: in \code{mixedgraph} representation, should the output
+##' @param useMatrices deprecated argument: in `mixedgraph` representation, should the output
 ##' use adjacency matrices?
-##' @param format type of graph format to use, options are \code{mixedgraph} 
-##' (the default), \code{graphNEL} (and \code{graphAM}, \code{graphBAM}), 
-##' \code{igraph}, \code{ggm}, \code{bn}, \code{PAG}.
+##' @param format type of graph format to use, options are `mixedgraph` 
+##' (the default), `graphNEL` (and `graphAM`, `graphBAM`), 
+##' `igraph`, `ggm`, `bn`, `PAG`.
 ##' 
-##' @details Symbols \code{-<>=*|:} are assumed to be part of an edge, so
+##' @details Symbols `-<>=*|:` are assumed to be part of an edge, so
 ##' cannot be used in node names using this function.  Note that if we want
-##' an edge with an \code{o} on the end (e.g. \code{o->}) then we must 
-##' leave a space between the \code{o} and the variable name.
+##' an edge with an `o` on the end (e.g. `o->`) then we must 
+##' leave a space between the `o` and the variable name.
 ##' 
-##' The \code{edgeCr()} creates just an \code{edgeList} object, and is helpful
+##' The `edgeCr()` creates just an `edgeList` object, and is helpful
 ##' for adding edges to existing graphs.
 ##' 
 ##' @examples
@@ -698,12 +732,12 @@ graphCr <- function(char, ..., mode="adjList", useMatrices=FALSE, format="mixedg
     v0 <- as.integer(vs_tmp[2*ncol(em)+seq_along(unattached)])
     vnames <- levels(vs_tmp)
   }
-  else vnames = NULL
+  else vnames <- NULL
   
   tmp <- v1[etype > nedgetypes]
   v1[etype > nedgetypes] <- v2[etype > nedgetypes]
   v2[etype > nedgetypes] <- tmp
-  etype = mask[etype]
+  etype <- mask[etype]
   
   n <- max(c(v1, v2, v0))
   
@@ -716,8 +750,8 @@ graphCr <- function(char, ..., mode="adjList", useMatrices=FALSE, format="mixedg
     names(edges) <- unique(etys[etype])
     
     for (i in seq_along(v2)) {
-      edges[[etys[etype[i]]]][[v1[i]]] = c(edges[[etys[etype[i]]]][[v1[i]]], v2[i])
-      if (!edgeTypes()$directed[etype[i]]) edges[[etys[etype[i]]]][[v2[i]]] = c(edges[[etys[etype[i]]]][[v2[i]]], v1[i])
+      edges[[etys[etype[i]]]][[v1[i]]] <- c(edges[[etys[etype[i]]]][[v1[i]]], v2[i])
+      if (!edgeTypes()$directed[etype[i]]) edges[[etys[etype[i]]]][[v2[i]]] <- c(edges[[etys[etype[i]]]][[v2[i]]], v1[i])
     }
     edges <- lapply(edges, function(x) {
       class(x) <- "adjList"
@@ -730,7 +764,7 @@ graphCr <- function(char, ..., mode="adjList", useMatrices=FALSE, format="mixedg
     edges <- list()
     
     for (i in seq_along(v1)) {
-      edges[[etys[etype[i]]]] = c(edges[[etys[etype[i]]]], list(c(v1[i], v2[i])))
+      edges[[etys[etype[i]]]] <- c(edges[[etys[etype[i]]]], list(c(v1[i], v2[i])))
     }
     edges <- lapply(edges, function(x) {
       class(x) <- "eList"
@@ -743,8 +777,8 @@ graphCr <- function(char, ..., mode="adjList", useMatrices=FALSE, format="mixedg
     names(edges) <- unique(etys[etype])
     
     for (i in seq_along(v1)) {
-      edges[[etys[etype[i]]]][v1[i], v2[i]] = 1
-      if (!edgeTypes()$directed[etype[i]]) edges[[etys[etype[i]]]][v2[i], v1[i]] = 1
+      edges[[etys[etype[i]]]][v1[i], v2[i]] <- 1
+      if (!edgeTypes()$directed[etype[i]]) edges[[etys[etype[i]]]][v2[i], v1[i]] <- 1
     }
     edges <- lapply(edges, function(x) {
       class(x) <- c("adjMatrix", class(x))

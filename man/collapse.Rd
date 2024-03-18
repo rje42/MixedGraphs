@@ -10,6 +10,7 @@ collapse(
   v2,
   dir = 1,
   matrix = FALSE,
+  nv,
   sparse = FALSE,
   sort = 1,
   rev = FALSE,
@@ -25,6 +26,8 @@ collapse(
 
 \item{matrix}{logical indicating whether to force the return of an adjacency matrix}
 
+\item{nv}{number of vertices for \code{adjMatrix}}
+
 \item{sparse}{should we use sparse matrices if available?}
 
 \item{sort}{1=unique but not sorted, 2=unique and sorted, 0=neither}
@@ -37,10 +40,12 @@ collapse(
 Collapse multiple edge types to a single list or matrix
 }
 \details{
-returns an edgeMatrix or adjacency matrix for possibly multiple edge types.
+returns an \code{edgeMatrix} or \code{adjMatrix} for possibly multiple edge types.
 If any of the edges are specified as an adjacency matrix, then the output will also
-be an adjacency matrix, and similarly for an edgeMatrix. 
+be an adjacency matrix, and similarly for an \code{edgeMatrix}.
 
-If \code{v1} or \code{v2} are specified then the first and 
+If \code{nv} is not supplied, then it is inferred from the input.
+
+If \code{v1} or \code{v2} are specified then the first and
 second vertices must belong to these respective sets.
 }

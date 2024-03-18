@@ -2,7 +2,7 @@
 % Please edit documentation in R/m_sep.R
 \name{moralize}
 \alias{moralize}
-\title{Moralize}
+\title{Moralize a mixed graph}
 \usage{
 moralize(graph, C, check = TRUE)
 }
@@ -14,5 +14,10 @@ moralize(graph, C, check = TRUE)
 \item{check}{logical: should we check graph is a summary graph?}
 }
 \description{
-Moralize
+Moralizes a mixed graph, possibly conditional on a subset of vertices.
+}
+\details{
+This works for any summary graph, though currently needs the
+graph to be the original one (and not any subgraph) in order to be
+guaranteed to run correctly.
 }

@@ -25,17 +25,17 @@ edgeCr(char, mode = "eList")
 \item{useMatrices}{deprecated argument: in \code{mixedgraph} representation, should the output
 use adjacency matrices?}
 
-\item{format}{type of graph format to use, options are \code{mixedgraph} 
-(the default), \code{graphNEL} (and \code{graphAM}, \code{graphBAM}), 
+\item{format}{type of graph format to use, options are \code{mixedgraph}
+(the default), \code{graphNEL} (and \code{graphAM}, \code{graphBAM}),
 \code{igraph}, \code{ggm}, \code{bn}, \code{PAG}.}
 }
 \description{
 Convenience function for quickly constructing graphs with character input
 }
 \details{
-Symbols \code{-<>=*|:} are assumed to be part of an edge, so
+Symbols \verb{-<>=*|:} are assumed to be part of an edge, so
 cannot be used in node names using this function.  Note that if we want
-an edge with an \code{o} on the end (e.g. \code{o->}) then we must 
+an edge with an \code{o} on the end (e.g. \verb{o->}) then we must
 leave a space between the \code{o} and the variable name.
 
 The \code{edgeCr()} creates just an \code{edgeList} object, and is helpful

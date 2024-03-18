@@ -11,7 +11,7 @@ convert(graph, format = "mixedgraph", cur_format, ...)
 
 \item{format}{character string giving new format to convert to}
 
-\item{cur_format}{character string of current format; can be deduced 
+\item{cur_format}{character string of current format; can be deduced
 from the object in many cases}
 
 \item{...}{other arguments}
@@ -21,10 +21,10 @@ Convert graph to format associated with specific package
 }
 \details{
 Possible formats
-are 
+are
 \itemize{
 \item \code{\link{mixedgraph}}
-\item \code{ggm}, an adjacency matrix as specified in the \code{ggm} package; 
+\item \code{ggm}, an adjacency matrix as specified in the \code{ggm} package;
 \item \code{graphNEL}, \code{graphAM}, \code{graphBAM} from the \code{graph} package;
 \item \code{igraph};
 \item \code{PAG}: that is, the output of \code{pc()} or \code{fci()} functions in the \code{pcalg} package;
@@ -48,7 +48,7 @@ Implemented natively thus far:
 \item graphNEL, graphAM <-> bn (using functions in the \code{bnlearn} package)
 }
 
-\code{ggm} entries must be specified by \code{cur_format = "ggm"}.  
-\code{PAG} objects are those whose class inherits from \code{gAlgo}, 
+\code{ggm} entries must be specified by \code{cur_format = "ggm"}.
+\code{PAG} objects are those whose class inherits from \code{gAlgo},
 or an adjacency matrix if \code{cur_format = "PAG"} is specified.
 }

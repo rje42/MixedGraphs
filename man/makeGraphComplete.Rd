@@ -7,6 +7,7 @@
 \alias{makeGraphCycle}
 \alias{makeGraphStar}
 \alias{makeGraphGrid}
+\alias{makeGraphBipartite}
 \title{Graph Constructor Functions}
 \usage{
 makeGraphComplete(n, type = "undirected")
@@ -20,6 +21,8 @@ makeGraphCycle(n, type = "undirected")
 makeGraphStar(n, type = "undirected", out = FALSE)
 
 makeGraphGrid(n, m = n, type = "undirected")
+
+makeGraphBipartite(n, m, type = "undirected")
 }
 \arguments{
 \item{n}{number of vertices (or rows for a grid)}
@@ -28,14 +31,14 @@ makeGraphGrid(n, m = n, type = "undirected")
 
 \item{out}{should edges be directed out from the centre?}
 
-\item{m}{number of columns}
+\item{m}{number of columns or size of second set}
 }
 \description{
 Graph Constructor Functions
 }
 \details{
-Provides some construction 
-functions for common graphs: complete graphs, 
+Provides some construction
+functions for common graphs: complete graphs,
 chains, cycles and stars.
 }
 \section{Functions}{
@@ -49,5 +52,7 @@ chains, cycles and stars.
 \item \code{makeGraphStar()}: star shaped graph
 
 \item \code{makeGraphGrid()}: grid of vertices
+
+\item \code{makeGraphBipartite()}: bipartite graph
 
 }}

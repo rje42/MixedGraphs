@@ -15,12 +15,12 @@ mb(graph, v, A, check = TRUE, sort = 1)
 
 \item{check}{logical: check \code{A} is ancestral?}
 
-\item{sort}{integer:1 for unique but unsorted, 2 for 
+\item{sort}{integer:1 for unique but unsorted, 2 for
 sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 then output will always be unique and sorted.}
 }
 \description{
-Find the Markov blanket for a vertex in an 
+Find the Markov blanket for a vertex in an
 ancestral set
 }
 \details{

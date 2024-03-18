@@ -22,12 +22,15 @@ Remove edges adjacent to set of vertices
 }
 \details{
 If no edge type is specified, then all edges are removed.
-If \code{dir=1}, then directed edges out of \code{A} are removed, 
+If \code{dir=1}, then directed edges out of \code{A} are removed,
 but ones into \code{A} are preserved; for \code{dir=-1} the reverse,
 and for \code{dir=0} (the default), direction is irrelevant.
 If a second set \code{B} is specified, then all edges between \code{A}
 and \code{B} are removed.
 
-Note that specifying \code{internal=TRUE} and providing a set \code{B} will 
+Note that specifying \code{internal=TRUE} and providing a set \code{B} will
+result in an error.
+
+Note that specifying \code{internal=TRUE} and providing a set \code{B} will
 result in an error.
 }

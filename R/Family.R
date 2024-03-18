@@ -3,16 +3,16 @@
 ##' The usual familial relations between vertices in
 ##' mixed graphs.
 ##' 
-##' @param graph \code{mixedgraph} object
+##' @param graph `mixedgraph` object
 ##' @param v collection of vertices
 ##' @param sort integer:1 for unique but unsorted, 2 for 
 ##' sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 ##' then output will always be unique and sorted.
 ##' 
-##' @details \code{pa}, \code{ch}, \code{sp} and \code{nb} find the 
-##' parents, children, spouses and neighbours of \code{v} respectively.
-##' \code{anc}, \code{dec}, \code{ant}, \code{dis}, \code{nhd} finds the ancestors
-##' descendants, anterior, district and neighbourhood of \code{v} respectively.
+##' @details `pa`, `ch`, `sp` and `nb` find the 
+##' parents, children, spouses and neighbours of `v` respectively.
+##' `anc`, `dec`, `ant`, `dis`, `nhd` finds the ancestors
+##' descendants, anterior, district and neighbourhood of `v` respectively.
 ##' 
 ##' @name family
 NULL
@@ -110,14 +110,14 @@ dis <- function(graph, v, sort=1, fast=FALSE) {
 ##' mixed graphs.
 ##' 
 ##' @aliases neighbourhoods, un
-##' @param graph \code{mixedgraph} object
+##' @param graph `mixedgraph` object
 ##' @param ... other arguments, not currently used
 ##' 
-##' @details \code{districts} and \code{neighbourhoods} find the
-##' bidirected-connected and undirected-connected components of \code{graph}.
-##' \code{un} finds the undirected part of \code{graph}.
+##' @details `districts` and `neighbourhoods` find the
+##' bidirected-connected and undirected-connected components of `graph`.
+##' `un` finds the undirected part of `graph`.
 ##' 
-##' \code{cliques} uses the Bron-Kirbosch algorithm to find 
+##' `cliques` uses the Bron-Kirbosch algorithm to find 
 ##' maximal fully-connected subsets.
 ##' 
 ##' @export
@@ -214,15 +214,15 @@ BK <- function(R, P, X, nbs, max_len) {
 ##' Find the Markov blanket for a vertex in an 
 ##' ancestral set
 ##' 
-##' @param graph \code{mixedgraph} object
-##' @param v a vertex, childless in \code{A}
+##' @param graph `mixedgraph` object
+##' @param v a vertex, childless in `A`
 ##' @param A an ancestral collection of vertices
-##' @param check logical: check \code{A} is ancestral?
+##' @param check logical: check `A` is ancestral?
 ##' @param sort integer:1 for unique but unsorted, 2 for 
 ##' sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 ##' then output will always be unique and sorted.
 ##' 
-##' @details Finds the Markov blanket of \code{v} in \code{A}.
+##' @details Finds the Markov blanket of `v` in `A`.
 ##' 
 ##' @export mb
 mb <- function(graph, v, A, check=TRUE, sort=1) {
@@ -258,13 +258,13 @@ mb <- function(graph, v, A, check=TRUE, sort=1) {
 
 ##' Find barren, sterile, orphaned vertices
 ##' 
-##' @param graph an object of class \code{mixedgraph}
-##' @param v set of vertices of \code{graph}
+##' @param graph an object of class `mixedgraph`
+##' @param v set of vertices of `graph`
 ##' 
-##' @details Barren vertices (within \code{v}) are those
-##' that have no proper descendants also within \code{v}.
-##' Sterile (orphaned) vertices in \code{v} have no 
-##' children (parents) also within \code{v}.
+##' @details Barren vertices (within `v`) are those
+##' that have no proper descendants also within `v`.
+##' Sterile (orphaned) vertices in `v` have no 
+##' children (parents) also within `v`.
 ##' 
 ##' 
 ##' @export barren
@@ -313,10 +313,10 @@ sterile <- function(graph, v=graph$v){
 ##' 
 ##' Find the Claudius of a (presumably) bidirected-connected set.
 ##' 
-##' @param graph a \code{mixedgraph} object
+##' @param graph a `mixedgraph` object
 ##' @param v set of vertices to consider
 ##' 
-##' @details Drops strict spouses of \code{v} and any of their 
+##' @details Drops strict spouses of `v` and any of their 
 ##' descendants.
 ##' 
 ##' @examples 
@@ -335,7 +335,7 @@ claudius <- function(graph, v) {
 ##' 
 ##' Find undirected skeleton of a mixed graph
 ##' 
-##' @param graph a \code{mixedgraph} object
+##' @param graph a `mixedgraph` object
 ##' 
 ##' @export skeleton
 skeleton <- function(graph) {
@@ -349,7 +349,7 @@ skeleton <- function(graph) {
 
 ##' Find ancestral sets of a graph.
 ##'
-##' @param graph object of class \code{mixedgraph}, should be a summary graph
+##' @param graph object of class `mixedgraph`, should be a summary graph
 ##' @param topOrder optional topological order of vertices
 ##' @param sort integer:1 for unique but unsorted, 2 for 
 ##' sorted.
@@ -360,9 +360,9 @@ skeleton <- function(graph) {
 ##' 3. Induction: (i) Assume we have a list L of all ancestral sets involving Xi-1 in the order.
 ##' (ii) If an ancestral set S in L contains all parents of Xi, Xi + S is also ancestral.
 ##' 
-##' The function \code{anSets2} proceeds by adding a new barren vertex to the 
+##' The function `anSets2` proceeds by adding a new barren vertex to the 
 ##' set, which is not a descendant of any existing vertices.  It consequently 
-##' provides the option \code{maxbarren} to cap this at a fixed value.
+##' provides the option `maxbarren` to cap this at a fixed value.
 ##' 
 ##' @author Ilya Shpitser
 ##' 
@@ -472,7 +472,7 @@ anSets2 <- function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
 ##' 
 ##' Return list of barren subsets up to specified size
 ##' 
-##' @param graph object of class \code{mixedgraph}
+##' @param graph object of class `mixedgraph`
 ##' @param topOrder optionally, a topological order
 ##' @param max_size integer giving maximum size to consider
 ##' @param same_dist logical: should barren sets be in the same district?
@@ -480,7 +480,7 @@ anSets2 <- function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
 ##' sorted.
 ##' @param return_anc_sets logical: return ancestral sets for each vertex as an attribute?
 ##' 
-##' @details Uses \code{clique} algorithm on a suitable undirected graph.
+##' @details Uses `clique` algorithm on a suitable undirected graph.
 ##' 
 ##' \strong{Warning:} Doesn't work for cyclic graphs.
 ##' 
