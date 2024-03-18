@@ -2,7 +2,7 @@
 ##' 
 ##' Some example graphs for illustration.
 ##' 
-##' @format These are all \code{mixedgraph} objects.
+##' @format These are all `mixedgraph` objects.
 ##' 
 "gr1"
 

@@ -20,8 +20,8 @@ isTopological(graph, v)
 Looks for topological ordering of vertices with respect to directed edges.
 }
 \details{
-\code{isTopological} tests for an ordering being 
-topological.  If the graph is cyclic, it returns \code{NA}, with or 
+\code{isTopological} tests for an ordering being
+topological.  If the graph is cyclic, it returns \code{NA}, with or
 without a warning depending on the value of \code{warn}.
 }
 \section{Functions}{

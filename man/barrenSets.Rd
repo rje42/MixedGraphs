@@ -22,7 +22,7 @@ barrenSets(
 
 \item{same_dist}{logical: should barren sets be in the same district?}
 
-\item{sort}{integer:1 for unique but unsorted, 2 for 
+\item{sort}{integer:1 for unique but unsorted, 2 for
 sorted.}
 
 \item{return_anc_sets}{logical: return ancestral sets for each vertex as an attribute?}

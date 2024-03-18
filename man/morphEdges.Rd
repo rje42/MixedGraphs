@@ -4,7 +4,7 @@
 \alias{morphEdges}
 \title{Transform edges to different type}
 \usage{
-morphEdges(graph, from, to, topOrd)
+morphEdges(graph, from, to, A, B, topOrd)
 }
 \arguments{
 \item{graph}{\code{mixedgraph} object}
@@ -13,11 +13,23 @@ morphEdges(graph, from, to, topOrd)
 
 \item{to}{character string of new edge type}
 
+\item{A}{optional subset within which to restrict changes}
+
+\item{B}{optional further subset to change edges from \code{A}}
+
 \item{topOrd}{optional topological order for directing edges}
 }
 \description{
 Transform edges to different type
 }
 \details{
-\code{to} must be a single entry
+Calling this function with neither \code{A} nor \code{B} simply changes all
+edges (of type \code{from} if specified) to those of type \code{to} (which must be a
+single entry).  If \code{A} is specified, then the change is only made to edges
+within the set \code{A}.  If a set \code{B} is also specified, then the change is
+only made to edges between the sets \code{A} and \code{B}.
+
+If \code{to} is a directed edge then this is done according to the topological
+order \code{topOrd} if supplied, otherwise the existing ordering of the vertices
+is used.
 }

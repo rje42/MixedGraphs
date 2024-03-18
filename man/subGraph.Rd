@@ -3,16 +3,19 @@
 \name{[.mixedgraph}
 \alias{[.mixedgraph}
 \alias{subGraph}
+\alias{restore_nodes}
 \title{Subgraphs for \code{mixedgraph} objects}
 \usage{
 \method{[}{mixedgraph}(graph, v, w, ..., drop = FALSE, etype, order = FALSE)
 
 subGraph(graph, v, w, drop = FALSE, etype, order = FALSE)
+
+restore_nodes(graph, v)
 }
 \arguments{
 \item{graph}{a \code{mixedgraph} object}
 
-\item{v}{vertices to keep}
+\item{v}{vertices to keep (or restore)}
 
 \item{w}{other set of vertices for bipartite subgraph}
 
@@ -28,13 +31,18 @@ subGraph(graph, v, w, drop = FALSE, etype, order = FALSE)
 Take induced vertex subgraph or bipartite subgraph of mixedgraph
 }
 \details{
-If \code{order} is \code{TRUE}, then \code{edgeMatrix} and \code{eList} 
+If \code{order} is \code{TRUE}, then \code{edgeMatrix} and \code{eList}
 formats are converted to \code{edgeList}s (\code{adjMatrix} format is preserved).
 
 Note that \code{order} will have no effect if \code{w} is specified.
+
+\code{restore_nodes} will add back in nodes whose names are still present, but
+which were removed by a \code{subGraph} command.
 }
 \section{Functions}{
 \itemize{
 \item \code{[}: bracket notation for subgraphs
+
+\item \code{restore_nodes()}: Add back in vertices removed by taking a subgraph
 
 }}

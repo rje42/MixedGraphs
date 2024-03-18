@@ -16,7 +16,7 @@ Returns an \code{eList} object from an adjacency matrix
 or edge matrix object.
 }
 \details{
-The \code{directed} argument is important; if omitted, 
-then some edges may be recorded only once, even though they are present 
+The \code{directed} argument is important; if omitted,
+then some edges may be recorded only once, even though they are present
 in both directions.
 }

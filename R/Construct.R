@@ -86,7 +86,7 @@ makeGraphStar = function(n, type = "undirected", out=FALSE) {
 }
 
 ##' @describeIn makeGraphComplete grid of vertices
-##' @param m number of columns
+##' @param m number of columns or size of second set
 ##' @export 
 makeGraphGrid = function(n, m=n, type="undirected") {
   
@@ -107,4 +107,59 @@ makeGraphGrid = function(n, m=n, type="undirected") {
   vnames = paste0(paste0("x", rep_len(seq_len(n), m*n)), rep(seq_len(m), each=n))
     
   mixedgraph(n*m, edges=edges, vnames=vnames)
+}
+
+##' @describeIn makeGraphComplete bipartite graph
+##' @export
+makeGraphBipartite <- function (n, m, type="undirected") {
+  out <- makeGraphComplete(n+m, type=type)
+  out <- mutilate(out, seq_len(n), internal=TRUE)
+  out <- mutilate(out, n+seq_len(m), internal=TRUE)
+  
+  return(out)
+}
+
+##' Map a graph onto an induced subgraph
+##' 
+##' @param graph an object of class `mixedgraph`
+##' @param ord an ordering to use for the existing vertices
+##' @param vnames a character vector of variable names
+##' 
+##' @details
+##' Either `ord` or `vnames` must be specified, and if they are both given then
+##' they must have the same length.  `vnames` must contain all the variable names
+##' used in `graph`.  
+##' 
+##' `ord` places the vertices in the order provided.  For example, if the 
+##' supplied vector is `c(2, 4, 1, 3)` for a graph with vertices `"x1"` and 
+##' `"x2"`, then the output graph will have the vertex order `"x2", "x_4", "x_1", "x_3"`.
+##' 
+##' @export
+to_subgraph <- function (graph, ord, vnames) {
+
+  ## think about what happens if graph has no vertices
+  if (missing(ord)) { 
+    if (missing(vnames)) stop("Must provide either an ordering or variable names")
+    n <- length(vnames)
+    loc <- match(graph$vnames[graph$v], vnames)
+    if (any(is.na(loc))) stop("Not all names in supplied graph matched")
+    match(vnames, graph$vnames, 0L)
+  }
+  else {
+    if (missing(vnames)) {
+      n <- length(ord)
+      vnames <- character(n)
+      wh_v <- match(graph$v, ord)
+      vnames[wh_v] <- graph$vnames[graph$v]
+      cands <- paste0("x", seq_len(n))
+      cands <- cands[-match(graph$vnames[graph$v], cands, nomatch = 0L)]
+      vnames[-wh_v] <- cands[seq_len(n-nv(graph))]
+    }
+  }
+  
+  out <- addNodes(graph, n-nv(graph))
+  out <- out[ord, order=TRUE]
+  out$vnames <- vnames
+  
+  return(out)
 }

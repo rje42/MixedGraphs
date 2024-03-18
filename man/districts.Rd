@@ -23,7 +23,7 @@ cliques(graph, sort = 1, max_len)
 
 \item{sort}{should output be sorted?  sort=3 will also sort cliques}
 
-\item{undirected_only}{logical: should vertices not adjacent to an 
+\item{undirected_only}{logical: should vertices not adjacent to an
 undirected edge be ignored?}
 
 \item{max_len}{maximum size of clique to consider}
@@ -37,7 +37,7 @@ mixed graphs.
 bidirected-connected and undirected-connected components of \code{graph}.
 \code{un} finds the undirected part of \code{graph}.
 
-\code{cliques} uses the Bron-Kirbosch algorithm to find 
+\code{cliques} uses the Bron-Kirbosch algorithm to find
 maximal fully-connected subsets.
 }
 \section{Functions}{

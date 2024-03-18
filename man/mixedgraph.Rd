@@ -21,7 +21,7 @@ mixedgraph(n, v = seq_len(n), edges = list(), vnames, vtype)
 Construct a mixed graph
 }
 \details{
-Currently row/column names on adjacency matrices are 
+Currently row/column names on adjacency matrices are
 dropped.  Might be useful to change this functionality in the future
 if they match (or can replace) vertex names.
 }

@@ -19,13 +19,13 @@ groups(graph, etype, sort = 1)
 
 \item{etype}{edge types to group by (defaults to all)}
 
-\item{inclusive}{logical indicating whether \code{v} should be 
+\item{inclusive}{logical indicating whether \code{v} should be
 included in output group.}
 
-\item{dir}{integer(s) indicating if direction should be 
+\item{dir}{integer(s) indicating if direction should be
 considered: 0 = undirected, 1 = from row to column; -1 = from column to row.}
 
-\item{sort}{integer: 1 for unique but unsorted, 2 for 
+\item{sort}{integer: 1 for unique but unsorted, 2 for
 sorted (0 for possibly repeated and unsorted).}
 
 \item{force}{logical - should invalid \code{v} be ignored?}
@@ -33,22 +33,22 @@ sorted (0 for possibly repeated and unsorted).}
 \item{edges}{an \code{adjMatrix} or \code{adjList}}
 }
 \description{
-Generic functions for finding groups based on edge adjacencies, 
+Generic functions for finding groups based on edge adjacencies,
 e.g. neighbourhoods, districts or ancestral sets.
 }
 \details{
 \code{grp()} finds all vertices that can be reached from
-vertices in \code{v} by edges of the specified type, and in the 
+vertices in \code{v} by edges of the specified type, and in the
 specified direction.
-For example, we can find all the ancestors of \code{v} by using 
-\code{type="directed"} and \code{dir=-1} (i.e.\ go back up the edges).
+For example, we can find all the ancestors of \code{v} by using
+\code{type="directed"} and \code{dir=-1} (i.e. go back up the edges).
 
-\code{groups()} finds equivalence classes in a graph based on being 
-connected by such a path (i.e.\ the connected components with respect 
+\code{groups()} finds equivalence classes in a graph based on being
+connected by such a path (i.e. the connected components with respect
 to the specified edge types).
 
-If any \code{v} is 
-not a vertex of \code{graph}, an error is returned, unless 
+If any \code{v} is
+not a vertex of \code{graph}, an error is returned, unless
 \code{force=TRUE}.
 
 \code{grp2} is a faster version of the function for a single \code{adjMatrix}
@@ -59,10 +59,8 @@ or \code{adjList}.
 \item \code{grp2()}: Faster routine for single \code{adjMatrix} or \code{adjList}
 
 \item \code{groups()}: find connected components
-repeat dir() vector with warning if necessary
 
 }}
 \seealso{
 \code{\link{adj}} for single edge adjacencies.
-repeat dir() vector with warning if necessary
 }

@@ -12,3 +12,4 @@ Rprof.out
 .DS_Store
 scratch
 .*
+src/*o

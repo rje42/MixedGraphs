@@ -20,8 +20,8 @@ is.SG(graph)
 \item{graph}{\code{mixedgraph} object
 
 \code{is.UG}, \code{is.DAG}, \code{is.ADMG}, \code{is.SG} respectively
-test whether a graph is an undirected graph, directed acyclic graph (DAG), 
-acyclic directed mixed graph (ADMG) or summary graph.  These have since 
+test whether a graph is an undirected graph, directed acyclic graph (DAG),
+acyclic directed mixed graph (ADMG) or summary graph.  These have since
 been replaced by \code{is_UG} etc.}
 }
 \description{
