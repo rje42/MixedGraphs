@@ -13,7 +13,7 @@ graphCr(
   format = "mixedgraph"
 )
 
-edgeCr(char, mode = "eList")
+edgeCr(char, mode = "eList", vnames)
 }
 \arguments{
 \item{char}{string of inputs given by vertex names separated by edges}
@@ -28,6 +28,8 @@ use adjacency matrices?}
 \item{format}{type of graph format to use, options are \code{mixedgraph}
 (the default), \code{graphNEL} (and \code{graphAM}, \code{graphBAM}),
 \code{igraph}, \code{ggm}, \code{bn}, \code{PAG}.}
+
+\item{vnames}{list of variable names for use in \code{edgeCr}}
 }
 \description{
 Convenience function for quickly constructing graphs with character input
@@ -39,7 +41,8 @@ an edge with an \code{o} on the end (e.g. \verb{o->}) then we must
 leave a space between the \code{o} and the variable name.
 
 The \code{edgeCr()} creates just an \code{edgeList} object, and is helpful
-for adding edges to existing graphs.
+for adding edges to existing graphs.  The \code{vnames} argument can be used if
+the graph has non-standard vertex labels.
 }
 \section{Functions}{
 \itemize{

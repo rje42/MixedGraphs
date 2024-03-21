@@ -35,7 +35,7 @@ adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
     for (i in seq_along(edges)) {
       out[i,edges[[i]]] <- 1
     }
-    if (!directed && !isSymmetric(out)) stop("Error in input")
+    # if (!directed && !isSymmetric(out)) stop("Error in input")
     
     return(out)
   }
