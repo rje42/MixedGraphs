@@ -626,3 +626,22 @@ pathConnected <- function(graph, v, D, etype, dir, verbose=FALSE) {
   
   return(intersect(seen, D))
 }
+
+##' Check if a subgraph is complete
+##' 
+##' @param graph an object of class `mixedgraph`
+##' @param v set of vertices to test completeness of
+##' 
+##' @export
+is_complete <- function (graph, v) {
+  if (missing(v)) v <- graph$v
+  nv <- length(v)
+  if (nv <= 1) return(TRUE)
+  
+  out <- collapse(graph$edges, v, v, dir=0, matrix=TRUE)
+  diag(out) <- 0
+  
+  if (sum(out) == nv*(nv-1)) return(TRUE)
+  else return(FALSE)
+}
+
