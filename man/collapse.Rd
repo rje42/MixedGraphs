@@ -34,7 +34,7 @@ collapse(
 
 \item{rev}{logical: should directed \code{adjList}s have the direction inverted if \code{dir=-1}?}
 
-\item{double_up}{logical: should edges with \code{dir=0} be repeated in both directions for an edgeMatrix?}
+\item{double_up}{logical: should edges with \code{dir=0} be repeated in both directions for an \code{edgeMatrix}?}
 }
 \description{
 Collapse multiple edge types to a single list or matrix

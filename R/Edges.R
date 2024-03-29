@@ -2,11 +2,11 @@
 ##' 
 ##' @param edges list or matrix giving edges
 ##' @param n total number of vertices, defaults to maximal value
-##' @param directed logical: if TRUE edges are assumed directed
+##' @param directed logical: if `TRUE` edges are assumed directed
 ##' @param sparse logical: use a sparse matrix?
 ##' 
 ##' @export adjMatrix
-adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
+adjMatrix <- function(edges, n, directed=FALSE, sparse=FALSE) {
   if (missing(edges)) {
     if (sparse) {
       out <- Matrix(0L,n,n)
@@ -76,7 +76,7 @@ adjMatrix = function(edges, n, directed=FALSE, sparse=FALSE) {
   class(out) <- c("adjMatrix", class(out))
   # if (!missing(vnames)) dimnames(out) <- list(vnames, vnames)
 
-  out
+  return(out)
 }
 
 ##' Get adjacency list of edges
@@ -165,7 +165,7 @@ adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
   class(out) <- "adjList"
   # if (!missing(vnames)) dimnames(out) <- list(vnames, vnames)
   
-  out
+  return(out)
 }
 
 ##' @describeIn adjList Get reverse directions for edges
@@ -178,7 +178,7 @@ revAdjList <- function(object) {
     out[object[[i]]] <- lapply(out[object[[i]]], function(x) c(x,i))
   }
   class(out) <- "adjList"
-  out
+  return(out)
 }
 
 ##' @describeIn adjList Make adjList symmetric
@@ -190,7 +190,7 @@ symAdjList <- function(object, unq=TRUE) {
   else out <- mapply(c, object, object_r, SIMPLIFY = FALSE)
   
   class(out) <- "adjList"
-  out
+  return(out)
 }
 
 ##' Get edges from adjacency matrix or list
@@ -245,7 +245,7 @@ edgeMatrix <- function(edges, directed=FALSE, double=FALSE) {
       }
     }
   }
-  else if (is.eList(edges) && all(lengths(edges) %in% c(0,2))) {
+  else if (is.eList(edges)) { # && all(lengths(edges) %in% c(0,2))) {
     out <- matrix(unlist(edges), nrow=2)
   }
   else stop("Hyperedges not supported for this format")
@@ -259,7 +259,7 @@ edgeMatrix <- function(edges, directed=FALSE, double=FALSE) {
   out[] <- as.integer(out)
   class(out) <- "edgeMatrix"
   
-  out
+  return(out)
 }
 
 ##' Edge list
@@ -268,7 +268,7 @@ edgeMatrix <- function(edges, directed=FALSE, double=FALSE) {
 ##' or edge matrix object.
 ##' 
 ##' @param edges `adjList`, `edgeMatrix`, `adjMatrix`, or a `list` of pairs of edges
-##' @param directed logical: if TRUE edges are assumed directed
+##' @param directed logical: if `TRUE` edges are assumed directed
 ##' 
 ##' @details The `directed` argument is important; if omitted, 
 ##' then some edges may be recorded only once, even though they are present 
@@ -364,9 +364,9 @@ makeEdgeList <- function(...) {
 }
 
 
-##' Check if object could be an edgeMatrix
+##' Check if object could be an `edgeMatrix`
 ##' 
-##' @param object purported edgeMatrix
+##' @param object purported `edgeMatrix`
 ##' @param n (optionally) number of vertices in graph
 ##' @param checknm logical: use class of object to determine answer?
 ##' 
@@ -382,7 +382,7 @@ is.edgeMatrix <- function(object, n, checknm=TRUE) {
   return(TRUE)
 }
 
-##' @describeIn is.edgeMatrix Check if object could be eList
+##' @describeIn is.edgeMatrix Check if object could be an `eList`
 ##' @export is.eList
 is.eList <- function(object, n, checknm=TRUE) {
   if ("eList" %in% class(object)) return(TRUE)
@@ -395,7 +395,7 @@ is.eList <- function(object, n, checknm=TRUE) {
 }
 
 
-##' @describeIn is.edgeMatrix Check if object could be adjMatrix
+##' @describeIn is.edgeMatrix Check if object could be `adjMatrix`
 ##' @export is.adjMatrix
 is.adjMatrix <- function(object, n, checknm=TRUE) {
   if("adjMatrix" %in% class(object)) return(TRUE)
@@ -410,7 +410,7 @@ is.adjMatrix <- function(object, n, checknm=TRUE) {
   return(TRUE)
 }
 
-##' @describeIn is.edgeMatrix Check if object could be adjList
+##' @describeIn is.edgeMatrix Check if object could be `adjList`
 ##' @export is.adjList
 is.adjList <- function(object, n, checknm = TRUE) {
   if("adjList" %in% class(object)) return(TRUE)
@@ -552,7 +552,7 @@ withEdgeMatrix <- function(graph, edges, force=FALSE) {
   
   class(graph$edges) <- "edgeList"
   
-  graph
+  return(graph)
 }
 
 ##' @describeIn withAdjMatrix Change to `eList` format
@@ -588,7 +588,7 @@ withEdgeList <- function(graph, edges, force=FALSE) {
   
   class(graph$edges) <- "edgeList"
   
-  graph
+  return(graph)
 }
 
 ##' @describeIn graphOps number of edges
@@ -605,7 +605,7 @@ nedge <- function (graph, edges) {
   if (length(idx) == 0) return(0L)
   
   dir <- edgeTypes()$directed[pmatch(names(graph$edges[idx]), edgeTypes()$type)]
-  sum(mapply(nedge2, graph$edges[idx], dir))
+  return(sum(mapply(nedge2, graph$edges[idx], dir)))
 }
 
 ## internal function to count edges 

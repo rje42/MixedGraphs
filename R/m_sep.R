@@ -204,8 +204,8 @@ complete_mg <- function (nU, nB, ord) {
 ##' 
 ##' 
 ##' @export
-m_sep <- function(graph, A, B, C) {
-  if (!is_SG(graph)) stop("Object must be a summary graph of class 'mixedgraph'")
+m_sep <- function(graph, A, B, C, check=TRUE) {
+  if (check && !is_SG(graph)) stop("Object must be a summary graph of class 'mixedgraph'")
   if (missing(C)) C <- integer(0)
   
   ## deal with trivial cases

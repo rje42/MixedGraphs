@@ -9,7 +9,7 @@ eList(edges, directed = FALSE)
 \arguments{
 \item{edges}{\code{adjList}, \code{edgeMatrix}, \code{adjMatrix}, or a \code{list} of pairs of edges}
 
-\item{directed}{logical: if TRUE edges are assumed directed}
+\item{directed}{logical: if \code{TRUE} edges are assumed directed}
 }
 \description{
 Returns an \code{eList} object from an adjacency matrix

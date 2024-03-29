@@ -4,7 +4,7 @@
 \alias{m_sep}
 \title{Test m-separation}
 \usage{
-m_sep(graph, A, B, C)
+m_sep(graph, A, B, C, check = TRUE)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}

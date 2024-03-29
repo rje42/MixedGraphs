@@ -8,7 +8,7 @@
 ##' @param sparse should we use sparse matrices if available?
 ##' @param sort 1=unique but not sorted, 2=unique and sorted, 0=neither
 ##' @param rev logical: should directed `adjList`s have the direction inverted if `dir=-1`?
-##' @param double_up logical: should edges with `dir=0` be repeated in both directions for an edgeMatrix?
+##' @param double_up logical: should edges with `dir=0` be repeated in both directions for an `edgeMatrix`?
 ##' 
 ##' @details returns an `edgeMatrix` or `adjMatrix` for possibly multiple edge types.
 ##' If any of the edges are specified as an adjacency matrix, then the output will also
