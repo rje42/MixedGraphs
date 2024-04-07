@@ -63,7 +63,7 @@ IntegerVector grp_cpp (List graph, IntegerVector v, int dir) {
         qu.pop();
         
         // now look at variables adjacent to v2
-        if (dir >= 0) {
+        if (dir <= 0) {
          NumericMatrix::Column v_col = edg.column(v2);
           for (int i=0; i < nv; i++) {
             if (v_col[i] == 0) continue;
@@ -74,7 +74,7 @@ IntegerVector grp_cpp (List graph, IntegerVector v, int dir) {
             checkUserInterrupt();
           }
         }
-        if (dir <= 0) {
+        if (dir >= 0) {
           NumericMatrix::Row v_row = edg.row(v2);
           for (int i=0; i < nv; i++) {
             if (v_row[i] == 0) continue;
