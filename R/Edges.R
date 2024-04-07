@@ -418,15 +418,15 @@ is.adjList <- function(object, n, checknm = TRUE) {
   
   ## check it is a list
   if (!is.list(object)) return(FALSE)
-  if (!missing(n)) {
+  if (missing(n)) {
+    ## if n is not known, check length makes sense with values
+    min_n <- suppressWarnings(max(unlist(object)))
+    if (!is.infinite(min_n) && length(object) < min_n) return(FALSE)
+  }
+  else {
     ## if n is known, check length and values make sense
     if(n != length(object)) return(FALSE)
     if (any(unlist(object) > n)) return(FALSE)
-  }
-  else {
-    ## if n is not known, check length makes sense with values
-    min_n <- max(unlist(object))
-    if (!is.infinite(min_n) && length(object) < min_n) return(FALSE)
   }
   if (any(unlist(object) <= 0)) return(FALSE)
 
