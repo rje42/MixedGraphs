@@ -5,7 +5,7 @@
 ##' @param directed logical: if `TRUE` edges are assumed directed
 ##' @param sparse logical: use a sparse matrix?
 ##' 
-##' @export adjMatrix
+##' @export 
 adjMatrix <- function(edges, n, directed=FALSE, sparse=FALSE) {
   if (missing(edges)) {
     if (sparse) {
@@ -90,7 +90,7 @@ adjMatrix <- function(edges, n, directed=FALSE, sparse=FALSE) {
 ##' @details Stores adjacencies by one of their vertices.  E.g. directed edges
 ##' are stored indexed by the child vertex, undirected by both neighbours.
 ##' 
-##' @export adjList
+##' @export
 adjList = function(edges, n, directed=FALSE, transpose=FALSE) {
   if (missing(edges) || length(edges) == 0L) {
     out <- rep(list(integer(0)), n)
@@ -274,7 +274,7 @@ edgeMatrix <- function(edges, directed=FALSE, double=FALSE) {
 ##' then some edges may be recorded only once, even though they are present 
 ##' in both directions.
 ##' 
-##' @export eList
+##' @export
 eList <- function(edges, directed=FALSE) {
   if (!is.logical(directed)) stop("argument 'directed' must be logical")
   if (missing(edges) || is.null(edges)) {
@@ -370,7 +370,7 @@ makeEdgeList <- function(...) {
 ##' @param n (optionally) number of vertices in graph
 ##' @param checknm logical: use class of object to determine answer?
 ##' 
-##' @export is.edgeMatrix
+##' @export
 is.edgeMatrix <- function(object, n, checknm=TRUE) {
   if("edgeMatrix" %in% class(object)) return(TRUE)
   else if (checknm || any(c("adjList", "eList", "adjMatrix") %in% class(object))) return(FALSE)
@@ -383,7 +383,7 @@ is.edgeMatrix <- function(object, n, checknm=TRUE) {
 }
 
 ##' @describeIn is.edgeMatrix Check if object could be an `eList`
-##' @export is.eList
+##' @export
 is.eList <- function(object, n, checknm=TRUE) {
   if ("eList" %in% class(object)) return(TRUE)
   else if (checknm || any(c("adjList", "adjMatrix", "edgeMatrix") %in% class(object))) return(FALSE)
@@ -396,7 +396,7 @@ is.eList <- function(object, n, checknm=TRUE) {
 
 
 ##' @describeIn is.edgeMatrix Check if object could be `adjMatrix`
-##' @export is.adjMatrix
+##' @export
 is.adjMatrix <- function(object, n, checknm=TRUE) {
   if("adjMatrix" %in% class(object)) return(TRUE)
   else if (checknm || any(c("adjList", "eList", "edgeMatrix") %in% class(object))) return(FALSE)
@@ -411,7 +411,7 @@ is.adjMatrix <- function(object, n, checknm=TRUE) {
 }
 
 ##' @describeIn is.edgeMatrix Check if object could be `adjList`
-##' @export is.adjList
+##' @export
 is.adjList <- function(object, n, checknm = TRUE) {
   if("adjList" %in% class(object)) return(TRUE)
   else if (checknm || any(c("adjMatrix", "eList", "edgeMatrix") %in% class(object))) return(FALSE)
@@ -443,7 +443,7 @@ is.adjList <- function(object, n, checknm = TRUE) {
 ##' @param sparse logical: should sparse matrices be used?
 ##' @param force logical: should edge sets be added when named?
 ##' 
-##' @export withAdjMatrix
+##' @export
 withAdjMatrix <- function(graph, edges, sparse=FALSE, force=FALSE) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
@@ -479,7 +479,7 @@ withAdjMatrix <- function(graph, edges, sparse=FALSE, force=FALSE) {
 }
 
 ##' @describeIn withAdjMatrix Change to `adjList` format
-##' @export withAdjList
+##' @export
 withAdjList <- function(graph, edges, force=FALSE) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else {
@@ -520,7 +520,7 @@ withAdjList <- function(graph, edges, force=FALSE) {
 }
 
 ##' @describeIn withAdjMatrix Change to `edgeMatrix` format
-##' @export withEdgeMatrix
+##' @export
 withEdgeMatrix <- function(graph, edges, force=FALSE) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
@@ -556,7 +556,7 @@ withEdgeMatrix <- function(graph, edges, force=FALSE) {
 }
 
 ##' @describeIn withAdjMatrix Change to `eList` format
-##' @export withEdgeList
+##' @export
 withEdgeList <- function(graph, edges, force=FALSE) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else idx <- pmatch(edges, names(graph$edges))
@@ -592,7 +592,7 @@ withEdgeList <- function(graph, edges, force=FALSE) {
 }
 
 ##' @describeIn graphOps number of edges
-##' @export nedge
+##' @export
 nedge <- function (graph, edges) {
   if (missing(edges)) idx <- seq_along(graph$edges)
   else {

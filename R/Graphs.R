@@ -644,7 +644,7 @@ standardizeEdges <- function(graph) {
 ##' @param g1,g2 two `mixedgraph` objects
 ##' 
 ##' NOT TESTED
-##' @export graph_equal
+##' @export
 graph_equal <- function(g1, g2) {
   g1 <- standardizeEdges(g1)
   g2 <- standardizeEdges(g2)

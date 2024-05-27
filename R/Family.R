@@ -132,7 +132,7 @@ districts.default <- function(graph, ...) {
 
 ##' @describeIn districts Obtain undirected component
 ##' @param sort should vertices be sorted?
-##' @export un
+##' @export
 un <- function(graph, sort=1) {
   adj(graph, v=graph$v, etype="undirected", dir=0, inclusive=TRUE, sort=sort)
 }
@@ -140,7 +140,7 @@ un <- function(graph, sort=1) {
 ##' @describeIn districts Obtain neighbourhoods
 ##' @param undirected_only logical: should vertices not adjacent to an 
 ##' undirected edge be ignored?
-##' @export neighbourhoods
+##' @export
 neighbourhoods <- function(graph, undirected_only=TRUE) {
   if (undirected_only) groups(graph[un(graph)], etype="undirected")
   else groups(graph, etype="undirected")
@@ -150,7 +150,7 @@ neighbourhoods <- function(graph, undirected_only=TRUE) {
 ##' @param sort should output be sorted?  sort=3 will also sort cliques
 ##' @param max_len maximum size of clique to consider
 ##' @describeIn districts Obtain maximal complete undirected subsets
-##' @export cliques
+##' @export
 cliques <- function(graph, sort=1, max_len) {
 
   # ## could do this by neighbourhood
@@ -178,36 +178,6 @@ cliques <- function(graph, sort=1, max_len) {
   out
 }
 
-## Bron-Kerbosch Algorithm
-BK <- function(R, P, X, nbs, max_len) {
-  ## if nothing else to add, then return R
-  if (length(R) == max_len || (length(P) == 0 && length(X) == 0)) {
-    # print(R)
-    return(list(R))
-  }
-  
-  ## otherwise, make a list
-  out <- list()
-  
-  for (v in P) {
-    ## add each vertex in turn
-    nb_v <- nbs[[v]]
-    out <- c(out, BK(c(R,v), intersect(P, nb_v), intersect(X, nb_v), nbs, max_len))
-    P <- setdiff(P, v)
-    X <- c(X, v)
-  }
-  
-  # return list of cliques found
-  out
-}
-
-# findCliques <- function(graph) {
-#   vs <- graph$v
-#   
-#   for (v in vs) {
-#     nb(graph, v)
-#   }
-# }
 
 ##' Find Markov blanket
 ##' 
@@ -224,7 +194,7 @@ BK <- function(R, P, X, nbs, max_len) {
 ##' 
 ##' @details Finds the Markov blanket of `v` in `A`.
 ##' 
-##' @export mb
+##' @export
 mb <- function(graph, v, A, check=TRUE, sort=1) {
   if (check && !is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   if (missing(A)) A <- graph$v
@@ -267,7 +237,7 @@ mb <- function(graph, v, A, check=TRUE, sort=1) {
 ##' children (parents) also within `v`.
 ##' 
 ##' 
-##' @export barren
+##' @export
 barren <- function (graph, v = graph$v) {
   if (length(v) == 0) return(integer(0))
   if (setequal(v, graph$v)) {
@@ -288,7 +258,7 @@ barren <- function (graph, v = graph$v) {
 }
 
 ##' @describeIn barren find vertices with no parents
-##' @export orphaned
+##' @export
 orphaned <- function (graph, v = graph$v) {
   if (length(v) == 0) return(integer(0))
   ans = adj(graph, v, etype="directed", dir=1)
@@ -298,8 +268,9 @@ orphaned <- function (graph, v = graph$v) {
   return(out)
 }
 
-##' @export sterile
+
 ##' @describeIn barren find vertices with no children in the same set
+##' @export 
 sterile <- function(graph, v=graph$v){
   if (length(v) == 0) return(integer(0))
   pas = adj(graph, v, etype="directed", dir=-1)
@@ -324,7 +295,7 @@ sterile <- function(graph, v=graph$v){
 ##' claudius(gr1, 1)
 ##' claudius(gr1, 4)
 ##' 
-##' @export claudius
+##' @export
 claudius <- function(graph, v) {
   sibs <- adj(graph, v, etype="bidirected", dir=0, inclusive=FALSE)
   
@@ -337,7 +308,7 @@ claudius <- function(graph, v) {
 ##' 
 ##' @param graph a `mixedgraph` object
 ##' 
-##' @export skeleton
+##' @export
 skeleton <- function(graph) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   # e = lapply(unlist(graph$edges, recursive=FALSE), sort.int)
@@ -366,7 +337,7 @@ skeleton <- function(graph) {
 ##' 
 ##' @author Ilya Shpitser
 ##' 
-##' @export anSets
+##' @export
 anSets <- function(graph, topOrder, sort=1) {
   if (length(graph$v) <= 1) return(list(graph$v))
   out = list(integer(0))
@@ -396,7 +367,7 @@ anSets <- function(graph, topOrder, sort=1) {
 ##' @param maxbarren maximum size of barren subsets
 ##' @param same_dist logical, should barren vertices be in the same district?
 ##' @describeIn anSets Uses different algorithm 
-##' @export anSets2
+##' @export
 anSets2 <- function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
   
   if (missing(maxbarren) || maxbarren > nv(graph)) maxbarren <- nv(graph)
@@ -484,7 +455,7 @@ anSets2 <- function(graph, topOrder, maxbarren, same_dist=FALSE, sort=1) {
 ##' 
 ##' \strong{Warning:} Doesn't work for cyclic graphs.
 ##' 
-##' @export barrenSets
+##' @export
 barrenSets <- function(graph, topOrder, max_size, same_dist=FALSE, 
                       sort=1, return_anc_sets=FALSE) {
   
