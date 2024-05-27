@@ -8,9 +8,9 @@
 \usage{
 adjList(edges, n, directed = FALSE, transpose = FALSE)
 
-revAdjList(object)
+revAdjList(edges)
 
-symAdjList(object, unq = TRUE)
+symAdjList(edges, unq = TRUE)
 }
 \arguments{
 \item{edges}{list or matrix giving edges in the form of an

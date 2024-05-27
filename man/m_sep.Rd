@@ -10,6 +10,8 @@ m_sep(graph, A, B, C, check = TRUE)
 \item{graph}{an object of class \code{mixedgraph}}
 
 \item{A, B, C}{sets of vertices in \code{graph}}
+
+\item{check}{logical: check if \code{graph} is a summary graph}
 }
 \description{
 Check if A is m-separated from B by C in a summary graph \code{graph}.

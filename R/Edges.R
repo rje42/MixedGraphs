@@ -170,12 +170,12 @@ adjList <- function(edges, n, directed=FALSE, transpose=FALSE) {
 
 ##' @describeIn adjList Get reverse directions for edges
 ##' @export
-revAdjList <- function(object) {
-  n <- length(object)
+revAdjList <- function(edges) {
+  n <- length(edges)
   out <- vector(mode="list", length=n)
   out[] <- list(integer(0))
   for (i in seq_len(n)) {
-    out[object[[i]]] <- lapply(out[object[[i]]], function(x) c(x,i))
+    out[edges[[i]]] <- lapply(out[edges[[i]]], function(x) c(x,i))
   }
   class(out) <- "adjList"
   return(out)
@@ -184,10 +184,10 @@ revAdjList <- function(object) {
 ##' @describeIn adjList Make adjList symmetric
 ##' @param unq logical: should values be made unique and sorted?
 ##' @export
-symAdjList <- function(object, unq=TRUE) {
-  object_r <- revAdjList(object)
-  if (unq) out <- mapply(function(x,y) sort.int(unique.default(c(x,y))), object, object_r, SIMPLIFY = FALSE)
-  else out <- mapply(c, object, object_r, SIMPLIFY = FALSE)
+symAdjList <- function(edges, unq=TRUE) {
+  edges_r <- revAdjList(edges)
+  if (unq) out <- mapply(function(x,y) sort.int(unique.default(c(x,y))), edges, edges_r, SIMPLIFY = FALSE)
+  else out <- mapply(c, edges, edges_r, SIMPLIFY = FALSE)
   
   class(out) <- "adjList"
   return(out)
@@ -364,12 +364,17 @@ makeEdgeList <- function(...) {
 }
 
 
-##' Check if object could be an `edgeMatrix`
+##' Check if edge object could be in given format
 ##' 
-##' @param object purported `edgeMatrix`
+##' @param object item of purported type
 ##' @param n (optionally) number of vertices in graph
 ##' @param checknm logical: use class of object to determine answer?
 ##' 
+##' @name check_edge_type
+##' 
+NULL
+
+##' @describeIn check_edge_type check if could be `edgeMatrix`
 ##' @export
 is.edgeMatrix <- function(object, n, checknm=TRUE) {
   if("edgeMatrix" %in% class(object)) return(TRUE)
@@ -382,7 +387,7 @@ is.edgeMatrix <- function(object, n, checknm=TRUE) {
   return(TRUE)
 }
 
-##' @describeIn is.edgeMatrix Check if object could be an `eList`
+##' @describeIn check_edge_type check if could be `eList`
 ##' @export
 is.eList <- function(object, n, checknm=TRUE) {
   if ("eList" %in% class(object)) return(TRUE)
@@ -395,7 +400,7 @@ is.eList <- function(object, n, checknm=TRUE) {
 }
 
 
-##' @describeIn is.edgeMatrix Check if object could be `adjMatrix`
+##' @describeIn check_edge_type check if could be `adjMatrix`
 ##' @export
 is.adjMatrix <- function(object, n, checknm=TRUE) {
   if("adjMatrix" %in% class(object)) return(TRUE)
@@ -410,7 +415,7 @@ is.adjMatrix <- function(object, n, checknm=TRUE) {
   return(TRUE)
 }
 
-##' @describeIn is.edgeMatrix Check if object could be `adjList`
+##' @describeIn check_edge_type check if could be `adjList`
 ##' @export
 is.adjList <- function(object, n, checknm = TRUE) {
   if("adjList" %in% class(object)) return(TRUE)

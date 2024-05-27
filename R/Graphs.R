@@ -372,7 +372,7 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
       for (i in seq_along(not_aLaM)) {
         graph$edges[[not_aLaM[i]]] <- adjList(graph$edges[[not_aLaM[i]]],
                                               n=length(vnames(graph)), 
-                                              dir=edgeTypes()$directed[edgeTypes()$type==not_aLaM[i]])
+                                              directed=edgeTypes()$directed[edgeTypes()$type==not_aLaM[i]])
       }
       waL <- sapply(graph$edges, is.adjList, checknm=TRUE)
       # graph <- withAdjMatrix(graph)

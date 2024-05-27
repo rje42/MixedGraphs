@@ -192,6 +192,9 @@ BK <- function(R, P, X, nbs, max_len=length(P)) {
 ##' @param graph1,graph2 two graphs to consider
 ##' @param use_skel logical indicating whether to take the skeleton
 ##' 
+##' @importFrom igraph graph.get.isomorphisms.vf2 degree
+##' @importFrom combinat permn
+##' 
 ##' @export
 list_isomorphisms <- function (graph1, graph2, use_skel=TRUE) {
   if (use_skel) {
@@ -204,7 +207,7 @@ list_isomorphisms <- function (graph1, graph2, use_skel=TRUE) {
     stop("All edges should be undirected")
   }
   
-  if (suppressWarnings(require(igraph))) {
+  if (requireNamespace("igraph")) {
     g1 <- convert(graph1, format="igraph")
     g2 <- convert(graph2, format="igraph")
     
@@ -212,21 +215,23 @@ list_isomorphisms <- function (graph1, graph2, use_skel=TRUE) {
     out <- lapply(out, as.numeric)
   }
   else {
-    A <- graph$edges$undirected
-    
-    deg <- igraph::degree(gr)
-    toTry <- combinat::permn(igraph::vcount(gr))
-    kp <- sapply(toTry, function(x) all(deg == deg[x]))
-    toTry <- toTry[kp]
-    
-    kp <- logical(length(toTry))
-    
-    for (i in seq_along(toTry)) {
-      A2 <- graph$edges$undirected[toTry[[i]],toTry[[i]]]
-      kp[i] <- all(A==A2)
-    }
-    
-    out <- toTry[kp]
+    stop("'igraph' must be installed to count isomorphisms")
+    # ## check that this works!
+    # A <- graph1$edges$undirected
+    # 
+    # deg <- igraph::degree(graph1)
+    # toTry <- combinat::permn(igraph::vcount(graph1))
+    # kp <- sapply(toTry, function(x) all(deg == deg[x]))
+    # toTry <- toTry[kp]
+    # 
+    # kp <- logical(length(toTry))
+    # 
+    # for (i in seq_along(toTry)) {
+    #   A2 <- graph2$edges$undirected[toTry[[i]],toTry[[i]]]
+    #   kp[i] <- all(A==A2)
+    # }
+    # 
+    # out <- toTry[kp]
   }
   
   return(out)

@@ -49,18 +49,18 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   via_mixed_graph <- c("ggm", "ADMG", "graphNEL", "graphAM", "bn")
   
   if (missing(cur_format)) {
-    if (class(graph) == "igraph") cur_format <- "igraph"
-    else if (class(graph) == "mixedgraph") cur_format <- "mixedgraph"
-# else if (class(graph) == "grain") cur_format <- "grain"
+    if ("igraph" %in% class(graph)) cur_format <- "igraph"
+    else if (is.mixedgraph(graph)) cur_format <- "mixedgraph"
+# else if ("grain" %in% class(graph)) cur_format <- "grain"
     else if ("graphNEL" %in% class(graph)) cur_format <- "graphNEL"
     else if ("graphAM" %in% class(graph)) cur_format <- "graphAM"
     else if ("graphBAM" %in% class(graph)) cur_format <- "graphBAM"
     else if ("gAlgo" %in% is(graph)) cur_format <- "PAG"
-    else if (class(graph) == "graph") {
+    else if ("graph" %in% class(graph)) {
       cur_format <- "ADMG"
     }
-    else if (class(graph) == "bn") cur_format <- "bn"
-    else if (class(graph) == "matrix") {
+    else if ("bn" %in% class(graph)) cur_format <- "bn"
+    else if ("matrix" %in% class(graph)) {
       warning("Matrix input, assuming ggm format")
       cur_format <- "ggm"
     }

@@ -112,7 +112,7 @@ moralize <- function (graph, C, check=TRUE) {
     if (length(D) <= 1) next
     Ad <- intersect(A, D)
     Sd <- intersect(S, D)
-    assertthat::are_equal(length(c(Ad,Sd)), length(D))
+    # assertthat::are_equal(length(c(Ad,Sd)), length(D))
     
     
     tmp <- complete_mg(length(Ad), length(Sd))
@@ -201,7 +201,7 @@ complete_mg <- function (nU, nB, ord) {
 ##' 
 ##' @param graph an object of class `mixedgraph`
 ##' @param A,B,C sets of vertices in `graph`
-##' 
+##' @param check logical: check if `graph` is a summary graph
 ##' 
 ##' @export
 m_sep <- function(graph, A, B, C, check=TRUE) {
