@@ -1,6 +1,6 @@
 Package: MixedGraphs
 Title: Mixed Graphs and Graphical Models
-Version: 1.1.5
+Version: 1.1.6
 Authors@R: person("Robin", "Evans", , "evans@stats.ox.ac.uk", role = c("aut", "cre"))
 Description: Functions for creating and manipulating graphs with arbitrary
     edge types.
@@ -29,6 +29,8 @@ Suggests:
     ggm,
     igraph,
     bnlearn,
+    pcalg,
+    Rgraphviz
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
