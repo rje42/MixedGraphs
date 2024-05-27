@@ -7,8 +7,8 @@
 ##' @param nv number of vertices for `adjMatrix`
 ##' @param sparse should we use sparse matrices if available?
 ##' @param sort 1=unique but not sorted, 2=unique and sorted, 0=neither
-##' @param rev logical: should directed `adjList`s have the direction inverted if `dir=1`?
-##' @param double_up logical: should edges with `dir=0` be repeated in both directions for an edgeMatrix?
+##' @param rev logical: should directed `adjList`s have the direction inverted if `dir=-1`?
+##' @param double_up logical: should edges with `dir=0` be repeated in both directions for an `edgeMatrix`?
 ##' 
 ##' @details returns an `edgeMatrix` or `adjMatrix` for possibly multiple edge types.
 ##' If any of the edges are specified as an adjacency matrix, then the output will also
@@ -98,6 +98,15 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, nv, sparse=FALSE, sort=
   if (all(isAList)) {
     for (i in seq_along(edges)) {
       if (dir[i] == 1) {
+        edges[[i]][vr1] <- vector(mode="list", length=length(vr1))
+        edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,v2))
+      }
+      else if (dir[i] == 0) {
+        edges[[i]] <- symAdjList(edges[[i]])
+        edges[[i]][vr] <- vector(mode="list", length=length(vr))
+        edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,c(v1,v2)))
+      }
+      else if (dir[i] == -1) {
         if (rev) {
           edges[[i]] <- revAdjList(edges[[i]])
           tmp <- vr1
@@ -109,15 +118,6 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, nv, sparse=FALSE, sort=
         }
         edges[[i]][vr2] <- vector(mode="list", length=length(vr2))
         edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,v1))
-      }
-      else if (dir[i] == 0) {
-        edges[[i]] <- symAdjList(edges[[i]])
-        edges[[i]][vr] <- vector(mode="list", length=length(vr))
-        edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,c(v1,v2)))
-      }
-      else if (dir[i] == -1) {
-        edges[[i]][vr1] <- vector(mode="list", length=length(vr1))
-        edges[[i]] <- lapply(edges[[i]], function(x) intersect(x,v2))
       }
     }
     names(edges) <- NULL
@@ -356,7 +356,7 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   if (length(edges) == 1) {
     if (is.adjList(edges[[1]], checknm=TRUE)) {
       wh <- match(names(graph$edges)[whEdge], edgeTypes()$type)
-      if (dir == -1 && edgeTypes()$directed[wh]) {
+      if (dir == 1 && edgeTypes()$directed[wh]) {
         return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive, sort=sort))
       }
       else if (dir == 0 && !edgeTypes()$directed[wh]) {
@@ -626,3 +626,22 @@ pathConnected <- function(graph, v, D, etype, dir, verbose=FALSE) {
   
   return(intersect(seen, D))
 }
+
+##' Check if a subgraph is complete
+##' 
+##' @param graph an object of class `mixedgraph`
+##' @param v set of vertices to test completeness of
+##' 
+##' @export
+is_complete <- function (graph, v) {
+  if (missing(v)) v <- graph$v
+  nv <- length(v)
+  if (nv <= 1) return(TRUE)
+  
+  out <- collapse(graph$edges, v, v, dir=0, matrix=TRUE)
+  diag(out) <- 0
+  
+  if (sum(out) == nv*(nv-1)) return(TRUE)
+  else return(FALSE)
+}
+

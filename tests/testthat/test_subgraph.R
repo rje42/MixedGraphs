@@ -64,4 +64,3 @@ testthat::test_that("edges preserved correctly in bipartite mode", {
   expect_equal(standardizeEdges(gr1el_c), standardizeEdges(gr1_c))
   expect_equal(standardizeEdges(gr1em_c), standardizeEdges(gr1_c))
 })
-

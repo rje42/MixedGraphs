@@ -5,7 +5,7 @@
 \alias{is.eList}
 \alias{is.adjMatrix}
 \alias{is.adjList}
-\title{Check if object could be an edgeMatrix}
+\title{Check if object could be an \code{edgeMatrix}}
 \usage{
 is.edgeMatrix(object, n, checknm = TRUE)
 
@@ -16,21 +16,21 @@ is.adjMatrix(object, n, checknm = TRUE)
 is.adjList(object, n, checknm = TRUE)
 }
 \arguments{
-\item{object}{purported edgeMatrix}
+\item{object}{purported \code{edgeMatrix}}
 
 \item{n}{(optionally) number of vertices in graph}
 
 \item{checknm}{logical: use class of object to determine answer?}
 }
 \description{
-Check if object could be an edgeMatrix
+Check if object could be an \code{edgeMatrix}
 }
 \section{Functions}{
 \itemize{
-\item \code{is.eList()}: Check if object could be eList
+\item \code{is.eList()}: Check if object could be an \code{eList}
 
-\item \code{is.adjMatrix()}: Check if object could be adjMatrix
+\item \code{is.adjMatrix()}: Check if object could be \code{adjMatrix}
 
-\item \code{is.adjList()}: Check if object could be adjList
+\item \code{is.adjList()}: Check if object could be \code{adjList}
 
 }}

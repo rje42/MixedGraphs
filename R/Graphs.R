@@ -221,18 +221,24 @@ print.edgeList <- function(x, vnames, ...) {
   edgeSymb <- edgeTypes()$char
   
   if (missing(vnames)) {
-    adjM <- sapply(x, is.adjMatrix)
-    if (any(adjM)) n_v <- nrow(x[[which(adjM)[1]]])
-    else {
-      adjL <- sapply(x, is.adjList)
-      if (any(adjL)) n_v <- length(x[[which(adjL)[1]]])
-      else {
-        oth <- sapply(x, function(y) is.edgeMatrix(y) || is.eList(y))
-        if (any(oth)) n_v <- max(unlist(x[oth]))
-        else stop("No valid edgetypes")
-      }
+    if (!is.null(attr(x, "vnames"))) {
+      vnames <- attr(x, "vnames")
+      n_v <- length(vnames)
     }
-    vnames <- paste0("x", seq_len(n_v))
+    else {
+      adjM <- sapply(x, is.adjMatrix)
+      if (any(adjM)) n_v <- nrow(x[[which(adjM)[1]]])
+      else {
+        adjL <- sapply(x, is.adjList)
+        if (any(adjL)) n_v <- length(x[[which(adjL)[1]]])
+        else {
+          oth <- sapply(x, function(y) is.edgeMatrix(y) || is.eList(y))
+          if (any(oth)) n_v <- max(unlist(x[oth]))
+          else stop("No valid edgetypes")
+        }
+      }
+      vnames <- paste0("x", seq_len(n_v))
+    }
   }
   else n_v <- length(vnames)
   
@@ -255,9 +261,9 @@ print.edgeList <- function(x, vnames, ...) {
       }
     }
     else if (is.adjList(x[[i]], checknm=TRUE)) {
-      tmp <- cbind(unlist(x[[i]]), rep(seq_len(n_v), times=lengths(x[[i]][seq_len(n_v)])))
+      tmp <- cbind(rep(seq_len(n_v), times=lengths(x[[i]][seq_len(n_v)])), unlist(x[[i]]))
       if (!edgeTypes()$directed[whEdge[i]]) tmp <- tmp[tmp[,1] < tmp[,2],,drop=FALSE]
-      
+
       for (j in seq_len(nrow(tmp))) {
         cat(vnames[tmp[j,1]], edgeSymb[whEdge[i]],
             vnames[tmp[j,2]], "\n", sep=" ")
@@ -287,6 +293,7 @@ print.edgeList <- function(x, vnames, ...) {
     v <- graph$v
   }
   else if (is.logical(v)) v <- which(v)
+  
   v <- v[v != 0]  # remove 0s
   if (length(v) > 0 && all(v < 0)) v <- setdiff(graph$v, -v)
   subGraph(graph, v, w, drop=drop, etype=etype, order=order)
@@ -354,7 +361,7 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
     if (length(v) == 0) graph[w, drop=drop, etype=character(0)]
     else if (length(w) == 0) graph[v, drop=drop, etype=character(0)]
   }
-  # v <- unique.default(v)
+  # v = unique.default(v)
   # if (drop) v <- sort.int(v)
   if (!all(v %in% graph$v) || (!missing(w) && !all(w %in% graph$v))) stop("Can only keep vertices that are present")
   if (order && missing(w)) {
@@ -378,6 +385,7 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
       graph$edges[waL] <- lapply(graph$edges[waL], function(x) lapply(x, match, v))
       graph$edges[waL] <- lapply(graph$edges[waL], function(x) `class<-`(x,"adjList"))
     }
+
     if (length(v) < length(graph$vnames)) graph$vnames[] <- c(graph$vnames[v], graph$vnames[-v])
     else graph$vnames <- graph$vnames[v]
     
@@ -461,7 +469,7 @@ subGraph <- function (graph, v, w, drop=FALSE, etype, order=FALSE) {
         x[v_w] <- lapply(x[v_w], intersect, y=w)
         x[w_v] <- lapply(x[w_v], intersect, y=v)
         x[-c(v,w)] <- list(integer(0))
-        
+
         if (drop) {
           x <- x[vw]
         }
@@ -636,7 +644,7 @@ standardizeEdges <- function(graph) {
 ##' @param g1,g2 two `mixedgraph` objects
 ##' 
 ##' NOT TESTED
-##' @export graph_equal
+##' @export
 graph_equal <- function(g1, g2) {
   g1 <- standardizeEdges(g1)
   g2 <- standardizeEdges(g2)
@@ -655,6 +663,7 @@ graph_equal <- function(g1, g2) {
 ##' @param format type of graph format to use, options are `mixedgraph` 
 ##' (the default), `graphNEL` (and `graphAM`, `graphBAM`), 
 ##' `igraph`, `ggm`, `bn`, `PAG`.
+##' @param vnames list of variable names for use in `edgeCr`
 ##' 
 ##' @details Symbols `-<>=*|:` are assumed to be part of an edge, so
 ##' cannot be used in node names using this function.  Note that if we want
@@ -662,7 +671,8 @@ graph_equal <- function(g1, g2) {
 ##' leave a space between the `o` and the variable name.
 ##' 
 ##' The `edgeCr()` creates just an `edgeList` object, and is helpful
-##' for adding edges to existing graphs.
+##' for adding edges to existing graphs.  The `vnames` argument can be used if
+##' the graph has non-standard vertex labels.
 ##' 
 ##' @examples
 ##' graphCr("1--->2<-->3<-4","2<->4,4->5")
@@ -747,9 +757,9 @@ graphCr <- function(char, ..., mode="adjList", useMatrices=FALSE, format="mixedg
     edges <- lapply(seq_len(len), function(x) adjList(n=n))
     names(edges) <- unique(etys[etype])
     
-    for (i in seq_along(v1)) {
-      edges[[etys[etype[i]]]][[v2[i]]] <- c(edges[[etys[etype[i]]]][[v2[i]]], v1[i])
-      if (!edgeTypes()$directed[etype[i]]) edges[[etys[etype[i]]]][[v1[i]]] <- c(edges[[etys[etype[i]]]][[v1[i]]], v2[i])
+    for (i in seq_along(v2)) {
+      edges[[etys[etype[i]]]][[v1[i]]] <- c(edges[[etys[etype[i]]]][[v1[i]]], v2[i])
+      if (!edgeTypes()$directed[etype[i]]) edges[[etys[etype[i]]]][[v2[i]]] <- c(edges[[etys[etype[i]]]][[v2[i]]], v1[i])
     }
     edges <- lapply(edges, function(x) {
       class(x) <- "adjList"
@@ -821,10 +831,11 @@ graphCr <- function(char, ..., mode="adjList", useMatrices=FALSE, format="mixedg
 
 ##' @describeIn graphCr Create edge list by hand
 ##' @export
-edgeCr <- function(char, mode="eList") {
+edgeCr <- function(char, mode="eList", vnames) {
   gr <- graphCr(char, mode=mode)
   out <- gr$edges
-  attr(out, "vnames") <- gr$vnames
+  if (missing(vnames)) attr(out, "vnames") <- gr$vnames
+  else attr(out, "vnames") <- vnames
   return(out)
 }
 

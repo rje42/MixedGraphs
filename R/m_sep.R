@@ -74,7 +74,7 @@
 # }
 # 
 moralize <- function (graph, C, check=TRUE) {
-  
+
   if (check && !is_SG(graph)) stop("Object must be a summary graph of class 'mixedgraph'")
   
   ## obtain sets to moralize
@@ -93,19 +93,22 @@ moralize <- function (graph, C, check=TRUE) {
   gr_d <- mutilate(graph[c(A,S)], A=S, internal=TRUE)
   
   ## get the districts and their parents in the graph that will need to be moralized
-  dists <- districts(gr_d)
-  pa_dists <- lapply(dists, function(x) union(x, pa(gr_d, intersect(x, A))))
+  dists <- districts(gr_d[A])
+  pa_dists <- lapply(dists, function(x) union(x, pa(gr_d, x)))
+  pa_s_dists <- lapply(dists, function(x) setdiff(sib(gr_d, x), x))
+  pa_s_dists <- mapply(c, pa_dists, pa_s_dists, SIMPLIFY = FALSE)
   
+  ## convert edges from ancestors, and between ancestors and their siblings
   gr_d <- morphEdges(gr_d, to="directed", A=S, B=A, topOrd=c(A,S))
   gr_d <- morphEdges(gr_d, to="undirected", A=A)
   
-  
+  ## remove edges from ancestors, and between ancestors and their siblings
   graph <- mutilate(graph, A, internal = TRUE)
   graph <- mutilate(graph, A, S)
   
   for (i in seq_along(dists)) {
     ## moralize this district
-    D <- pa_dists[[i]]
+    D <- pa_s_dists[[i]]
     if (length(D) <= 1) next
     Ad <- intersect(A, D)
     Sd <- intersect(S, D)
@@ -134,8 +137,9 @@ moralize <- function (graph, C, check=TRUE) {
     # gr_d <- addEdges(gr_d, edges=list(bidirected=SG$edges$bidirected,
     #                                     undirected=AG$edges$undirected,
     #                                     directed=DG$edges$directed))
-    graph <- addEdges(graph, gr_d$edges)
+    # graph <- addEdges(graph, gr_d$edges)
   }
+  ## add back in converted edges
   graph <- addEdges(graph, gr_d$edges)
   
   return(graph)
@@ -200,8 +204,8 @@ complete_mg <- function (nU, nB, ord) {
 ##' 
 ##' 
 ##' @export
-m_sep <- function(graph, A, B, C) {
-  if (!is_SG(graph)) stop("Object must be a summary graph of class 'mixedgraph'")
+m_sep <- function(graph, A, B, C, check=TRUE) {
+  if (check && !is_SG(graph)) stop("Object must be a summary graph of class 'mixedgraph'")
   if (missing(C)) C <- integer(0)
   
   ## deal with trivial cases

@@ -11,7 +11,7 @@ adjMatrix(edges, n, directed = FALSE, sparse = FALSE)
 
 \item{n}{total number of vertices, defaults to maximal value}
 
-\item{directed}{logical: if TRUE edges are assumed directed}
+\item{directed}{logical: if \code{TRUE} edges are assumed directed}
 
 \item{sparse}{logical: use a sparse matrix?}
 }

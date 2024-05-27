@@ -30,4 +30,7 @@ and \code{B} are removed.
 
 Note that specifying \code{internal=TRUE} and providing a set \code{B} will
 result in an error.
+
+Note that specifying \code{internal=TRUE} and providing a set \code{B} will
+result in an error.
 }
