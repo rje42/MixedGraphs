@@ -7,6 +7,10 @@
 ##' functions for common graphs: complete graphs, 
 ##' chains, cycles and stars.
 ##' 
+##' @name construct_graphs
+NULL
+
+##' @describeIn construct_graphs graph with all adjacencies
 ##' @export 
 makeGraphComplete = function (n, type = "undirected") {
   if (n < 2) return(mixedgraph(n))
@@ -24,7 +28,22 @@ makeGraphComplete = function (n, type = "undirected") {
   return(out)
 }
 
-##' @describeIn makeGraphComplete graph with no edges
+##' @param useC should C++ function be used?  Defaults to `TRUE`
+complete_graph <- function (n, type = "undirected", useC = TRUE) {
+  etys = edgeTypes()$type
+  wh = pmatch(type, etys)
+  if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
+  else names(edges) = etys[wh]
+  
+  elst <- makeEdgeList(complete_gr_cpp(as.integer(n)))
+  names(elst) <- etys[wh]
+  mixedgraph(n, edges=)
+  
+
+  
+}
+
+##' @describeIn construct_graphs graph with no edges
 ##' @export 
 makeGraphEmpty = function(n) {
   edges = list(undirected=list())
@@ -34,7 +53,7 @@ makeGraphEmpty = function(n) {
   return(out)
 }
 
-##' @describeIn makeGraphComplete graph with chain of edges
+##' @describeIn construct_graphs graph with chain of edges
 ##' @export 
 makeGraphChain = function(n, type = "undirected") {
   edges = list(lapply(seq_len(max(n-1,0)), function(x) c(x, x+1)))
@@ -49,7 +68,13 @@ makeGraphChain = function(n, type = "undirected") {
   return(out)
 }
 
-##' @describeIn makeGraphComplete graph with cycle of edges
+##' @param useC should C++ function be used?  Defaults to `TRUE`
+chain_graph <- function (n, type = "undirected", useC = TRUE) {
+  chain_gr_cpp(as.integer(n))
+}
+
+
+##' @describeIn construct_graphs graph with cycle of edges
 ##' @export 
 makeGraphCycle = function(n, type = "undirected") {
   
@@ -66,7 +91,7 @@ makeGraphCycle = function(n, type = "undirected") {
   return(out)
 }
 
-##' @describeIn makeGraphComplete star shaped graph
+##' @describeIn construct_graphs star shaped graph
 ##' @param out should edges be directed out from the centre?
 ##' @export 
 makeGraphStar = function(n, type = "undirected", out=FALSE) {
@@ -85,7 +110,7 @@ makeGraphStar = function(n, type = "undirected", out=FALSE) {
   return(out)
 }
 
-##' @describeIn makeGraphComplete grid of vertices
+##' @describeIn construct_graphs grid of vertices
 ##' @param m number of columns or size of second set
 ##' @export 
 makeGraphGrid = function(n, m=n, type="undirected") {
@@ -109,7 +134,7 @@ makeGraphGrid = function(n, m=n, type="undirected") {
   mixedgraph(n*m, edges=edges, vnames=vnames)
 }
 
-##' @describeIn makeGraphComplete bipartite graph
+##' @describeIn construct_graphs bipartite graph
 ##' @export
 makeGraphBipartite <- function (n, m, type="undirected") {
   out <- makeGraphComplete(n+m, type=type)
