@@ -634,3 +634,10 @@ nedge2 <- function(edges, directed=TRUE) {
   else if(is.null(edges)) return(0L)
   else stop("Edge type not recognised")
 }
+
+##' @describeIn graphOps Test for existence of particular type of edge
+##' @export
+has_edge_entry <- function (graph, edges) {
+  wh <- pmatch(edges, names(graph$edges))
+  return(!is.na(wh))
+}

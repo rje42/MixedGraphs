@@ -90,8 +90,9 @@ makeGraphStar = function(n, type = "undirected", out=FALSE) {
 ##' @export 
 makeGraphGrid = function(n, m=n, type="undirected") {
   
-  if (n == 0) return(makeGraphEmpty(0))
+  if (n == 0 || m == 0) return(makeGraphEmpty(0))
   if (n == 1) return(makeGraphChain(m, type))
+  else if (m == 1) return(makeGraphChain(n, type))
 
   first <- c(matrix(seq_len(n*m),nrow=n, ncol=m)[-m,,drop=FALSE])
   tmp <- lapply(first, function(x) c(x,x+1))

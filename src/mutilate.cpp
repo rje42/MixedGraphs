@@ -6,9 +6,37 @@
 #include <unordered_set>
 using namespace Rcpp;
 
+// Note that these functions have as inputs values that would be used in R;
+// that is, vertices are indexed from 1 rather than 0.
+
+StringVector etyps = {"undirected", "directed", "bidirected", 
+                      "partially directed", "partially undirected", 
+                      "not directed"};
+IntegerVector edir = {0, 1, 0, 1, 1, 0};
+
+// [[Rcpp::export]]
+IntegerVector match_char (CharacterVector x, CharacterVector y) {
+  IntegerVector out(x.length());
+  for (int i=0; i < x.length(); i++) {
+    for (int j=0; j < y.length(); j++) {
+      // std::cout << i << "," << j << "," << (x[i] == y[j]) << "\n";
+      if (x[i] == y[j]) {
+        out[i] = j+1;
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+// [[Rcpp::export]]
+IntegerVector match_(NumericVector x, NumericVector y) {
+  return match(x, y);
+}
+
 // [[Rcpp::export]]
 NumericMatrix add_edges_aM (NumericMatrix aM, IntegerVector e1, IntegerVector e2, int dir) {
-  if (e1.size() != e2.size()) stop("index vectors must be the same length");
+  if (e1.size() != e2.size()) Rf_error("index vectors must be the same length");
   
   NumericMatrix aM2 = clone(aM);
   
@@ -19,6 +47,41 @@ NumericMatrix add_edges_aM (NumericMatrix aM, IntegerVector e1, IntegerVector e2
   
   return aM2;
 }
+
+NumericMatrix add_edges_aM (NumericMatrix aM, NumericMatrix add) {
+  if (aM.nrow() != aM.ncol()) Rf_error("Matrices must be square");
+  if (aM.nrow() != add.nrow() || aM.nrow() != add.ncol()) Rf_error("Matrices must have same dimensions");
+  
+  NumericMatrix aM2(aM.nrow(), aM.ncol());
+  
+  for (int i=0; i < aM2.nrow(); i++) aM2.row(i) = pmin(aM.row(i) + add.row(i), 1);
+  aM2.attr("class") = "adjMatrix";
+  
+  return aM2;
+}
+
+List add_edges_aMs (List graph, List adjMs) {
+  List edges = graph["edges"];
+  
+  IntegerVector mtch_etype = match_char(adjMs.names(), etyps) - 1;
+  IntegerVector mtch_grs = match_char(edges.names(), etyps) - 1;
+  
+  // if (as<bool>(any(mtch_etype == -1))) Rf_error("Added edge types should match");
+  // if (any(mtch_grs == -1)) Rf_error("Graph edge types should match");
+  
+  // add in code for putting in edges using add_edges_aM...
+  IntegerVector em = match(as<NumericVector>(mtch_etype), as<NumericVector>(mtch_grs));
+  
+  for (int i=0; i < adjMs.length(); i++) {
+    // add in ith adjacencies
+    NumericMatrix adj = edges(em[i]);
+    NumericMatrix add = adjMs(i);
+    adj = add_edges_aM(adj, add);
+  }
+  
+  return edges;
+}
+
 
 // [[Rcpp::export]]
 List add_edges_aL (List aL, IntegerVector e1, IntegerVector e2, int dir) {
@@ -130,3 +193,8 @@ List chg_ends_cpp (NumericMatrix m1, NumericMatrix m2, NumericVector v1, Numeric
   
   return out;
 }
+
+// // [[Rcpp::export]]
+// List collapse_cpp (List graph, NumericMatrix m2, NumericVector v1, NumericVector v2, bool d2) {
+//   
+// }
