@@ -12,27 +12,38 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // grp_cpp
-IntegerVector grp_cpp(List graph, IntegerVector v, int dir);
+IntegerVector grp_cpp(List graph, IntegerVector v, IntegerVector dir);
 RcppExport SEXP _MixedGraphs_grp_cpp(SEXP graphSEXP, SEXP vSEXP, SEXP dirSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type graph(graphSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type v(vSEXP);
-    Rcpp::traits::input_parameter< int >::type dir(dirSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type dir(dirSEXP);
     rcpp_result_gen = Rcpp::wrap(grp_cpp(graph, v, dir));
     return rcpp_result_gen;
 END_RCPP
 }
+// groups_cpp
+List groups_cpp(List graph);
+RcppExport SEXP _MixedGraphs_groups_cpp(SEXP graphSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type graph(graphSEXP);
+    rcpp_result_gen = Rcpp::wrap(groups_cpp(graph));
+    return rcpp_result_gen;
+END_RCPP
+}
 // adj_cpp
-IntegerVector adj_cpp(List graph, IntegerVector v, int dir);
+IntegerVector adj_cpp(List graph, IntegerVector v, IntegerVector dir);
 RcppExport SEXP _MixedGraphs_adj_cpp(SEXP graphSEXP, SEXP vSEXP, SEXP dirSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type graph(graphSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type v(vSEXP);
-    Rcpp::traits::input_parameter< int >::type dir(dirSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type dir(dirSEXP);
     rcpp_result_gen = Rcpp::wrap(adj_cpp(graph, v, dir));
     return rcpp_result_gen;
 END_RCPP
@@ -67,6 +78,30 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type adjList(adjListSEXP);
     rcpp_result_gen = Rcpp::wrap(sym_adjList_cpp(adjList));
+    return rcpp_result_gen;
+END_RCPP
+}
+// match_char
+IntegerVector match_char(CharacterVector x, CharacterVector y);
+RcppExport SEXP _MixedGraphs_match_char(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(match_char(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// match_
+IntegerVector match_(NumericVector x, NumericVector y);
+RcppExport SEXP _MixedGraphs_match_(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(match_(x, y));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -141,18 +176,99 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// complete_mg_cpp
+List complete_mg_cpp(IntegerVector n, IntegerVector m);
+RcppExport SEXP _MixedGraphs_complete_mg_cpp(SEXP nSEXP, SEXP mSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type n(nSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type m(mSEXP);
+    rcpp_result_gen = Rcpp::wrap(complete_mg_cpp(n, m));
+    return rcpp_result_gen;
+END_RCPP
+}
+// complete_gr_cpp
+List complete_gr_cpp(IntegerVector n, LogicalVector dir);
+RcppExport SEXP _MixedGraphs_complete_gr_cpp(SEXP nSEXP, SEXP dirSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type n(nSEXP);
+    Rcpp::traits::input_parameter< LogicalVector >::type dir(dirSEXP);
+    rcpp_result_gen = Rcpp::wrap(complete_gr_cpp(n, dir));
+    return rcpp_result_gen;
+END_RCPP
+}
+// chain_gr_cpp
+List chain_gr_cpp(IntegerVector n, LogicalVector dir);
+RcppExport SEXP _MixedGraphs_chain_gr_cpp(SEXP nSEXP, SEXP dirSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type n(nSEXP);
+    Rcpp::traits::input_parameter< LogicalVector >::type dir(dirSEXP);
+    rcpp_result_gen = Rcpp::wrap(chain_gr_cpp(n, dir));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cycle_gr_cpp
+List cycle_gr_cpp(IntegerVector n, LogicalVector dir);
+RcppExport SEXP _MixedGraphs_cycle_gr_cpp(SEXP nSEXP, SEXP dirSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type n(nSEXP);
+    Rcpp::traits::input_parameter< LogicalVector >::type dir(dirSEXP);
+    rcpp_result_gen = Rcpp::wrap(cycle_gr_cpp(n, dir));
+    return rcpp_result_gen;
+END_RCPP
+}
+// bipartite_gr_cpp
+List bipartite_gr_cpp(IntegerVector n, IntegerVector m);
+RcppExport SEXP _MixedGraphs_bipartite_gr_cpp(SEXP nSEXP, SEXP mSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type n(nSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type m(mSEXP);
+    rcpp_result_gen = Rcpp::wrap(bipartite_gr_cpp(n, m));
+    return rcpp_result_gen;
+END_RCPP
+}
+// grid_graph_cpp
+List grid_graph_cpp(int n, int m);
+RcppExport SEXP _MixedGraphs_grid_graph_cpp(SEXP nSEXP, SEXP mSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
+    rcpp_result_gen = Rcpp::wrap(grid_graph_cpp(n, m));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_MixedGraphs_grp_cpp", (DL_FUNC) &_MixedGraphs_grp_cpp, 3},
+    {"_MixedGraphs_groups_cpp", (DL_FUNC) &_MixedGraphs_groups_cpp, 1},
     {"_MixedGraphs_adj_cpp", (DL_FUNC) &_MixedGraphs_adj_cpp, 3},
     {"_MixedGraphs_adjMat_to_adjList", (DL_FUNC) &_MixedGraphs_adjMat_to_adjList, 1},
     {"_MixedGraphs_rev_adjList_cpp", (DL_FUNC) &_MixedGraphs_rev_adjList_cpp, 1},
     {"_MixedGraphs_sym_adjList_cpp", (DL_FUNC) &_MixedGraphs_sym_adjList_cpp, 1},
+    {"_MixedGraphs_match_char", (DL_FUNC) &_MixedGraphs_match_char, 2},
+    {"_MixedGraphs_match_", (DL_FUNC) &_MixedGraphs_match_, 2},
     {"_MixedGraphs_add_edges_aM", (DL_FUNC) &_MixedGraphs_add_edges_aM, 4},
     {"_MixedGraphs_add_edges_aL", (DL_FUNC) &_MixedGraphs_add_edges_aL, 4},
     {"_MixedGraphs_rmv_edges_aL", (DL_FUNC) &_MixedGraphs_rmv_edges_aL, 4},
     {"_MixedGraphs_rmv_edges_aM", (DL_FUNC) &_MixedGraphs_rmv_edges_aM, 4},
     {"_MixedGraphs_chg_ends_cpp", (DL_FUNC) &_MixedGraphs_chg_ends_cpp, 5},
+    {"_MixedGraphs_complete_mg_cpp", (DL_FUNC) &_MixedGraphs_complete_mg_cpp, 2},
+    {"_MixedGraphs_complete_gr_cpp", (DL_FUNC) &_MixedGraphs_complete_gr_cpp, 2},
+    {"_MixedGraphs_chain_gr_cpp", (DL_FUNC) &_MixedGraphs_chain_gr_cpp, 2},
+    {"_MixedGraphs_cycle_gr_cpp", (DL_FUNC) &_MixedGraphs_cycle_gr_cpp, 2},
+    {"_MixedGraphs_bipartite_gr_cpp", (DL_FUNC) &_MixedGraphs_bipartite_gr_cpp, 2},
+    {"_MixedGraphs_grid_graph_cpp", (DL_FUNC) &_MixedGraphs_grid_graph_cpp, 2},
     {NULL, NULL, 0}
 };
 

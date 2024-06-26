@@ -2,12 +2,15 @@
 % Please edit documentation in R/Edges.R, R/Graphs.R
 \name{nedge}
 \alias{nedge}
+\alias{has_edge_entry}
 \alias{graphOps}
 \alias{vnames}
 \alias{nv}
 \title{Graph Operations}
 \usage{
 nedge(graph, edges)
+
+has_edge_entry(graph, edges)
 
 vnames(graph)
 
@@ -29,6 +32,8 @@ or both?
 \section{Functions}{
 \itemize{
 \item \code{nedge()}: number of edges
+
+\item \code{has_edge_entry()}: Test for existence of particular type of edge
 
 \item \code{vnames()}: names of vertices for \code{mixedgraph} object
 

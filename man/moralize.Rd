@@ -4,7 +4,7 @@
 \alias{moralize}
 \title{Moralize a mixed graph}
 \usage{
-moralize(graph, C, check = TRUE)
+moralize(graph, C, check = TRUE, use_cpp = TRUE)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}
@@ -12,6 +12,8 @@ moralize(graph, C, check = TRUE)
 \item{C}{optional set of vertices to condition upon}
 
 \item{check}{logical: should we check graph is a summary graph?}
+
+\item{use_cpp}{should faster C++ code be used?}
 }
 \description{
 Moralizes a mixed graph, possibly conditional on a subset of vertices.

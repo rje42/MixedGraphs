@@ -5,6 +5,7 @@
 ##' @param graph an object of class `mixedgraph`
 ##' @param C optional set of vertices to condition upon
 ##' @param check logical: should we check graph is a summary graph?
+##' @inheritParams grp
 ##'
 ##' @details This works for any summary graph, though currently needs the 
 ##' graph to be the original one (and not any subgraph) in order to be 
@@ -73,9 +74,20 @@
 #   return(out)
 # }
 # 
-moralize <- function (graph, C, check=TRUE) {
+moralize <- function (graph, C, check=TRUE, use_cpp=TRUE) {
 
   if (check && !is_SG(graph)) stop("Object must be a summary graph of class 'mixedgraph'")
+
+  if (nedge(graph) == 0) return(graph)
+  
+  if (use_cpp) {
+    if (!has_edge_entry(graph, "undirected")) graph <- addEdges(graph, edges = "undirected")
+    if (!has_edge_entry(graph, "directed")) graph <- addEdges(graph, edges = "directed")
+    if (!has_edge_entry(graph, "bidirected")) graph <- addEdges(graph, edges = "bidirected")
+      
+    graph <- withAdjMatrix(graph)
+  }
+
   
   ## obtain sets to moralize
   if (missing(C)) {
@@ -102,9 +114,10 @@ moralize <- function (graph, C, check=TRUE) {
   gr_d <- morphEdges(gr_d, to="directed", A=S, B=A, topOrd=c(A,S))
   gr_d <- morphEdges(gr_d, to="undirected", A=A)
   
-  ## remove edges from ancestors, and between ancestors and their siblings
-  graph <- mutilate(graph, A, internal = TRUE)
-  graph <- mutilate(graph, A, S)
+  ## remove (bi)directed edges from ancestors, and bidirected edges between 
+  ## ancestors and their siblings
+  graph <- mutilate(graph, A, internal = TRUE, etype = c("directed", "bidirected"))
+  graph <- mutilate(graph, A, S, etype = "bidirected")  # may not be needed...
   
   for (i in seq_along(dists)) {
     ## moralize this district
@@ -114,11 +127,35 @@ moralize <- function (graph, C, check=TRUE) {
     Sd <- intersect(S, D)
     # assertthat::are_equal(length(c(Ad,Sd)), length(D))
     
-    
-    tmp <- complete_mg(length(Ad), length(Sd))
-    ord <- order(c(Ad, Sd, setdiff(seq_along(graph$vnames),c(Ad,Sd))))
-    gr_d <- addEdges(gr_d, to_subgraph(tmp, ord = ord)$edges)
-    
+    if (use_cpp) {
+      Adi <- as.integer(Ad)
+      Sdi <- as.integer(Sd)
+      
+      ## add undirected edges
+      UD1 <- rep(Adi, times=rev(seq_along(Adi)-1))
+      MA <- diag(length(Adi))
+      UD2 <- Adi[row(MA)[lower.tri(MA)]]
+      graph$edges$undirected <- add_edges_aM(graph$edges$undirected, UD1, UD2, dir=0L)
+      
+      ## add directed edges
+      DI1 <- rep(Adi, each=length(Sdi))
+      DI2 <- rep(Sdi, length(Adi))
+      graph$edges$directed <- add_edges_aM(graph$edges$directed, DI1, DI2, dir=1L)
+      
+      ## add bidirected edges
+      BI1 <- rep(Sdi, times=rev(seq_along(Sdi)-1))
+      MS <- diag(length(Sdi))
+      BI2 <- Sdi[row(MS)[lower.tri(MS)]]
+      graph$edges$bidirected <- add_edges_aM(graph$edges$bidirected, BI1, BI2, dir=0L)
+      # tmp <- complete_mg_cpp(length(Ad), length(Sd))
+      
+    }
+    else {
+      tmp <- complete_mg(length(Ad), length(Sd))
+      ord <- order(c(Ad, Sd, setdiff(seq_along(graph$vnames),c(Ad,Sd))))
+      to_add <- to_subgraph(tmp, ord = ord)$edges
+      gr_d <- addEdges(gr_d, to_add)
+    }
     # ## get list of bidirected edges to add back
     # SG <- makeGraphComplete(length(Sd), "bidirected")
     # SG <- addNodes(SG, nv(graph)-nv(SG))   # sort this out for subgraphs! 
@@ -140,7 +177,10 @@ moralize <- function (graph, C, check=TRUE) {
     # graph <- addEdges(graph, gr_d$edges)
   }
   ## add back in converted edges
-  graph <- addEdges(graph, gr_d$edges)
+  if (use_cpp) {
+    
+  }
+  else graph <- addEdges(graph, gr_d$edges)
   
   return(graph)
 }

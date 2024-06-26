@@ -122,6 +122,9 @@ match_vnames <- function (graph, edges) {
 ##' remove duplicate edges. Currently `removeEdges()` forces 
 ##' all edges to be represented by adjacency matrices. 
 ##' 
+##' If the `edges` argument to `addEdges()` is a character vector, then an 
+##' empty edge list is added (if no entry is currently present).
+##' 
 ##' The `fast` argument for `removeEdges` requires that 
 ##' the edge to be removed is given as a single vector of length 2.
 ##' 
@@ -139,15 +142,38 @@ addEdges <- function(graph, edges, ..., remDup = TRUE
   
   args <- list(...)
   if (length(args) > 0) edges <- do.call(makeEdgeList, args)
-  etys = edgeTypes()$type
-  
-  if (!is.list(edges)) stop("'edges' must be a list named with edge types")
+  etys <- edgeTypes()$type
+
+  ## if nothing to add, return original graph  
   if (length(edges) == 0) return(graph)
+  
+  if (!is.list(edges)) {
+    if (!is.character(edges)) stop("'edges' must be a list named with edge types or a character vector of edge types")
+    wh <- pmatch(edges, etys)
+    if (any(is.na(wh))) {
+      warning(paste0("edge types '", paste(etys[is.na(wh)], collapse="', '"), "' not matched"))
+      edges <- etys[na.omit(wh)]
+      if (length(edges) == 0) return(graph)
+    }
+    else edges <- etys[wh]
+    
+    n <- length(graph$vnames)
+    
+    ## now run through list and see if already present.  If not, add an empty adjList
+    for (i in seq_along(edges)) {
+      if (!has_edge_entry(graph, edges[i])) {
+        graph$edges[[edges[i]]] <- adjList(n=n)
+      }
+    }
+    
+    return(graph)
+  }
+  
   if (is.null(names(edges))) {
     warning("No edge type given, assuming undirected")
-    et = 1
+    et <- 1
   }
-  else et = pmatch(names(edges), etys)
+  else et <- pmatch(names(edges), etys)
   
   if (any(is.na(et))) stop("Edge types not matched")
   else if (any(duplicated(et))) stop("Repeated edge types matched")
@@ -188,19 +214,19 @@ addEdges <- function(graph, edges, ..., remDup = TRUE
       A <- out$edges[[etys[et[i]]]]
       
       if (is.eList(A)) {
-        A = c(A, eList(edges[[etys[et[i]]]], directed = dir))
+        A <- c(A, eList(edges[[etys[et[i]]]], directed = dir))
         class(A) <- "eList"
       }
       else if (is.edgeMatrix(A)) {
-        A = cbind(A, edgeMatrix(edges[[etys[et[i]]]], directed = dir))
+        A <- cbind(A, edgeMatrix(edges[[etys[et[i]]]], directed = dir))
         class(A) <- "edgeMatrix"
       }
       else if (is.adjMatrix(A)) {
         if (is.adjMatrix(edges[[etys[et[i]]]]) && nrow(edges[[etys[et[i]]]]) == nv(graph)) {
-          A[v,v] = A[v,v] + adjMatrix(edges[[etys[et[i]]]], n=nrow(A), directed = dir)
+          A[v,v] <- A[v,v] + adjMatrix(edges[[etys[et[i]]]], n=nrow(A), directed = dir)
         }
         else {
-          A = A + adjMatrix(edges[[etys[et[i]]]], n=nrow(A), directed = dir)
+          A <- A + adjMatrix(edges[[etys[et[i]]]], n=nrow(A), directed = dir)
         }
 #        out$edges[[etys[et[i]]]] <- pmin(1, out$edges[[etys[et[i]]]])
         A[A > 1] <- 1
@@ -359,6 +385,7 @@ mutilate <- function(graph, A, B, etype, dir=0L, internal=FALSE) {
   }
   else if (all(graph$v %in% A) && missing(etype)) {
     edg <- graph$edges
+    
     for (i in seq_along(edg)) {
       if ("adjList" %in% class(edg[[i]])) {
         edg[[i]] <- adjList(n=length(graph$vnames))
@@ -390,8 +417,8 @@ mutilate <- function(graph, A, B, etype, dir=0L, internal=FALSE) {
   }
   else {
     whEdge <- pmatch(etype, names(graph$edges))
-    etype = etype[!is.na(whEdge)]
-    whEdge = etype[!is.na(whEdge)]
+    etype <- etype[!is.na(whEdge)]
+    whEdge <- whEdge[!is.na(whEdge)]
     if (length(etype) == 0) return(graph)
     tmp <- pmatch(etype, edgeTypes()$type)
     if (any(is.na(tmp))) stop("Some edge types not matched")
@@ -400,6 +427,7 @@ mutilate <- function(graph, A, B, etype, dir=0L, internal=FALSE) {
 
   edges <- graph$edges[whEdge]  
   
+  ## now go through edges and implement
   for (i in seq_along(edges)) {
     if (is.adjList(edges[[i]], checknm=TRUE)) {
       ## adjList format

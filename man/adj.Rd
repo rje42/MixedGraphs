@@ -5,7 +5,16 @@
 \alias{adjacent}
 \title{Find adjacent vertices}
 \usage{
-adj(graph, v, etype, dir = 0, inclusive = TRUE, sort = 1, force = FALSE)
+adj(
+  graph,
+  v,
+  etype,
+  dir = 0,
+  inclusive = TRUE,
+  sort = 1,
+  force = FALSE,
+  use_cpp = TRUE
+)
 
 adjacent(graph, v1, v2, etype, dir = 0)
 }
@@ -27,6 +36,8 @@ sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 then output will always be unique and sorted.}
 
 \item{force}{logical - should invalid \code{v} be ignored?}
+
+\item{use_cpp}{should faster C++ code be used?}
 
 \item{v1, v2}{vertices between which to test for adjacency}
 }

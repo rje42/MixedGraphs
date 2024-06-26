@@ -6,11 +6,20 @@
 \alias{groups}
 \title{Group vertices by adjacencies}
 \usage{
-grp(graph, v, etype, inclusive = TRUE, dir = 0, sort = 1, force = FALSE)
+grp(
+  graph,
+  v,
+  etype,
+  inclusive = TRUE,
+  dir = 0,
+  sort = 1,
+  force = FALSE,
+  use_cpp = TRUE
+)
 
 grp2(v, edges, dir, inclusive, sort = 1)
 
-groups(graph, etype, sort = 1)
+groups(graph, etype, use_cpp = FALSE)
 }
 \arguments{
 \item{graph}{an object of class \code{mixedgraph}}
@@ -29,6 +38,8 @@ considered: 0 = undirected, 1 = from row to column; -1 = from column to row.}
 sorted (0 for possibly repeated and unsorted).}
 
 \item{force}{logical - should invalid \code{v} be ignored?}
+
+\item{use_cpp}{should faster C++ code be used?}
 
 \item{edges}{an \code{adjMatrix} or \code{adjList}}
 }

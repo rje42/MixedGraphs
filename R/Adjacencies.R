@@ -189,6 +189,7 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, nv, sparse=FALSE, sort=
 ##' sorted (0 for possibly repeated and unsorted).  If edges are stored as a matrix
 ##' then output will always be unique and sorted.
 ##' @param force logical - should invalid `v` be ignored?
+##' @param use_cpp should faster C++ code be used?
 ##' 
 ##' @details The argument `directed` is recycled for multiple edge types, but 
 ##' has no effect for edges without a specified direction.  If any `v` is 
@@ -206,7 +207,7 @@ collapse <- function(edges, v1, v2, dir=1, matrix=FALSE, nv, sparse=FALSE, sort=
 ##' for partitions of vertices by adjacency type.
 ##' 
 ##' @export
-adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
+adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE, use_cpp=TRUE) {
   ## if no edge type specified, use all available types
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
   
@@ -221,7 +222,7 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
     warning("More directions specified than edge types")
     dir <- dir[seq_along(etype)]
   }
-  else dir = dir*rep.int(1L, length(etype))
+  else dir <- dir*rep.int(1L, length(etype))
   
   ## if undirected edges are specified as directed 
   ## then change and give a warning
@@ -234,53 +235,59 @@ adj <- function(graph, v, etype, dir=0, inclusive=TRUE, sort=1, force=FALSE) {
   
   ## get edge types
   whEdge <- na.omit(pmatch(etype,names(graph$edges)))
-  edges <- graph$edges[whEdge]
+  edges <- graph$edges <- graph$edges[whEdge]
   # n <- length(graph$v)
   
-  ## special case of one adjacency matrix to save time
-  if (length(edges) == 1 && is.adjMatrix(edges[[1]], length(graph$vnames), checknm=TRUE)) {
-    es <- matrix(0, length(v), length(graph$vnames))
-
-    ## add in edges dependent on direction
-    if (dir >= 0) es <- es + edges[[1]][v,,drop=FALSE]
-    if (dir <= 0) es <- es + t(edges[[1]][,v,drop=FALSE])
-
-    wh <- which(colSums(es) > 0)
-    if (!inclusive) wh <- setdiff(wh, v)
+  if (use_cpp) {
+    graph <- withAdjList(graph)
+    out <- adj_cpp(graph=graph, v=v, dir=dir) + 1
+  }
+  else {
+    # special case of one adjacency matrix to save time
+    if (length(edges) == 1 && is.adjMatrix(edges[[1]], length(graph$vnames), checknm=TRUE)) {
+      es <- matrix(0, length(v), length(graph$vnames))
+      
+      ## add in edges dependent on direction
+      if (dir >= 0) es <- es + edges[[1]][v,,drop=FALSE]
+      if (dir <= 0) es <- es + t(edges[[1]][,v,drop=FALSE])
+      
+      wh <- which(colSums(es) > 0)
+      if (!inclusive) wh <- setdiff(wh, v)
+      
+      return(wh)
+    }
     
-    return(wh)
+    ## if no edges then return an empty vector
+    if (length(edges) == 0) return(integer(0))
+    
+    ## collapse edges into one representation
+    es <- collapse(edges, v1=v, dir=dir, rev=TRUE, double_up=TRUE)
+    
+    ## select depending on mode of output
+    if (is.adjMatrix(es)) {
+      ## this is an adjacency matrix
+      d <- dim(es)
+      wh <- which(.colSums(es, d[1], d[2]) > 0)
+      if (!inclusive) wh <- setdiff(wh, v)
+      return(wh)
+    }
+    else if (is.adjList(es)) {
+      out <- unlist(es[v])
+      # if (dir <= 0) out <- unlist(es[v])
+      # else out <- which(sapply(es, function(x) any(v %in% x)))
+    }
+    else if (is.edgeMatrix(es)) {
+      ## this is an edge matrix
+      if (ncol(es) == 0) return(integer(0))
+      out <- es[2,]
+    }
+    else if (is.eList(es)) stop("Shouldn't be an eList object")
+    else stop("Not a valid edgeList element")
   }
-  
-  ## if no edges then return an empty vector
-  if (length(edges) == 0) return(integer(0))
-  
-  ## collapse edges into one representation
-  es <- collapse(edges, v1=v, dir=dir, rev=TRUE, double_up=TRUE)
-  
-  ## select depending on mode of output
-  if (is.adjMatrix(es)) {
-    ## this is an adjacency matrix
-    d <- dim(es)
-    wh <- which(.colSums(es, d[1], d[2]) > 0)
-    if (!inclusive) wh <- setdiff(wh, v)
-    return(wh)
-  }
-  else if (is.adjList(es)) {
-    out <- unlist(es[v])
-    # if (dir <= 0) out <- unlist(es[v])
-    # else out <- which(sapply(es, function(x) any(v %in% x)))
-  }
-  else if (is.edgeMatrix(es)) {
-    ## this is an edge matrix
-    if (ncol(es) == 0) return(integer(0))
-    out = es[2,]
-  }
-  else if (is.eList(es)) stop("Shouldn't be an eList object")
-  else stop("Not a valid edgeList element")
   
   if (sort > 0) out <- unique.default(out)
   if (sort > 1) out <- sort.int(out)
-  if (!inclusive) out = setdiff(out, v)
+  if (!inclusive) out <- setdiff(out, v)
   
   out <- as.integer(out)
 
@@ -311,6 +318,7 @@ adjacent <- function(graph, v1, v2, etype, dir=0) {
 ##' @param force logical - should invalid `v` be ignored?
 ## @param skipChecks guarantees that input is valid
 ##' @param edges an `adjMatrix` or `adjList`
+##' @param use_cpp should faster C++ code be used?
 ##' 
 ##' @details `grp()` finds all vertices that can be reached from
 ##' vertices in `v` by edges of the specified type, and in the 
@@ -332,7 +340,7 @@ adjacent <- function(graph, v1, v2, etype, dir=0) {
 ##' @seealso \code{\link{adj}} for single edge adjacencies.
 ##' 
 ##' @export
-grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
+grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE, use_cpp=TRUE) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
 
   # if (!skipChecks) {
@@ -341,101 +349,108 @@ grp <- function(graph, v, etype, inclusive=TRUE, dir=0, sort=1, force=FALSE) {
   else if (any(!(v %in% graph$v))) stop("Invalid values of v")
   if (length(v) == 0) return(integer(0))
   
-  ## obtain edgeTypes if not supplied, and sort out directions
-  if (missing(etype)) etype <- edgeTypes()$type
+  ## use all edgeTypes if not supplied, and sort out directions
+  if (missing(etype)) etype <- names(graph$edges)
   ## repeat dir() vector with warning if necessary
   if (length(dir) > length(etype)) warning("More directions specified than edge types")
-  dir = dir*rep.int(1L, length(etype))
+  dir <- dir*rep.int(1L, length(etype))
   
   ## get lists of relevant edges
   tmp <- pmatch(etype, edgeTypes()$type)
   dir[!edgeTypes()$directed[tmp]] <- 0L
   whEdge <- pmatch(etype,names(graph$edges))
-  edges <- graph$edges[whEdge]
+  edges <- graph$edges <- graph$edges[whEdge]
   
-  if (length(edges) == 1) {
-    if (is.adjList(edges[[1]], checknm=TRUE)) {
-      wh <- match(names(graph$edges)[whEdge], edgeTypes()$type)
-      if (dir == 1 && edgeTypes()$directed[wh]) {
+  ## decide whether to use faster C++ code or not
+  if (use_cpp) {
+    graph <- withAdjList(graph)
+    out <- grp_cpp(graph=graph, v=v, dir=dir) + 1
+  }
+  else {
+    if (length(edges) == 1) {
+      if (is.adjList(edges[[1]], checknm=TRUE)) {
+        wh <- match(names(graph$edges)[whEdge], edgeTypes()$type)
+        if (dir == 1 && edgeTypes()$directed[wh]) {
+          return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive, sort=sort))
+        }
+        else if (dir == 0 && !edgeTypes()$directed[wh]) {
+          return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive, sort=sort))
+        }
+        # else stop("This won't work")
+      }
+      else if (is.adjMatrix(edges[[1]], checknm=TRUE)) {
         return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive, sort=sort))
       }
-      else if (dir == 0 && !edgeTypes()$directed[wh]) {
-        return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive, sort=sort))
-      }
-      # else stop("This won't work")
     }
-    else if (is.adjMatrix(edges[[1]], checknm=TRUE)) {
-      return(grp2(v, edges[[1]], dir=dir, inclusive=inclusive, sort=sort))
-    }
-  }
-  
-  ## collapse edges into one representation
-  es <- collapse(edges, dir=dir, rev=TRUE, double_up=TRUE)
-
-  # }
-  # else {
-  #   if (etype %in% names(graph$edges)) {
-  #     es <- graph$edges[etype]
-  #   }
-  #   else return(integer(0))
-  # }
-
-  #   tmp = lapply(graph$edges[etype], edgeMatrix)
-  #   if (!is.null(tmp)) {
-  #     es = do.call(cbind, tmp)
-  #   }
-  #   else es = matrix(NA, ncol=0, nrow=2)
-
-  out = v
-
-  if (is.adjList(es)) {
-    continue = TRUE
-    new = v
     
-    while (continue) {
-      out2 <- unlist(es[new])
-      new <- setdiff(out2, out)
-      out <- c(out, new)
-      
-      continue = (length(new) > 0)
-    }
-  }
-  else if (is.adjMatrix(es)) {
-    continue = TRUE
-    new = v
+    ## collapse edges into one representation
+    es <- collapse(edges, dir=dir, rev=TRUE, double_up=TRUE)
     
-    while (continue) {
-      out2 = which(colSums(es[new, , drop=FALSE]) > 0)
-      new = setdiff(out2, out)
-      es[out,] = 0L
-      out <- c(out, new)
-      
-      continue = (length(new) > 0)
-    }
-  }
-  else if (is.edgeMatrix(es)) {
-    if (isTRUE(ncol(es) > 0)) {
-      continue = TRUE
-      new = v
+    # }
+    # else {
+    #   if (etype %in% names(graph$edges)) {
+    #     es <- graph$edges[etype]
+    #   }
+    #   else return(integer(0))
+    # }
+    
+    #   tmp <- lapply(graph$edges[etype], edgeMatrix)
+    #   if (!is.null(tmp)) {
+    #     es <- do.call(cbind, tmp)
+    #   }
+    #   else es <- matrix(NA, ncol=0, nrow=2)
+    
+    out <- v
+    
+    if (is.adjList(es)) {
+      continue <- TRUE
+      new <- v
       
       while (continue) {
-        out2 = es[2, es[1,] %in% new]
-        out2 = es[2, es[1,] %in% new]
+        out2 <- unlist(es[new])
+        new <- setdiff(out2, out)
+        out <- c(out, new)
         
-        new = unique.default(out2[!(out2 %in% out)])
-        out = c(out, new)
-        continue = (length(new) > 0)
+        continue <- (length(new) > 0)
       }
     }
+    else if (is.adjMatrix(es)) {
+      continue <- TRUE
+      new <- v
+      
+      while (continue) {
+        out2 <- which(colSums(es[new, , drop=FALSE]) > 0)
+        new <- setdiff(out2, out)
+        es[out,] <- 0L
+        out <- c(out, new)
+        
+        continue <- (length(new) > 0)
+      }
+    }
+    else if (is.edgeMatrix(es)) {
+      if (isTRUE(ncol(es) > 0)) {
+        continue <- TRUE
+        new <- v
+        
+        while (continue) {
+          out2 <- es[2, es[1,] %in% new]
+          out2 <- es[2, es[1,] %in% new]
+          
+          new <- unique.default(out2[!(out2 %in% out)])
+          out <- c(out, new)
+          continue <- (length(new) > 0)
+        }
+      }
+    }
+    else if (is.eList(es)) stop("Shouldn't be an eList object")
+    else stop("Not a valid edgeList element")
   }
-  else if (is.eList(es)) stop("Shouldn't be an eList object")
-  else stop("Not a valid edgeList element")
   
   ## if not inclusive, then remove elements of v
-  if (!inclusive) out = setdiff(out, v)
+  if (!inclusive) out <- setdiff(out, v)
   
   ## sort if requested
-  if (sort > 1) out = sort.int(out)
+  if (sort > 1) out <- sort.int(out)
   out <- as.integer(out)
   
   out
@@ -478,67 +493,73 @@ grp2 <- function(v, edges, dir, inclusive, sort=1) {
   if (sort > 1) out <- sort.int(out)
   out <- as.integer(out)
   
-  out
+  return(out)
 }
 
 ##' @describeIn grp find connected components
 ##' @export 
-groups = function(graph, etype, sort=1) {
+groups <- function(graph, etype, use_cpp=FALSE) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
-  if (missing(etype)) etype <- edgeTypes()$type
-
-  ## repeat dir() vector with warning if necessary
-  whEdge <- pmatch(etype,names(graph$edges))
-  edges <- graph$edges[whEdge[!is.na(whEdge)]]
+  if (!missing(etype)) {
+    whEdge <- pmatch(etype,edgeTypes()$type)
+    graph$edges <- graph$edges[na.omit(edgeTypes()$type[whEdge])]
+  }
   
-  ## collapse edges into one representation
-  es <- collapse(edges, dir=0, double_up = TRUE)
-  
-  grp = rep(0, length(vnames(graph)))
-  grp[graph$v] = seq_along(graph$v)  
-  
-  if (is.adjList(es, n=nv(graph))) {
-    grp0 <- grp
-    for (i in seq_along(es)[graph$v]) {
-      if (grp[i] < grp0[i]) next
-      
-      vs <- c(i)
-      new <- es[[i]]
-      while (length(new) > 0) {
-        vs <- c(vs, new)
-        new <- setdiff(unlist(es[new]), vs)
-      }
-      grp[vs] <- min(grp[vs])
-    }
+  if (nedge(graph) == 0) out <- lapply(graph$v, c)
+  else if (use_cpp) {
+    graph <- withAdjMatrix(graph)
+    out <- groups_cpp(graph)
+  }
+  else {
+    ## collapse edges into one representation
+    es <- collapse(graph$edges, dir=0, double_up = TRUE)
     
-    # for (i in seq_along(es)[graph$v]) {
-    #   if (length(es[[i]]) > 0) grp[c(i, es[[i]])] <- min(grp[c(i, es[[i]])])  ### NEED TO CHECK THIS!
-    #   if (grp[i] == 0) stop("Should be in a group")
-    # }
-  }
-  else if (is.adjMatrix(es)) {
-    for (i in seq_len(ncol(es))) {
-      g1 = grp[i]
-      g2s = grp[which(es[,i] > 0)]
-      grp[grp %in% g2s] = g1
+    grp <- rep(0, length(vnames(graph)))
+    grp[graph$v] <- seq_along(graph$v)  
+    
+    if (is.adjList(es, n=nv(graph))) {
+      grp0 <- grp
+      for (i in seq_along(es)[graph$v]) {
+        if (grp[i] < grp0[i]) next
+        
+        vs <- c(i)
+        new <- es[[i]]
+        while (length(new) > 0) {
+          vs <- c(vs, new)
+          new <- setdiff(unlist(es[new]), vs)
+        }
+        grp[vs] <- min(grp[vs])
+      }
+      
+      # for (i in seq_along(es)[graph$v]) {
+      #   if (length(es[[i]]) > 0) grp[c(i, es[[i]])] <- min(grp[c(i, es[[i]])])  ### NEED TO CHECK THIS!
+      #   if (grp[i] == 0) stop("Should be in a group")
+      # }
+    }
+    else if (is.adjMatrix(es)) {
+      for (i in seq_len(ncol(es))) {
+        g1 <- grp[i]
+        g2s <- grp[which(es[,i] > 0)]
+        grp[grp %in% g2s] <- g1
+      }
+    }
+    else if (is.edgeMatrix(es)) {
+      for (i in seq_len(ncol(es))) {
+        g1 <- grp[es[1,i]]
+        g2 <- grp[es[2,i]]
+        if (g1 == g2) next
+        grp[grp == g2] <- g1
+      }
+    }
+    else stop("eLists assumed not possible from collapse()")
+    
+    out <- list()
+    for (i in unique.default(grp[grp>0])) {
+      out <- c(out, list(which(grp==i)))
     }
   }
-  else if (is.edgeMatrix(es)) {
-    for (i in seq_len(ncol(es))) {
-      g1 = grp[es[1,i]]
-      g2 = grp[es[2,i]]
-      if (g1 == g2) next
-      grp[grp == g2] = g1
-    }
-  }
-  else stop("eLists assumed not possible from collapse()")
   
-  out = list()
-  for (i in unique.default(grp[grp>0])) {
-    out = c(out, list(which(grp==i)))
-  }
-  
-  out
+  return(out)
 }
 
 ##' Find vertices in subset connected to vertex

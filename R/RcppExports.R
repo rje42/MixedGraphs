@@ -5,6 +5,10 @@ grp_cpp <- function(graph, v, dir) {
     .Call('_MixedGraphs_grp_cpp', PACKAGE = 'MixedGraphs', graph, v, dir)
 }
 
+groups_cpp <- function(graph) {
+    .Call('_MixedGraphs_groups_cpp', PACKAGE = 'MixedGraphs', graph)
+}
+
 adj_cpp <- function(graph, v, dir) {
     .Call('_MixedGraphs_adj_cpp', PACKAGE = 'MixedGraphs', graph, v, dir)
 }
@@ -19,6 +23,14 @@ rev_adjList_cpp <- function(adjList) {
 
 sym_adjList_cpp <- function(adjList) {
     .Call('_MixedGraphs_sym_adjList_cpp', PACKAGE = 'MixedGraphs', adjList)
+}
+
+match_char <- function(x, y) {
+    .Call('_MixedGraphs_match_char', PACKAGE = 'MixedGraphs', x, y)
+}
+
+match_ <- function(x, y) {
+    .Call('_MixedGraphs_match_', PACKAGE = 'MixedGraphs', x, y)
 }
 
 add_edges_aM <- function(aM, e1, e2, dir) {
@@ -39,5 +51,29 @@ rmv_edges_aM <- function(aM, e1, e2, dir) {
 
 chg_ends_cpp <- function(m1, m2, v1, v2, d2) {
     .Call('_MixedGraphs_chg_ends_cpp', PACKAGE = 'MixedGraphs', m1, m2, v1, v2, d2)
+}
+
+complete_mg_cpp <- function(n, m) {
+    .Call('_MixedGraphs_complete_mg_cpp', PACKAGE = 'MixedGraphs', n, m)
+}
+
+complete_gr_cpp <- function(n, dir) {
+    .Call('_MixedGraphs_complete_gr_cpp', PACKAGE = 'MixedGraphs', n, dir)
+}
+
+chain_gr_cpp <- function(n, dir) {
+    .Call('_MixedGraphs_chain_gr_cpp', PACKAGE = 'MixedGraphs', n, dir)
+}
+
+cycle_gr_cpp <- function(n, dir) {
+    .Call('_MixedGraphs_cycle_gr_cpp', PACKAGE = 'MixedGraphs', n, dir)
+}
+
+bipartite_gr_cpp <- function(n, m) {
+    .Call('_MixedGraphs_bipartite_gr_cpp', PACKAGE = 'MixedGraphs', n, m)
+}
+
+grid_graph_cpp <- function(n, m) {
+    .Call('_MixedGraphs_grid_graph_cpp', PACKAGE = 'MixedGraphs', n, m)
 }
 

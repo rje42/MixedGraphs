@@ -30,6 +30,9 @@ The \code{remDup} argument is set by default to
 remove duplicate edges. Currently \code{removeEdges()} forces
 all edges to be represented by adjacency matrices.
 
+If the \code{edges} argument to \code{addEdges()} is a character vector, then an
+empty edge list is added (if no entry is currently present).
+
 The \code{fast} argument for \code{removeEdges} requires that
 the edge to be removed is given as a single vector of length 2.
 }
