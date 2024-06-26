@@ -10,6 +10,73 @@
 ##' @name construct_graphs
 NULL
 
+
+##' @describeIn construct_graphs complete graph (faster implementation)
+##' @param use_cpp should C++ function be used?  Defaults to `TRUE`
+##' @export
+complete_graph <- function (n, type = "undirected", use_cpp = TRUE) {
+  
+  if (length(type) != 1) stop("Must supply a single type of edge")
+  
+  if (!use_cpp) return(makeGraphComplete(n=n, type=type))
+  
+  etys <- edgeTypes()$type
+  wh <- pmatch(type, etys)
+  if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
+  else names(edges) <- etys[wh]
+  
+  ## obtain output edge list
+  elst <- makeEdgeList(complete_gr_cpp(as.integer(n)))
+  names(elst) <- etys[wh]
+  
+  return(mixedgraph(n, edges=elst))
+}
+
+##' @describeIn construct_graphs empty graph (faster implementation)
+##' @export
+empty_graph <- function (n) {
+  mixedgraph(n=n)
+}
+
+##' @describeIn construct_graphs chain graph (faster implementation)
+##' @export
+chain_graph <- function (n, type = "undirected", use_cpp = TRUE) {
+  if (length(type) != 1) stop("Must supply a single type of edge")
+  
+  if (!use_cpp) return(makeGraphChain(n=n, type=type))
+  
+  etys <- edgeTypes()$type
+  wh <- pmatch(type, etys)
+  if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
+  else names(edges) <- etys[wh]
+  
+  ## obtain output edge list
+  elst <- makeEdgeList(chain_gr_cpp(as.integer(n)))
+  names(elst) <- etys[wh]
+  
+  return(mixedgraph(n, edges=elst)) 
+}
+
+##' @describeIn construct_graphs lattice graph (faster implementation)
+##' @export
+grid_graph <- function (n, m, type = "undirected", use_cpp = TRUE) {
+  if (length(type) != 1) stop("Must supply a single type of edge")
+  
+  if (!use_cpp) return(makeGraphGrid(n=n, m=m, type=type))
+  
+  etys <- edgeTypes()$type
+  wh <- pmatch(type, etys)
+  if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
+  else names(edges) <- etys[wh]
+  
+  ## obtain output edge list
+  elst <- makeEdgeList(grid_gr_cpp(as.integer(n), as.integer(m)))
+  names(elst) <- etys[wh]
+  
+  return(mixedgraph(n, edges=elst)) 
+}
+
+
 ##' @describeIn construct_graphs graph with all adjacencies
 ##' @export 
 makeGraphComplete = function (n, type = "undirected") {
@@ -28,92 +95,70 @@ makeGraphComplete = function (n, type = "undirected") {
   return(out)
 }
 
-##' @param useC should C++ function be used?  Defaults to `TRUE`
-complete_graph <- function (n, type = "undirected", useC = TRUE) {
-  etys = edgeTypes()$type
-  wh = pmatch(type, etys)
-  if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
-  else names(edges) = etys[wh]
-  
-  elst <- makeEdgeList(complete_gr_cpp(as.integer(n)))
-  names(elst) <- etys[wh]
-  mixedgraph(n, edges=)
-  
-
-  
-}
 
 ##' @describeIn construct_graphs graph with no edges
 ##' @export 
-makeGraphEmpty = function(n) {
-  edges = list(undirected=list())
-  class(edges[[1]]) <- "eList"
-  
-  out = mixedgraph(n=n, edges=edges)
+makeGraphEmpty <- function(n) {
+  out <- mixedgraph(n=n)
   return(out)
 }
 
 ##' @describeIn construct_graphs graph with chain of edges
 ##' @export 
-makeGraphChain = function(n, type = "undirected") {
-  edges = list(lapply(seq_len(max(n-1,0)), function(x) c(x, x+1)))
+makeGraphChain <- function(n, type = "undirected") {
+  edges <- list(lapply(seq_len(max(n-1,0)), function(x) c(x, x+1)))
   class(edges[[1]]) <- "eList"
   
-  etys = edgeTypes()$type
-  wh = pmatch(type, etys)
+  etys <- edgeTypes()$type
+  wh <- pmatch(type, etys)
   if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
-  else names(edges) = etys[wh]
+  else names(edges) <- etys[wh]
   
-  out = mixedgraph(n=n, edges=edges)
+  out <- mixedgraph(n=n, edges=edges)
   return(out)
-}
-
-##' @param useC should C++ function be used?  Defaults to `TRUE`
-chain_graph <- function (n, type = "undirected", useC = TRUE) {
-  chain_gr_cpp(as.integer(n))
 }
 
 
 ##' @describeIn construct_graphs graph with cycle of edges
 ##' @export 
-makeGraphCycle = function(n, type = "undirected") {
+makeGraphCycle <- function(n, type = "undirected") {
   
-  edges = list(lapply(seq_len(max(n-1,0)), function(x) c(x, x+1)))
-  if (n > 2) edges[[1]][[n]] = c(n, 1)
+  edges <- list(lapply(seq_len(max(n-1,0)), function(x) c(x, x+1)))
+  if (n > 2) edges[[1]][[n]] <- c(n, 1)
   class(edges[[1]]) <- "eList"
   
-  etys = edgeTypes()$type
-  wh = pmatch(type, etys)
+  etys <- edgeTypes()$type
+  wh <- pmatch(type, etys)
   if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
-  else names(edges) = etys[wh]
+  else names(edges) <- etys[wh]
   
-  out = mixedgraph(n=n, edges=edges)
+  out <- mixedgraph(n=n, edges=edges)
   return(out)
 }
 
 ##' @describeIn construct_graphs star shaped graph
 ##' @param out should edges be directed out from the centre?
 ##' @export 
-makeGraphStar = function(n, type = "undirected", out=FALSE) {
+makeGraphStar <- function(n, type = "undirected", out=FALSE) {
   
   if (n <= 1) return(makeGraphComplete(n, type))
-  if (out) edges = list(lapply(seq_len(n-1)+1, function(x) c(1, x)))
-  else edges = list(lapply(seq_len(n-1), function(x) c(x, n)))
+  if (out) edges <- list(lapply(seq_len(n-1)+1, function(x) c(1, x)))
+  else edges <- list(lapply(seq_len(n-1), function(x) c(x, n)))
   class(edges[[1]]) <- "eList"
   
-  etys = edgeTypes()$type
-  wh = pmatch(type, etys)
+  etys <- edgeTypes()$type
+  wh <- pmatch(type, etys)
   if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
-  else names(edges) = etys[wh]
+  else names(edges) <- etys[wh]
   
-  out = mixedgraph(n=n, edges=edges)
+  out <- mixedgraph(n=n, edges=edges)
   return(out)
 }
 
 ##' @describeIn construct_graphs grid of vertices
 ##' @param m number of columns or size of second set
 ##' @export 
-makeGraphGrid = function(n, m=n, type="undirected") {
+makeGraphGrid <- function(n, m=n, type="undirected") {
   
   if (n == 0 || m == 0) return(makeGraphEmpty(0))
   if (n == 1) return(makeGraphChain(m, type))
@@ -125,12 +170,12 @@ makeGraphGrid = function(n, m=n, type="undirected") {
   edges <- list(out)
   
   ## match edge type
-  etys = edgeTypes()$type
-  wh = pmatch(type, etys)
+  etys <- edgeTypes()$type
+  wh <- pmatch(type, etys)
   if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
-  else names(edges)[[1]] = etys[wh]
+  else names(edges)[[1]] <- etys[wh]
   
-  vnames = paste0(paste0("x", rep_len(seq_len(n), m*n)), rep(seq_len(m), each=n))
+  vnames <- paste0(paste0("x", rep_len(seq_len(n), m*n)), rep(seq_len(m), each=n))
     
   mixedgraph(n*m, edges=edges, vnames=vnames)
 }

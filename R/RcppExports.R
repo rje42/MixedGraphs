@@ -73,7 +73,7 @@ bipartite_gr_cpp <- function(n, m) {
     .Call('_MixedGraphs_bipartite_gr_cpp', PACKAGE = 'MixedGraphs', n, m)
 }
 
-grid_graph_cpp <- function(n, m) {
-    .Call('_MixedGraphs_grid_graph_cpp', PACKAGE = 'MixedGraphs', n, m)
+grid_graph_cpp <- function(n, m, dir) {
+    .Call('_MixedGraphs_grid_graph_cpp', PACKAGE = 'MixedGraphs', n, m, dir)
 }
 

@@ -105,7 +105,16 @@ test_that("grid_graph_cpp handles m = 0", {
 })
 
 test_that("grid_graph_cpp handles n = 0 and m = 0", {
-  result <- grid_graph_cpp(0, 0)
+  result <- grid_graph_cpp(0, 0, dir=FALSE)
   expect_equal(length(result), 0)
   expect_s3_class(result, "adjList")
+})
+
+test_that("grid_graph_cpp works for a 1x3 directed grid", {
+  result <- grid_graph_cpp(1, 3, dir=TRUE)
+  expect_equal(length(result), 3)
+  
+  expect_setequal(result[[1]], c(2L))
+  expect_setequal(result[[2]], c(3L))
+  expect_setequal(result[[3]], integer(0))
 })

@@ -117,25 +117,24 @@ List chain_gr_cpp(IntegerVector n, LogicalVector dir) {
 }
 
 // [[Rcpp::export]]
-List cycle_gr_cpp(IntegerVector n, LogicalVector dir) {
+List cycle_gr_cpp(int n, LogicalVector dir) {
   
   // obtain number of vertices
-  int nv = n[0];
   bool dr = dir[0];
-  if (nv < 0) Rf_error("Number of vertices must be a non-negative integer");
+  if (n < 0) Rf_error("Number of vertices must be a non-negative integer");
   
   // list for output
   List out;
   
-  for (int i=0; i < nv; i++) {
+  for (int i=0; i < n; i++) {
     IntegerVector tmp;
     // add neibouring vertices for this vertex being filled
-    if (!dr & (nv > 2)) {
-      if (i == 0) tmp.push_back(nv);
+    if (!dr & (n > 2)) {
+      if (i == 0) tmp.push_back(n);
       else tmp.push_back(i);
     }
-    if (nv > 1) {
-      if (i == nv-1) tmp.push_back(1);
+    if (n > 1) {
+      if (i == n-1) tmp.push_back(1);
       else tmp.push_back(i+2);
     }    
     // add to list
@@ -179,13 +178,15 @@ List bipartite_gr_cpp(IntegerVector n, IntegerVector m) {
 }
 
 // [[Rcpp::export]]
-List grid_graph_cpp(int n, int m) {
+List grid_graph_cpp(int n, int m, LogicalVector dir) {
   if (n < 0 || m < 0) Rf_error("Both n and m must be non-negative integers");
   if (n == 0 || m == 0) {
     List out(0);
     out.attr("class") = "adjList";
     return out;
   }
+  
+  bool dr = is_true(all(dir));
 
   int nv = n * m;
   List out(nv); // List for output
@@ -194,11 +195,14 @@ List grid_graph_cpp(int n, int m) {
     for (int j = 0; j < m; ++j) {
       IntegerVector neighbors;
 
-      if (i > 0) neighbors.push_back((i - 1) * m + j + 1);       // (i-1, j)
       if (i < n - 1) neighbors.push_back((i + 1) * m + j + 1);    // (i+1, j)
-      if (j > 0) neighbors.push_back(i * m + (j - 1) + 1);        // (i, j-1)
       if (j < m - 1) neighbors.push_back(i * m + (j + 1) + 1);    // (i, j+1)
-
+      
+      if (!dr) {
+        if (i > 0) neighbors.push_back((i - 1) * m + j + 1);       // (i-1, j)
+        if (j > 0) neighbors.push_back(i * m + (j - 1) + 1);        // (i, j-1)
+      }
+      
       out[i * m + j] = neighbors;
     }
   }
