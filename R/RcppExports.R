@@ -69,11 +69,15 @@ cycle_gr_cpp <- function(n, dir) {
     .Call('_MixedGraphs_cycle_gr_cpp', PACKAGE = 'MixedGraphs', n, dir)
 }
 
-bipartite_gr_cpp <- function(n, m) {
-    .Call('_MixedGraphs_bipartite_gr_cpp', PACKAGE = 'MixedGraphs', n, m)
+bipartite_gr_cpp <- function(n, m, dir) {
+    .Call('_MixedGraphs_bipartite_gr_cpp', PACKAGE = 'MixedGraphs', n, m, dir)
 }
 
-grid_graph_cpp <- function(n, m, dir) {
-    .Call('_MixedGraphs_grid_graph_cpp', PACKAGE = 'MixedGraphs', n, m, dir)
+grid_gr_cpp <- function(n, m, dir) {
+    .Call('_MixedGraphs_grid_gr_cpp', PACKAGE = 'MixedGraphs', n, m, dir)
+}
+
+star_gr_cpp <- function(n, dir, cn = -1L) {
+    .Call('_MixedGraphs_star_gr_cpp', PACKAGE = 'MixedGraphs', n, dir, cn)
 }
 

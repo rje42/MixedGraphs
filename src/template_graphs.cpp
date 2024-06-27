@@ -147,38 +147,41 @@ List cycle_gr_cpp(int n, LogicalVector dir) {
 }
 
 // [[Rcpp::export]]
-List bipartite_gr_cpp(IntegerVector n, IntegerVector m) {
-  int u = n[0]; // Size of the first set of vertices
-  int v = m[0]; // Size of the second set of vertices
-  int nv = u + v; // Total number of vertices
+List bipartite_gr_cpp(int n, int m, LogicalVector dir) {
+  int nv = n + m; // Total number of vertices
   
-  if (u < 0 || v < 0) Rf_error("Sizes of vertex sets must be non-negative integers");
+  if (n < 0 || m < 0) Rf_error("Sizes of vertex sets must be non-negative integers");
   
+  bool dr = dir[0];
   List out(nv); // List for output
   
   // Create the bipartite graph
-  for (int i = 0; i < u; i++) {
+  for (int i = 0; i < n; i++) {
     IntegerVector tmp;
-    for (int j = u; j < nv; j++) {
+    for (int j = n; j < nv; j++) {
       tmp.push_back(j + 1); // Vertices in the second set (1-based index)
     }
     out[i] = tmp;
   }
   
-  for (int i = u; i < nv; i++) {
+  // for directed edges put in empty vector, otherwise add in list of vertices in first set
+  for (int i = n; i < nv; i++) {
     IntegerVector tmp;
-    for (int j = 0; j < u; j++) {
-      tmp.push_back(j + 1); // Vertices in the first set (1-based index)
+    if (!dr) {
+      for (int j = 0; j < n; j++) {
+        tmp.push_back(j + 1); // Vertices in the first set (1-based index)
+      }
     }
     out[i] = tmp;
   }
+
   
   out.attr("class") = "adjList";
   return out;
 }
 
 // [[Rcpp::export]]
-List grid_graph_cpp(int n, int m, LogicalVector dir) {
+List grid_gr_cpp(int n, int m, LogicalVector dir) {
   if (n < 0 || m < 0) Rf_error("Both n and m must be non-negative integers");
   if (n == 0 || m == 0) {
     List out(0);
@@ -186,7 +189,7 @@ List grid_graph_cpp(int n, int m, LogicalVector dir) {
     return out;
   }
   
-  bool dr = is_true(all(dir));
+  bool dr = dir[0];
 
   int nv = n * m;
   List out(nv); // List for output
@@ -195,18 +198,58 @@ List grid_graph_cpp(int n, int m, LogicalVector dir) {
     for (int j = 0; j < m; ++j) {
       IntegerVector neighbors;
 
-      if (i < n - 1) neighbors.push_back((i + 1) * m + j + 1);    // (i+1, j)
-      if (j < m - 1) neighbors.push_back(i * m + (j + 1) + 1);    // (i, j+1)
-      
       if (!dr) {
-        if (i > 0) neighbors.push_back((i - 1) * m + j + 1);       // (i-1, j)
-        if (j > 0) neighbors.push_back(i * m + (j - 1) + 1);        // (i, j-1)
+        if (j > 0) neighbors.push_back((j - 1) * n + i + 1);       // (i, j-1)
+        if (i > 0) neighbors.push_back(j * n + (i - 1) + 1);        // (i-1, j)
       }
       
-      out[i * m + j] = neighbors;
+      if (i < n - 1) neighbors.push_back(j * n + (i + 1) + 1);    // (i+1, j)
+      if (j < m - 1) neighbors.push_back((j + 1) * n + i + 1);    // (i, j+1)
+      
+      out[i + j * n] = neighbors;
     }
   }
 
   out.attr("class") = "adjList";
   return out;
-}  
+} 
+
+// [[Rcpp::export]]
+List star_gr_cpp(int n, LogicalVector dir, int cn = -1) {
+  if (n == 0) {
+    List out(0);
+    out.attr("class") = "adjList";
+    return out;
+  }
+  if (n < 0) Rf_error("n must be a non-negative integer");
+  
+  bool dr = dir[0];
+  
+  // If cn is not specified or invalid, use the last node as the central node
+  if (cn < 1 || cn > n) {
+    cn = n;
+  }
+  
+  List out(n); // List for output
+  
+  for (int i = 0; i < n; ++i) {
+    IntegerVector tmp;
+    if (i+1 != cn) {
+      // for non-central nodes, add central node if appropriate
+      if (i+1 < cn) tmp.push_back(cn);
+      else if (!dr && i+1 > cn) tmp.push_back(cn);
+    }
+    else if (i+1 == cn) {
+      // for central node add appropriate neighbours
+      if (!dr) {
+        for (int j=1; j < cn; j++) tmp.push_back(j);
+      }
+      for (int j=cn+1; j < n+1; j++) tmp.push_back(j);
+    }
+    
+    out[i] = tmp;
+  }
+  
+  out.attr("class") = "adjList";
+  return out;
+}

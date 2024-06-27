@@ -2,26 +2,41 @@
 % Please edit documentation in R/Construct.R
 \name{construct_graphs}
 \alias{construct_graphs}
-\alias{makeGraphComplete}
 \alias{complete_graph}
+\alias{empty_graph}
+\alias{chain_graph}
+\alias{cycle_graph}
+\alias{grid_graph}
+\alias{bipartite_graph}
+\alias{star_graph}
+\alias{makeGraphComplete}
 \alias{makeGraphEmpty}
 \alias{makeGraphChain}
-\alias{chain_graph}
 \alias{makeGraphCycle}
 \alias{makeGraphStar}
 \alias{makeGraphGrid}
 \alias{makeGraphBipartite}
 \title{Graph Constructor Functions}
 \usage{
-makeGraphComplete(n, type = "undirected")
-
 complete_graph(n, type = "undirected", use_cpp = TRUE)
+
+empty_graph(n)
+
+chain_graph(n, type = "undirected", use_cpp = TRUE)
+
+cycle_graph(n, type = "undirected", use_cpp = TRUE)
+
+grid_graph(n, m, type = "undirected", use_cpp = TRUE)
+
+bipartite_graph(n, m = n, type = "undirected", use_cpp = TRUE)
+
+star_graph(n, type = "undirected", use_cpp = TRUE)
+
+makeGraphComplete(n, type = "undirected")
 
 makeGraphEmpty(n)
 
 makeGraphChain(n, type = "undirected")
-
-chain_graph(n, type = "undirected", use_cpp = TRUE)
 
 makeGraphCycle(n, type = "undirected")
 
@@ -38,9 +53,9 @@ makeGraphBipartite(n, m, type = "undirected")
 
 \item{use_cpp}{should C++ function be used?  Defaults to \code{TRUE}}
 
-\item{out}{should edges be directed out from the centre?}
-
 \item{m}{number of columns or size of second set}
+
+\item{out}{should edges be directed out from the centre?}
 }
 \description{
 Graph Constructor Functions
@@ -52,15 +67,25 @@ chains, cycles and stars.
 }
 \section{Functions}{
 \itemize{
-\item \code{makeGraphComplete()}: graph with all adjacencies
-
 \item \code{complete_graph()}: complete graph (faster implementation)
+
+\item \code{empty_graph()}: empty graph (faster implementation)
+
+\item \code{chain_graph()}: chain graph (faster implementation)
+
+\item \code{cycle_graph()}: chain graph (faster implementation)
+
+\item \code{grid_graph()}: lattice graph (faster implementation)
+
+\item \code{bipartite_graph()}: bipartite graph (faster implementation)
+
+\item \code{star_graph()}: star graph (faster implementation)
+
+\item \code{makeGraphComplete()}: graph with all adjacencies
 
 \item \code{makeGraphEmpty()}: graph with no edges
 
 \item \code{makeGraphChain()}: graph with chain of edges
-
-\item \code{chain_graph()}: complete graph (faster implementation)
 
 \item \code{makeGraphCycle()}: graph with cycle of edges
 

@@ -6,6 +6,10 @@ plot.mixedgraph <- function (x, ...) {
   
   plot_fci <- selectMethod("plot", signature = "fciAlgo")@.Data
   
+  if (nv(x) == 0) {
+    message("No vertices, so nothing to plot")
+    return(invisible(NULL))
+  }
   amat <- convert(x, "PAG")
   amat <- as(amat, "matrix")
 

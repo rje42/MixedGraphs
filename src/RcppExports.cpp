@@ -225,27 +225,41 @@ BEGIN_RCPP
 END_RCPP
 }
 // bipartite_gr_cpp
-List bipartite_gr_cpp(IntegerVector n, IntegerVector m);
-RcppExport SEXP _MixedGraphs_bipartite_gr_cpp(SEXP nSEXP, SEXP mSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< IntegerVector >::type n(nSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type m(mSEXP);
-    rcpp_result_gen = Rcpp::wrap(bipartite_gr_cpp(n, m));
-    return rcpp_result_gen;
-END_RCPP
-}
-// grid_graph_cpp
-List grid_graph_cpp(int n, int m, LogicalVector dir);
-RcppExport SEXP _MixedGraphs_grid_graph_cpp(SEXP nSEXP, SEXP mSEXP, SEXP dirSEXP) {
+List bipartite_gr_cpp(int n, int m, LogicalVector dir);
+RcppExport SEXP _MixedGraphs_bipartite_gr_cpp(SEXP nSEXP, SEXP mSEXP, SEXP dirSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< int >::type m(mSEXP);
     Rcpp::traits::input_parameter< LogicalVector >::type dir(dirSEXP);
-    rcpp_result_gen = Rcpp::wrap(grid_graph_cpp(n, m, dir));
+    rcpp_result_gen = Rcpp::wrap(bipartite_gr_cpp(n, m, dir));
+    return rcpp_result_gen;
+END_RCPP
+}
+// grid_gr_cpp
+List grid_gr_cpp(int n, int m, LogicalVector dir);
+RcppExport SEXP _MixedGraphs_grid_gr_cpp(SEXP nSEXP, SEXP mSEXP, SEXP dirSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
+    Rcpp::traits::input_parameter< LogicalVector >::type dir(dirSEXP);
+    rcpp_result_gen = Rcpp::wrap(grid_gr_cpp(n, m, dir));
+    return rcpp_result_gen;
+END_RCPP
+}
+// star_gr_cpp
+List star_gr_cpp(int n, LogicalVector dir, int cn);
+RcppExport SEXP _MixedGraphs_star_gr_cpp(SEXP nSEXP, SEXP dirSEXP, SEXP cnSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< LogicalVector >::type dir(dirSEXP);
+    Rcpp::traits::input_parameter< int >::type cn(cnSEXP);
+    rcpp_result_gen = Rcpp::wrap(star_gr_cpp(n, dir, cn));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -268,8 +282,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MixedGraphs_complete_gr_cpp", (DL_FUNC) &_MixedGraphs_complete_gr_cpp, 2},
     {"_MixedGraphs_chain_gr_cpp", (DL_FUNC) &_MixedGraphs_chain_gr_cpp, 2},
     {"_MixedGraphs_cycle_gr_cpp", (DL_FUNC) &_MixedGraphs_cycle_gr_cpp, 2},
-    {"_MixedGraphs_bipartite_gr_cpp", (DL_FUNC) &_MixedGraphs_bipartite_gr_cpp, 2},
-    {"_MixedGraphs_grid_graph_cpp", (DL_FUNC) &_MixedGraphs_grid_graph_cpp, 3},
+    {"_MixedGraphs_bipartite_gr_cpp", (DL_FUNC) &_MixedGraphs_bipartite_gr_cpp, 3},
+    {"_MixedGraphs_grid_gr_cpp", (DL_FUNC) &_MixedGraphs_grid_gr_cpp, 3},
+    {"_MixedGraphs_star_gr_cpp", (DL_FUNC) &_MixedGraphs_star_gr_cpp, 3},
     {NULL, NULL, 0}
 };
 

@@ -24,9 +24,10 @@ complete_graph <- function (n, type = "undirected", use_cpp = TRUE) {
   wh <- pmatch(type, etys)
   if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
   else names(edges) <- etys[wh]
+  dir <- edgeTypes()$directed[wh]
   
   ## obtain output edge list
-  elst <- makeEdgeList(complete_gr_cpp(as.integer(n)))
+  elst <- makeEdgeList(complete_gr_cpp(as.integer(n), dir=dir))
   names(elst) <- etys[wh]
   
   return(mixedgraph(n, edges=elst))
@@ -49,9 +50,30 @@ chain_graph <- function (n, type = "undirected", use_cpp = TRUE) {
   wh <- pmatch(type, etys)
   if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
   else names(edges) <- etys[wh]
+  dir <- edgeTypes()$directed[wh]
   
   ## obtain output edge list
-  elst <- makeEdgeList(chain_gr_cpp(as.integer(n)))
+  elst <- makeEdgeList(chain_gr_cpp(as.integer(n), dir=dir))
+  names(elst) <- etys[wh]
+  
+  return(mixedgraph(n, edges=elst)) 
+}
+
+##' @describeIn construct_graphs chain graph (faster implementation)
+##' @export
+cycle_graph <- function (n, type = "undirected", use_cpp = TRUE) {
+  if (length(type) != 1) stop("Must supply a single type of edge")
+  
+  if (!use_cpp) return(makeGraphChain(n=n, type=type))
+  
+  etys <- edgeTypes()$type
+  wh <- pmatch(type, etys)
+  if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
+  else names(edges) <- etys[wh]
+  dir <- edgeTypes()$directed[wh]
+  
+  ## obtain output edge list
+  elst <- makeEdgeList(cycle_gr_cpp(as.integer(n), dir=dir))
   names(elst) <- etys[wh]
   
   return(mixedgraph(n, edges=elst)) 
@@ -67,10 +89,52 @@ grid_graph <- function (n, m, type = "undirected", use_cpp = TRUE) {
   etys <- edgeTypes()$type
   wh <- pmatch(type, etys)
   if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
-  else names(edges) <- etys[wh]
+  # else names(edges) <- etys[wh]
+  dir <- edgeTypes()$directed[wh]
+
+  ## obtain output edge list
+  elst <- makeEdgeList(grid_gr_cpp(as.integer(n), as.integer(m), dir=dir))
+  names(elst) <- etys[wh]
+  vnames <- paste0(paste0("x", rep_len(seq_len(n), m*n)), rep(seq_len(m), each=n))
+  
+  return(mixedgraph(n*m, edges=elst, vnames=vnames)) 
+}
+
+##' @describeIn construct_graphs bipartite graph (faster implementation)
+##' @export
+bipartite_graph <- function (n, m=n, type = "undirected", use_cpp = TRUE) {
+  if (length(type) != 1) stop("Must supply a single type of edge")
+  
+  if (!use_cpp) return(makeGraphBipartite(n=n, m=m, type=type))
+  
+  etys <- edgeTypes()$type
+  wh <- pmatch(type, etys)
+  if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
+  # else names(edges) <- etys[wh]
+  dir <- edgeTypes()$directed[wh]
   
   ## obtain output edge list
-  elst <- makeEdgeList(grid_gr_cpp(as.integer(n), as.integer(m)))
+  elst <- makeEdgeList(bipartite_gr_cpp(as.integer(n), as.integer(m), dir=dir))
+  names(elst) <- etys[wh]
+  
+  return(mixedgraph(n+m, edges=elst)) 
+}
+
+##' @describeIn construct_graphs star graph (faster implementation)
+##' @export
+star_graph <- function (n, type = "undirected", use_cpp = TRUE) {
+  if (length(type) != 1) stop("Must supply a single type of edge")
+  
+  if (!use_cpp) return(makeGraphStar(n=n, type=type))
+  
+  etys <- edgeTypes()$type
+  wh <- pmatch(type, etys)
+  if (is.na(wh)) stop(paste("Edge type not matched: should be one of ", paste(etys, collapse=", "), sep=""))
+  # else names(edges) <- etys[wh]
+  dir <- edgeTypes()$directed[wh]
+  
+  ## obtain output edge list
+  elst <- makeEdgeList(star_gr_cpp(as.integer(n), dir=dir))
   names(elst) <- etys[wh]
   
   return(mixedgraph(n, edges=elst)) 
@@ -164,7 +228,7 @@ makeGraphGrid <- function(n, m=n, type="undirected") {
   if (n == 1) return(makeGraphChain(m, type))
   else if (m == 1) return(makeGraphChain(n, type))
 
-  first <- c(matrix(seq_len(n*m),nrow=n, ncol=m)[-m,,drop=FALSE])
+  first <- c(matrix(seq_len(n*m),nrow=n, ncol=m)[-n,,drop=FALSE])
   tmp <- lapply(first, function(x) c(x,x+1))
   out <- eList(c(tmp, lapply(seq_len(n*(m-1)), function(x) c(x,x+n))))
   edges <- list(out)
