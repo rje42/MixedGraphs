@@ -305,3 +305,46 @@ conv_mixedgraph_PAG <- function(graph) {
   # methods::new("fciAlgo", amat=out)
   out
 }
+
+conv_miic_mixedgraph <- function (graph) {
+  x <- graph
+  if (any(!x %in% c(0,1,2,-2,6))) stop("invalid input")
+  
+  ## extract undirected edges
+  UD <- x %% 2
+  x <- (x - UD)/2
+  
+  ## extract directed edges
+  D <- (x*(x > 0)) %% 3
+  x <- (x - D + t(D))/3
+  
+  ## extract bidirected edges
+  BD <- x
+  
+  ## construct mixedgraph
+  edges <- list(undirected=as.adjMatrix(UD), directed=as.adjMatrix(D), bidirected=as.adjMatrix(BD))
+  out <- mixedgraph(n=nrow(x), edges=edges)
+  
+  return(out)
+}
+
+conv_mixedgraph_miic <- function (graph) {
+  
+  graph <- withAdjMatrix(graph)
+  nv <- length(graph$vnames)
+  if (nv <= 1) return(matrix(0, nv, nv))
+  
+  nvld <- graph$edges[!(names(graph$edges) %in% c("undirected", "directed", "bidirected"))]
+  if (length(nvld) > 0 && any(sapply(nvld, function (x) any(x != 0)))) stop("Edges not representable")
+  
+  out <- matrix(0, nv, nv)
+  
+  if (!is.null(graph$edges$undirected)) out <- out + graph$edges$undirected
+  if (!is.null(graph$edges$directed)) out <- out + 2*graph$edges$directed -  2*t(graph$edges$directed)
+  if (!is.null(graph$edges$bidirected)) out <- out + 6*graph$edges$bidirected
+  
+  class(out) <- NULL
+  
+  return(out)
+}
+

@@ -15,6 +15,7 @@
 ##' \itemize{
 ##' \item \code{\link{mixedgraph}}
 ##' \item `ggm`, an adjacency matrix as specified in the `ggm` package; 
+##' \item `miic`, an adjacency matrix as specified in the `miic` package; 
 ##' \item `graphNEL`, `graphAM`, `graphBAM` from the `graph` package;
 ##' \item `igraph`;
 ##' \item `PAG`: that is, the output of `pc()` or `fci()` functions in the `pcalg` package;
@@ -46,7 +47,7 @@
 convert <- function(graph, format="mixedgraph", cur_format, ...) {
   
   ## formats we can do 'to' and 'from' mixedgraph directly.
-  via_mixed_graph <- c("ggm", "ADMG", "graphNEL", "graphAM", "bn")
+  via_mixed_graph <- c("ggm", "ADMG", "graphNEL", "graphAM", "bn", "miic")
   
   if (missing(cur_format)) {
     if ("igraph" %in% class(graph)) cur_format <- "igraph"
@@ -73,7 +74,7 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   
   if (cur_format == "ADMG") {
     if(format == "mixedgraph") {
-      out = conv_ADMG_mixedgraph(graph)
+      out <- conv_ADMG_mixedgraph(graph)
     } 
     else if (cur_format %in% via_mixed_graph) {
       ## go 'via' a mixedgraph
@@ -98,11 +99,11 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   }
   else if (cur_format == "graphNEL") {
     if (format == "mixedgraph") {
-      out = conv_graphNEL_mixedgraph(graph)
+      out <- conv_graphNEL_mixedgraph(graph)
     }
     else if (format == "igraph") {
       requireNamespace("igraph", quietly = TRUE)
-      out = igraph::igraph.from.graphNEL(graph)
+      out <- igraph::igraph.from.graphNEL(graph)
     }
     else if (cur_format %in% via_mixed_graph) {
       ## go 'via' a mixedgraph
@@ -139,6 +140,10 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
       stop("Method not currently supported, but check back soon...")
     }
   }
+  else if (cur_format == "miic") {
+    out <- conv_miic_mixedgraph(graph)
+    if (format != "mixedgraph") out <- Recall(out, format=format)
+  }
   else if (cur_format == "PAG") {
     out <- conv_PAG_mixedgraph(graph)
     if (format != "mixedgraph") out <- Recall(out, format=format)
@@ -147,7 +152,7 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
     
     if (format == "graphNEL") {
       requireNamespace("igraph", quietly = TRUE)
-      out = igraph::igraph.to.graphNEL(graph)
+      out <- igraph::igraph.to.graphNEL(graph)
     }
     else {
       out <- conv_igraph_mixedgraph(graph)
@@ -169,28 +174,31 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   }
   else if (cur_format == "mixedgraph") {
     if (format == "ADMG") {
-      out = conv_mixedgraph_ADMG(graph)
+      out <- conv_mixedgraph_ADMG(graph)
     } 
     else if (format == "ggm") {
-      out = conv_mixedgraph_ggm(graph)
+      out <- conv_mixedgraph_ggm(graph)
     }
     else if (format == "graphNEL") {
-      out = conv_mixedgraph_graphNEL(graph)
+      out <- conv_mixedgraph_graphNEL(graph)
     }
     else if (format == "graphAM") {
-      out = conv_mixedgraph_graphAM(graph)
+      out <- conv_mixedgraph_graphAM(graph)
     }
     else if (format == "graphBAM") {
-      out = as(conv_mixedgraph_graphNEL(graph), "graphBAM")
+      out <- as(conv_mixedgraph_graphNEL(graph), "graphBAM")
     }
     else if (format == "bn") {
-      out = conv_mixedgraph_bn(graph)
+      out <- conv_mixedgraph_bn(graph)
     }
     else if (format == "igraph") {
-      out = conv_mixedgraph_igraph(graph)
+      out <- conv_mixedgraph_igraph(graph)
     }
     else if (format == "PAG") {
-      out = conv_mixedgraph_PAG(graph)
+      out <- conv_mixedgraph_PAG(graph)
+    }
+    else if (format == "miic") {
+      out <- conv_mixedgraph_miic(graph)
     }
     else {
       stop("Method not currently supported, but check back soon...")

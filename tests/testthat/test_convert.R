@@ -13,3 +13,19 @@ test_that("conversion between ggm and mixedgraph works", {
 #   gr1_pag_mg <- standardizeEdges(gr1_pag_mg)
 #   expect_equal(gr1_pag_mg, gr1)
 # })
+
+
+
+
+am <- matrix(c(
+  0,1,6,0,
+  1,0,2,-2,
+  6,-2,0,0,
+  0,2,0,0)
+  , 4,4)
+
+test_that("conversion between miic and mixedgraph works", {
+  mg <- convert(am, cur_format="miic")
+  am2 <- convert(mg, format="miic")
+  expect_equal(am, am2)
+})
