@@ -369,15 +369,35 @@ removeEdges <- function(graph, edges, ..., force=FALSE, fast=FALSE) {
 ##' If a second set `B` is specified, then all edges between `A`
 ##' and `B` are removed.
 ##' 
+##' If `A` is not specified, then this will remove the edge classes specified in
+##' `etype` entirely.
+##' 
 ##' Note that specifying `internal=TRUE` and providing a set `B` will 
 ##' result in an error.
 ##' 
-##' Note that specifying \code{internal=TRUE} and providing a set \code{B} will 
+##' Note that specifying \code{internal=TRUE} and providing a set `B` will 
 ##' result in an error.
 ##' 
 ##' @export 
 mutilate <- function(graph, A, B, etype, dir=0L, internal=FALSE) {
   if (!is.mixedgraph(graph)) stop("'graph' should be an object of class 'mixedgraph'")
+  
+  if (missing(A)) {
+    if (missing(etype)) stop("Must specify at least one of 'A' or 'etype'")
+    
+    etyps <- na.omit(pmatch(etype, edgeTypes()$type))
+    if (length(etyps) == 0) {
+      warning("No valid edge types specified")
+      return(graph)
+    }
+    else if (length(etyps) < length(etype)) warning("Some edge types specified")
+    
+    rm <- match(edgeTypes()$type[etyps], names(graph$edges))
+    graph$edges <- graph$edges[-rm]
+    
+    return(graph)
+  }
+  
   if (length(A) == 0) return(graph)
   if (!missing(B)) {
     if (internal) stop("'internal' must be false if B is supplied")

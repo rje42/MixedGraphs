@@ -65,6 +65,15 @@ test_that("mutilate for incoming edges works", {
   expect_equal(mutilate(mg1, 4, etype="directed", dir=-1), mg1a)
 })
 
+
+gr1a <- standardizeEdges(graphCr("2 <-> 3, 1 <-> 4"))
+
+test_that("mutilate removes edge class correctly", {
+  gr1t <- standardizeEdges(mutilate(gr1, etype="dir"))
+  expect_equal(gr1t, gr1a)
+})
+
+
 test_that("addEdges works", {
   expect_equal(addEdges(mg1, edges=makeEdgeList(un=eList(c(3,5)))), mg2)
 })

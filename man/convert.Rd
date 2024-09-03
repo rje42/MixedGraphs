@@ -25,6 +25,7 @@ are
 \itemize{
 \item \code{\link{mixedgraph}}
 \item \code{ggm}, an adjacency matrix as specified in the \code{ggm} package;
+\item \code{miic}, an adjacency matrix as specified in the \code{miic} package;
 \item \code{graphNEL}, \code{graphAM}, \code{graphBAM} from the \code{graph} package;
 \item \code{igraph};
 \item \code{PAG}: that is, the output of \code{pc()} or \code{fci()} functions in the \code{pcalg} package;

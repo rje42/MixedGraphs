@@ -28,6 +28,9 @@ and for \code{dir=0} (the default), direction is irrelevant.
 If a second set \code{B} is specified, then all edges between \code{A}
 and \code{B} are removed.
 
+If \code{A} is not specified, then this will remove the edge classes specified in
+\code{etype} entirely.
+
 Note that specifying \code{internal=TRUE} and providing a set \code{B} will
 result in an error.
 
