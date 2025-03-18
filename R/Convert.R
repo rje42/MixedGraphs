@@ -228,7 +228,6 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
 ##' @export %G%
 `%G%` <- function (graph, .f) 
 {
-  requireNamespace("magrittr", quietly = TRUE)
   subf = substitute(.f)
   package = determinePackage(subf)
   
@@ -241,7 +240,7 @@ convert <- function(graph, format="mixedgraph", cur_format, ...) {
   }
   else mode = graphFormats()$format[wh]
   
-  eval(substitute(graph %>% .f, 
+  eval(substitute(graph |> .f(), 
                   list(graph=convert(graph, mode), .f=subf)
                   # list(graph=convert(graph, mode), .f=substitute(.f, env=))
                   ))
