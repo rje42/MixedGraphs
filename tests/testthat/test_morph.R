@@ -27,3 +27,18 @@ test_that("morphEdges() works with direction", {
   expect_equal(gr1c2, gr1d2)
 })
 
+gr4 <- makeGraphComplete(4)
+gr4a <- graphCr("2 -> 1 -- 3 <- 2 -- 4 -> 1, 3 <- 4")
+gr4b <- morphEdges(gr4, to = "directed", A = c(2,4), B = c(1,3))
+gr4aa <- graphCr("2 <- 1 -- 3 <- 2 -- 4 <- 1, 3 -> 4")
+gr4ab <- morphEdges(gr4, to = "directed", A = c(2,4), B = c(1,3), topOrd = 1:4)
+
+gr4a <- standardizeEdges(gr4a)
+gr4b <- standardizeEdges(gr4b)
+gr4aa <- standardizeEdges(gr4aa)
+gr4ab <- standardizeEdges(gr4ab)
+
+test_that("morphEdges() works with two sets specified", {
+  expect_equal(gr4a, gr4b)
+  expect_equal(gr4aa, gr4ab)
+})

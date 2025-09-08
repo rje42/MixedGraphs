@@ -4,11 +4,17 @@
 \alias{as_adjacency}
 \alias{as.adjMatrix}
 \alias{as.adjList}
+\alias{as.edgeMatrix}
+\alias{as.eList}
 \title{Put edges in correct format}
 \usage{
 as.adjMatrix(x, valid = FALSE, n)
 
 as.adjList(x, valid = FALSE, n)
+
+as.edgeMatrix(x, valid = FALSE)
+
+as.eList(x, valid = FALSE)
 }
 \arguments{
 \item{x}{object containing edge information}
@@ -21,14 +27,16 @@ as.adjList(x, valid = FALSE, n)
 Functions to place adjacency object in a specific format.
 }
 \details{
-If \code{valid = TRUE} then for \code{as.adjMatrix} the argument \code{x} should be a
-valid adjacency matrix, and no checks are performed.  Similarly for \code{as.adjList}
-the object should be a valid adjacency list.
+If \code{valid = TRUE} then no checks are performed.
 }
 \section{Functions}{
 \itemize{
 \item \code{as.adjMatrix()}: Convert to an \code{adjMatrix} object
 
 \item \code{as.adjList()}: Convert to an \code{adjList} object
+
+\item \code{as.edgeMatrix()}: Convert to an \code{edgeMatrix} object
+
+\item \code{as.eList()}: Convert to an \code{eList} object
 
 }}

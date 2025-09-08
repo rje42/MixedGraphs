@@ -122,8 +122,8 @@ match_vnames <- function (graph, edges) {
 ##' remove duplicate edges. Currently `removeEdges()` forces 
 ##' all edges to be represented by adjacency matrices. 
 ##' 
-##' The `fast` argument for `removeEdges` requires that 
-##' the edge to be removed is given as a single vector of length 2.
+## The `fast` argument for `removeEdges` requires that 
+## the edge to be removed is given as a single vector of length 2.
 ##' 
 ##' @export
 addEdges <- function(graph, edges, ..., remDup = TRUE
@@ -577,6 +577,9 @@ morphEdges <- function(graph, from, to, A, B, topOrd) {
   if (!missing(A)) {
     if (!missing(B)) {
       gr <- graph[c(A,B)]
+      if (missing(topOrd) && !missing(to) && edgeTypes()$directed[edgeTypes()$type == to]) {
+        topOrd <- c(A, B)
+      }
       gr <- mutilate(gr, A, internal = TRUE)
       gr <- mutilate(gr, B, internal = TRUE)
       gr <- Recall(graph=gr, from=from, to=to, topOrd=topOrd)

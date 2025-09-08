@@ -7,9 +7,7 @@
 ##' @param n number of vertices
 ##' 
 ##' @details
-##' If `valid = TRUE` then for `as.adjMatrix` the argument `x` should be a 
-##' valid adjacency matrix, and no checks are performed.  Similarly for `as.adjList`
-##' the object should be a valid adjacency list.
+##' If `valid = TRUE` then no checks are performed.
 ##' 
 ##' @name as_adjacency
 NULL
@@ -107,5 +105,37 @@ as.adjList <- function (x, valid=FALSE, n) {
   }
   
   if (!("adjList" %in% class(x))) class(x) <- c("adjList", class(x))
+  return(x)
+}
+
+##' @describeIn as_adjacency Convert to an `edgeMatrix` object
+##' @export
+as.edgeMatrix <- function (x, valid = FALSE) {
+  if (!valid) {
+    if (nrow(x) != 2) stop("Number of rows in 'x' not equal to 2")
+    if (!all(is.numeric(x))) stop("Some entries in 'x' not numeric")
+    if (!all(x > 0.5)) stop("Some entries in 'x' are non-positive")
+    if (!all(abs(round(x) - x) < sqrt(.Machine$double.eps))) stop("Some entries in 'x' are not integers")
+  }
+  
+  if (!("edgeMatrix" %in% class(x))) class(x) <- c("edgeMatrix", class(x))
+  return(x)
+}
+
+##' @describeIn as_adjacency Convert to an `eList` object
+##' @export
+as.eList <- function (x, valid = FALSE) {
+  if (!valid) {
+    if (!(is.list(x) || is.numeric(x))) stop("Not a list object")
+    else if (is.numeric(x)) x <- list(x)
+    if (!all(lengths(x) == 2)) {
+      stop(paste0("Lengths of entries ", paste(which(lengths(x) != 2), collapse=", "), " not equal to 2"))
+    }
+    if (!all(sapply(x, is.numeric))) stop("Some entries in 'x' not numeric")
+    if (!all(sapply(x, function(y) y > 0.5))) stop("Some entries in 'x' are non-positive")
+    if (!all(sapply(x, function (y) abs(round(y) - y) < sqrt(.Machine$double.eps)))) stop("Some entries in 'x' are not integers")
+  }
+  
+  if (!("eList" %in% class(x))) class(x) <- c("eList", class(x))
   return(x)
 }

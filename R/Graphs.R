@@ -687,6 +687,7 @@ graphCr <- function(char, ..., mode="adjList", useMatrices=FALSE, format="mixedg
   # in future try to allow direct typing
   #out <- unlist(sapply(out, as.character))
   out <- unlist(out)
+  out <- gsub("[\t\n\r]", " ", out)
   out <- unlist(strsplit(out, ","))
   out <- gsub("[-]+", "-", out)
   out <- gsub("[=]+", "=", out)

@@ -121,9 +121,10 @@ matrices: this will be corrected in future.
 
 ## Edge Specifications
 
-Edges can be specified in any of four ways, as an adjacency matrix (`adjMatrix`) which may be sparse, a list of adjacencies (`adjList`), 
-a list of edges (`eList`), or a matrix with two rows, each of whose column
-corresponds to an edge (`edgeMatrix`).  
+Edges can be specified in any of four ways, as an adjacency matrix 
+(`adjMatrix`) which may be sparse, a list of adjacencies (`adjList`), a list of 
+edges (`eList`), or a matrix with two rows, each of whose column corresponds to 
+an edge (`edgeMatrix`).  
 
 These each have their own 
 useful properties: adjacency matrices and lists generally allow things 
@@ -134,24 +135,24 @@ Conversely, using edge lists or
 edge matrices requires searching for the edges whose end points match the 
 specification. 
 
-For larger sparse graphs the adjacency matrix may become burdensome and wasteful, even if represented sparsely itself; we can therefore use one of the other specifications.  The edge matrix is the most efficient,
-but lists are intuitive and will in future be extended to allow hypergraphs.
+For larger sparse graphs the adjacency matrix may become burdensome and 
+wasteful, even if represented sparsely itself; we can therefore use one of the 
+other specifications.  The edge matrix is the most efficient, but lists are 
+intuitive and will in future be extended to allow hypergraphs.
 
-We can force the use of adjacency matrices by applying `withAdjMatrix()`
-to a `mixedgraph` object.
+We can force the use of adjacency matrices by applying `withAdjMatrix()` to a 
+`mixedgraph` object.
 
 ## Generic Relations
 
-The functions `adj()`, `grp()`, `groups()` and `mutilate()` 
-allow graphical operations to be performed on any edge type,
-as specified by the user.  
+The functions `adj()`, `grp()`, `groups()` and `mutilate()` allow graphical 
+operations to be performed on any edge type, as specified by the user.  
 
 ### Adjacency
 
-`adj()` is used to find vertices which are adjacent to the 
-specified vertex, with respect to whatever kind of edge.
-To find the neighbours of a (set of) vertices \code{v}, 
-we just specify that we want adjacency via undirected edges:
+`adj()` is used to find vertices which are adjacent to the specified vertex, 
+with respect to whatever kind of edge.  To find the neighbours of a (set of) 
+vertices `v`, we just specify that we want adjacency via undirected edges:
 ```{r}
 adj(gr1, v = 2, etype = "undirected")
 ```
@@ -180,7 +181,7 @@ We are also free to specify multiple edge types and directions:
 adj(gr1, v = c(2,4), etype = c("undirected", "directed"), dir = c(0,-1))
 ```
 
-#### Specific Versions
+### Specific Versions
 
 The functions `pa()`, `ch()`, `sp()` and `nb()` are available for
 the special cases of adjacencies generally called parents, children,
@@ -191,7 +192,7 @@ ch(gr1, 2)   # short cut for adj(gr1, v = 2, etype = "directed", dir = 1)
 
 ## Adding Edge Types
 
-New edge types can be added to the built in options.
+New edge types can be added to the built-in options.
 
 ## Graph Format Conversion
 
